@@ -6,7 +6,7 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use("/auth/api",authRouter);
+app.use("/api/auth",authRouter);
 
 app.get("/home",(req,res)=>{
     res.send("db connected..");
