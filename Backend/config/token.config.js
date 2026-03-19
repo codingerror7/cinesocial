@@ -1,13 +1,21 @@
 import jwt from "jsonwebtoken";
 
-const genToken = async (userId) => {
+//IMPLEMENTING REFRESH TOKEN MACHANISM
+
+export const generateAccessToken = async (userId) => {
     try {
-        const token = await jwt.sign({userId},process.env.JWT_SIGN,{expiresIn:"1d"});
+        const token = await jwt.sign({userId},process.env.ACCESS_SECRET,{expiresIn : "15m"});
         return token;
     } catch (error) {
-        throw new error("TOKEN NOT GENERATED");
-        console.log(error);
+        console.log(`token not generated ${error}`);
     }
 }
 
-export default genToken;
+export const generateRefreshToken = async (userId) => {
+    try {
+        const token = await jwt.sign({userId},process.env.REFRESH_SECRET,{expiresIn : "7d"});
+        return token;
+    } catch (error) {
+        console.log(`token not generated ${error}`);
+    }
+}

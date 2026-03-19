@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import bcrypt from "bcrypt";
-import genToken from "../config/token.config.js";
+import {generateAccessToken , generateRefreshToken} from "../config/token.config.js";
 import User from "../model/auth.model.js";
 
 export const signUp = async (req,res) => {
@@ -13,14 +13,16 @@ export const signUp = async (req,res) => {
         }
         let hashPassword = await bcrypt.hash(password,10);
         const user = await User.create({name,email,password : hashPassword});
-        const token = genToken(user._id);
-        res.cookie("token",token,{
+        //refresh token mechanism
+        const accessToken = generateAccessToken(user._id);
+        const refreshToken = generateRefreshToken(user._id);
+        res.cookie("refreshToken",refreshToken,{
             httpOnly : true,
-            secure : true,
+            secure : process.env.NODE_ENVIRONMENT === "production",
             sameSite : "none",
-            maxAge : 24*60*60*1000 
+            maxAge : 7*24*60*60*1000
         })
-        return res.status(200).json(user,token);
+        return res.status(200).json({accessToken});
 
     } catch (error) {
         return res.status(500).json({message : `${error}`});
@@ -38,22 +40,40 @@ export const logIn = async (req,res) => {
     if(!userMatch){
         await res.status(400).json({message : "password invalid."});
     }
-    let token = genToken(user._id);
-    res.cookie("token",token),{
+    //refresh token mechanism
+    const accessToken = generateAccessToken(user._id);
+    const refreshToken = generateRefreshToken(user._id);
+    res.cookie("refreshToken",refreshToken,{
         httpOnly : true,
-        secure : true,
+        secure : process.env.NODE_ENVIRONMENT === "production",
         sameSite : "none",
         maxAge : 7*24*60*60*1000
-    }
-    return res.status(200).json(user,token);
+    })
+    return res.status(200).json({accessToken});
     } catch (error) {
         return res.status(400).json({message : "something went wrong,",error});
     }
 }
 
+//refresh token
+export const refresh = (req,res) => {
+    const token = req.cookies.refreshToken;
+    if(!token){
+        return res.status(401).json({message : "no refresh token"});
+    }
+    try {
+        const decoded = jwt.verify(token,process.env.REFRESH_SECRET);
+        const newAccessToken = generateAccessToken(decoded.userId);
+        res.json({accessToken : newAccessToken});
+    } catch (error) {
+        return res.status(401).json({message : "invalid refresh token"});
+    }
+}
+
+
 export const logOut = async (req,res) => {
     try {
-        res.clearCookie("token");
+        res.clearCookie("refreshToken");
         return res.status(200).json({message : "user logout successfully"})
     } catch (error) {
         return res.status(400).json({message:error});
