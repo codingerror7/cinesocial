@@ -5,7 +5,7 @@ import {generateAccessToken , generateRefreshToken} from "../config/token.config
 import User from "../model/auth.model.js";
 
 export const signUp = async (req,res) => {
-    try {
+    try {  
         const {name,password,email} = req.body;
         let existUser = await User.findOne({email});
         if(existUser){
