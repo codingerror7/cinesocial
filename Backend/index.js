@@ -7,8 +7,8 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(express.json());
-app.use(cookieParser());
+app.use(express.json());    //to read users data like name,email,password through req.body
+app.use(cookieParser());    //to read data in cookies coming from users browser and to validate user
 
 app.use("/api/auth",authRouter);
 
