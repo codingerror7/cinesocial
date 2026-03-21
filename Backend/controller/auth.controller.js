@@ -2,11 +2,11 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import bcrypt from "bcrypt";
 import {generateAccessToken , generateRefreshToken} from "../config/token.config.js";
-import User from "../model/auth.model.js";
+import User from "../model/User.models.js";
 
 export const signUp = async (req,res) => {
     try {  
-        const {name,password,email} = req.body;
+        const {name,email,password} = req.body;
         let existUser = await User.findOne({email});
         if(existUser){
             return res.status(400).json({message:"user already exist,please login"});
@@ -22,7 +22,7 @@ export const signUp = async (req,res) => {
             sameSite : "none",
             maxAge : 7*24*60*60*1000
         })
-        return res.status(200).json({accessToken});
+        return res.status(201).json({accessToken});
 
     } catch (error) {
         return res.status(500).json({message : `${error}`});
@@ -49,7 +49,7 @@ export const logIn = async (req,res) => {
         sameSite : "none",
         maxAge : 7*24*60*60*1000
     })
-    return res.status(200).json({accessToken});
+    return res.status(201).json({accessToken});
     } catch (error) {
         return res.status(400).json({message : "something went wrong,",error});
     }
