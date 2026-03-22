@@ -10,7 +10,7 @@ const postSchema = new mongoose.Schema({
             type : String,
             required : true,
             lowercase : true,
-            trim : true
+            trim : true,
         },
         profilePic : {
             type : String,
@@ -64,7 +64,11 @@ const postSchema = new mongoose.Schema({
         required : true,
         default : 0
     }
-},{timestamps : true})
+},{timestamps : true});
+
+//indexing for optimized query search
+postSchema.index({userName : 1});
+postSchema.index({createdAt : -1});
 
 const Post = mongoose.model("Post",postSchema);
 

@@ -33,6 +33,11 @@ const commentSchema = new mongoose.Schema({
     }
 },{timestamps : true});
 
+
+//indexing for optimized query search
+commentSchema.index({userId : 1});
+commentSchema.index({createdAt : -1});
+
 const Comment = mongoose.model("Comment",commentSchema);
 
 export default Comment;

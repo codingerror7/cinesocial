@@ -3,7 +3,6 @@ const userSchema = new mongoose.Schema({
     name : {
         type : String,
         required : [true,"username is required"],
-        unique : [true,"username must be unique"],
         lowercase : true,
         trim : true,
         minlength : 3,
@@ -56,6 +55,10 @@ const userSchema = new mongoose.Schema({
 {
     timestamps : true
 });
+
+//indexing for optimized query search
+userSchema.index({name : 1}); 
+userSchema.index({createdAt : -1});
 
 const User = mongoose.model("User",userSchema);
 export default User;

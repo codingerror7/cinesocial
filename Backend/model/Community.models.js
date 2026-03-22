@@ -4,8 +4,13 @@ const communitySchema = new mongoose.Schema({
     title : {
         type : String,
         required : true,
+        unique : true,
         minlength : 2,
         maxlength : 20
+    },
+    avatar : {
+        type : String,   //cloudinary url
+        default : "",
     },
     admin : {
         type : mongoose.Schema.Types.ObjectId,
