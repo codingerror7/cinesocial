@@ -1,6 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 import connectDB from "./config/db.config.js";
 import authRouter from "./routes/auth.route.js";
 
@@ -9,8 +10,14 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(express.json());    //to read users data like name,email,password through req.body
-app.use(cookieParser());    //to read data in cookies coming from users browser and to validate user
+app.cors({
+    origin : process.env.CORS_ORIGIN,
+    credentials : true
+})
+
+app.use(express.json({limit : "16kb"}));    //to read users data like name,email,password through req.body, and 1 req me 1 time per 16kb se jyada data nhi ayga, basic security feature. agr 16 kb se jyada aya to error dega server.
+app.use(cookieParser());    //to read data in cookies coming from users browser and to validate user and to set cookies in user's browser
+app.use(express.urlencoded({extended : true , limit : "16kb"}));
 
 app.use("/api/auth",authRouter);
 
