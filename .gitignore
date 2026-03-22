@@ -1,0 +1,15 @@
+# Ignore env files everywhere
+.env
+.env.*
+
+# Explicit (extra safety)
+backend/.env
+frontend/.env
+frontend/.env.local
+
+# node_modules
+node_modules/
+
+# build files
+dist/
+build/
