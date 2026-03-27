@@ -24,11 +24,16 @@ const userSchema = new mongoose.Schema({
         required : true,
         default : "default.jpg",
     },
+    coverPhoto : {
+        type : String,
+        required : true,
+        default : "default.jpg"
+    },
     bio : {
         type : String,
         trim : true,
         minlength : 5,
-        maxlength : 100
+        maxlength : 300
     },
     genre : {
         type : String,

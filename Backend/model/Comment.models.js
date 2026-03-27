@@ -24,8 +24,6 @@ const commentSchema = new mongoose.Schema({
     content : {
         type : String,
         required : true,
-        minlength : 2,
-        maxlength : 50
     },
     commentedAt : {
         type : Date,

@@ -17,7 +17,11 @@ app.use(cors({
 
 app.use(express.json({limit : "16kb"}));    //to read users data like name,email,password through req.body, and 1 req me 1 time per 16kb se jyada data nhi ayga, basic security feature. agr 16 kb se jyada aya to error dega server.
 app.use(cookieParser());    //to read data in cookies coming from users browser and to validate user and to set cookies in user's browser
-app.use(express.urlencoded({extended : true , limit : "16kb"}));
+app.use(express.urlencoded({   //its main task is to handle url encoded form data coming from client and is used in post request to read and store form data in db.
+    extended : true , 
+    limit : "16kb", 
+    parameterLimit : 5000        //to prevent DoS attacks
+}));
 
 app.use("/api/auth",authRouter);
 

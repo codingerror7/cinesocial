@@ -20,7 +20,7 @@ const communitySchema = new mongoose.Schema({
     description : {
         type : String,
         minlength : 5,
-        maxlength : 50
+        maxlength : 100
     },
     createdAt : {
         type : Date,

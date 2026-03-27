@@ -34,7 +34,7 @@ export const logIn = async (req,res) => {
         const {email,password} = req.body;
     let existUser = await User.findOne({email});
     if(!existUser){
-        await res.status(400).json({message:"user not found, please signup."});
+        await res.status(404).json({message:"user not found, please signup."});
     }
     let userMatch = await bcrypt.compare(password,existUser.password);
     if(!userMatch){
@@ -74,7 +74,7 @@ export const refresh = (req,res) => {
 export const logOut = async (req,res) => {
     try {
         res.clearCookie("refreshToken");
-        return res.status(200).json({message : "user logout successfully"})
+        return res.status(204).json({message : "user logout successfully"})
     } catch (error) {
         return res.status(400).json({message:error});
     }
