@@ -2,8 +2,8 @@ import express from "express";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import connectDB from "./config/db.config.js";
-import authRouter from "./routes/auth.route.js";
+import connectDB from "./src/config/db.config.js";
+import authRouter from "./src/routes/auth.route.js";
 
 dotenv.config();
 
@@ -34,4 +34,4 @@ app.get("/what",(req,res)=>{
 app.listen(PORT,()=>{
     console.log(`running at ${PORT}`);
     connectDB();
-})
+});
