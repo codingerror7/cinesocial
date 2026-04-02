@@ -4,10 +4,10 @@ import jwt from "jsonwebtoken";
 
 export const generateAccessToken = async (userId) => {
     try {
-        const token = await jwt.sign({userId},process.env.ACCESS_SECRET,{expiresIn : "15m"});
         if(!process.env.ACCESS_SECRET){
             throw new error("ACCESS SECRET VARIABLE missing in dotenv file.");
         }
+        const token = await jwt.sign({userId},process.env.ACCESS_SECRET,{expiresIn : "15m"});
         return token;
     } catch (error) {
         console.log(`token not generated ${error}`);
