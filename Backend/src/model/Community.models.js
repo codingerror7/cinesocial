@@ -6,7 +6,7 @@ const communitySchema = new mongoose.Schema({
         required : true,
         unique : true,
         minlength : 2,
-        maxlength : 20
+        maxlength : 40
     },
     avatar : {
         type : String,   //cloudinary url

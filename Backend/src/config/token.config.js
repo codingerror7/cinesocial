@@ -16,10 +16,10 @@ export const generateAccessToken = async (userId) => {
 
 export const generateRefreshToken = async (userId) => {
     try {
-        const token = await jwt.sign({userId},process.env.REFRESH_SECRET,{expiresIn : "7d"});
         if(!process.env.REFRESH_SECRET){
             throw new error("REFRESH SECRET VARIABLE not present in dotenv file.")
         }
+        const token = await jwt.sign({userId},process.env.REFRESH_SECRET,{expiresIn : "7d"});
         return token;
     } catch (error) {
         console.log(`token not generated ${error}`);

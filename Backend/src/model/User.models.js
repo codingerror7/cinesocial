@@ -3,7 +3,6 @@ const userSchema = new mongoose.Schema({
     name : {
         type : String,
         required : [true,"username is required"],
-        lowercase : true,
         trim : true,
         minlength : 3,
         maxlength : 20
@@ -11,9 +10,8 @@ const userSchema = new mongoose.Schema({
     email : {
         type : String,
         required : [true,"email is required"],
-        unique : [true,"email must be unique"],
+        unique : [true,"email must be unique"],   //basic indexing.
         trim : true,
-        lowercase : true
     },
     password : {
         type : String,
