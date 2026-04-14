@@ -6,7 +6,7 @@ import connectDB from "./src/config/db.config.js";
 import authRouter from "./src/routes/auth.route.js";
 
 dotenv.config({
-    path : "./.env"     //exact .env path
+    path : "./.env"     //exact .env path, we have to call dotenv.config() only in server.js
 });
 
 const app = express();
