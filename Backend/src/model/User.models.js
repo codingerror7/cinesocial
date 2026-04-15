@@ -19,12 +19,10 @@ const userSchema = new mongoose.Schema({
     },
     profilePic : {
         type : String,
-        required : true,
         default : "default.jpg",
     },
     coverPhoto : {
         type : String,
-        required : true,
         default : "default.jpg"
     },
     bio : {
@@ -36,7 +34,6 @@ const userSchema = new mongoose.Schema({
     genre : {
         type : String,
         enum : ["action","thriller","emotional","gen-z","anime"],
-        required : true
     },
     dob : {
         type : Date,

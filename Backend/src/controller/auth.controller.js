@@ -25,6 +25,7 @@ export const signUp = async (req,res) => {
         return res.status(201).json({accessToken});
 
     } catch (error) {
+        console.log(error);
         return res.status(500).json({message : `${error}`});
     }
 }
@@ -34,15 +35,15 @@ export const logIn = async (req,res) => {
         const {email,password} = req.body;
     let existUser = await User.findOne({email});
     if(!existUser){
-        await res.status(404).json({message:"user not found, please signup."});
+        return res.status(404).json({message:"user not found, please signup."});
     }
     let userMatch = await bcrypt.compare(password,existUser.password);
     if(!userMatch){
-        await res.status(400).json({message : "password invalid."});
+        return res.status(400).json({message : "password invalid."});
     }
     //refresh token mechanism
-    const accessToken = generateAccessToken(user._id);
-    const refreshToken = generateRefreshToken(user._id);
+    const accessToken = generateAccessToken(existUser._id);
+    const refreshToken = generateRefreshToken(existUser._id);
     res.cookie("refreshToken",refreshToken,{
         httpOnly : true,
         secure : process.env.NODE_ENVIRONMENT === "production",
@@ -51,6 +52,7 @@ export const logIn = async (req,res) => {
     })
     return res.status(201).json({accessToken});
     } catch (error) {
+        console.log(error);
         return res.status(400).json({message : "something went wrong,",error});
     }
 }
