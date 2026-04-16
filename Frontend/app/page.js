@@ -1,9 +1,11 @@
+"use client"
 import React from 'react'
+import Home from '@/Components/Home'
 
 const page = () => {
   return (
     <>
-    <h1>CINESOCIAL.</h1>
+    <Home/>
     </>
   )
 }
