@@ -4,8 +4,10 @@ import React from 'react'
 const Searchbar = () => {
   return (
     <>
-    <div className='w-20 bg-yellow-700 rounded-[20px]'>
-        <h1 className='text-xl font-extrabold font-[gilroy]'>SEARCH BAR</h1>
+    <div>
+      <form>
+        <input className='w-80 border border-white/10 outline-none rounded-[20px] p-1 mr-10 font-[gilroy] text-sm' placeholder='Search..'></input>
+      </form>
     </div>
     </>
   )

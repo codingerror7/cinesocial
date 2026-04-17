@@ -6,7 +6,7 @@ import Suggest from './Suggest'
 const Rightpanel = () => {
   return (
     <>
-    <aside className='space-y-5 mt-30'>
+    <aside className='space-y-8 mt-30 mr-12'>
         <Trending/>
         <Suggest/>
     </aside>

@@ -6,7 +6,7 @@ import Postcard from './Postcard'
 const Feed = () => {
   return (
     <>
-     <div className="max-w-[1100px] mx-auto px-6 py-8 grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-8 overflow-x-hidden">
+     <div className="w-[800px] mx-auto px-6 py-8 grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-4 overflow-x-hidden">
       
       {/* LEFT FEED */}
       <div>

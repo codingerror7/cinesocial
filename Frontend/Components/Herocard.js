@@ -4,7 +4,7 @@ import React from 'react'
 const Herocard = () => {
   return (
     <>
-     <div className="relative h-[200px] mt-30 rounded-2xl overflow-hidden mb-7 cursor-pointer group">
+     <div className="relative h-[200px] w-[50vw] mt-21 rounded-2xl overflow-hidden mb-7 cursor-pointer group font-[gilroy]">
       
       {/* BG Gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-[#1a0a2e] via-[#2d0a1a] to-[#0a1a2e]" />

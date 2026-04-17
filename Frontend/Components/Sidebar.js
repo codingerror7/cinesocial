@@ -3,7 +3,7 @@ import React from "react";
 
 const Sidebar = () => {
   return (
-    <aside className="fixed left-0 top-0 h-screen w-64 bg-gradient-to-b from-[#0e0e14] to-black border-r border-white/10 flex flex-col z-100 py-7">
+    <aside className="fixed left-0 top-0 h-screen w-68 bg-gradient-to-b from-[#0e0e14] to-black border-r border-white/10 flex flex-col z-100 py-2">
       
       {/* LOGO */}
       <div className="px-6 pb-9 flex items-center gap-2.5">

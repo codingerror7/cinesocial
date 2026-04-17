@@ -18,7 +18,7 @@ const Postcard = ({variant = "default"}) => {
 }
   return (
     <>
-    <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden transition hover:border-white/20 hover:shadow-[0_8px_40px_rgba(0,0,0,0.6)] hover:-translate-y-[2px] cursor-pointer">
+    <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden transition hover:border-white/20 hover:shadow-[0_8px_40px_rgba(0,0,0,0.6)] hover:-translate-y-[2px] cursor-pointer font-[gilroy]">
       
       {/* HEADER */}
       <div className="flex items-center gap-3 px-4 pt-4 pb-3">
