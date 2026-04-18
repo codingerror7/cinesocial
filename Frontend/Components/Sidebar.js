@@ -1,12 +1,13 @@
 "use client"
 import React from "react";
+import Link from "next/link";
 
 const Sidebar = () => {
   return (
     <aside className="fixed left-0 top-0 h-screen w-68 bg-gradient-to-b from-[#0e0e14] to-black border-r border-white/10 flex flex-col z-100 py-2">
       
       {/* LOGO */}
-      <div className="px-6 pb-9 flex items-center gap-2.5">
+      <div className="px-6 pb-6 py-6 flex items-center gap-2.5">
         <div className="w-9 h-9 rounded-lg flex items-center justify-center text-lg bg-gradient-to-br from-red-500 to-orange-400 shadow-[0_0_20px_rgba(239,68,68,0.6)]">
           🎬
         </div>
@@ -24,7 +25,7 @@ const Sidebar = () => {
         </div>
 
         <NavItem icon="🏠" text="Home Feed" active />
-        <NavItem icon="🔭" text="Explore" />
+        <NavItem icon="📢" text="Communities" />
         <NavItem icon="✏️" text="Create Post" />
 
         {/* LIBRARY */}
@@ -32,9 +33,9 @@ const Sidebar = () => {
           Library
         </div>
 
-        <NavItem icon="🎥" text="Movie Pages" />
+        <NavItem icon="🤖" text="Chatbot" />
         <NavItem icon="🔔" text="Notifications" badge="7" />
-        <NavItem icon="👤" text="Profile" />
+        <Link href="./Signup"><NavItem icon="👤" text="Profile" /></Link>
 
         {/* MORE */}
         <div className="text-[10px] font-semibold tracking-[1.5px] uppercase text-white/40 px-3 mt-5 mb-2">
