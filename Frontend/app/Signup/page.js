@@ -1,6 +1,17 @@
-import React from 'react'
+"use client"
+import React from 'react';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import Link from 'next/link';
 
 const Signup = () => {
+
+   const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
+
   return (
     <>
     <div className='min-h-screen w-full flex bg-gradient-to-b from-[#0e0e14] to-black overflow-x-hidden'>
@@ -43,6 +54,94 @@ const Signup = () => {
   </p>
   
 
+</div>
+<div className='w-[50vw] min-h-screen px-20 relative overflow-hidden'>
+  <form
+  onSubmit={handleSubmit((data) => console.log(data))}
+  className="w-full max-w-md mx-auto mt-40 p-8 rounded-2xl 
+             bg-white/[0.04] backdrop-blur-xl border border-white/10 
+             shadow-[0_0_40px_rgba(0,0,0,0.6)] space-y-6"
+>
+
+  {/* TITLE */}
+  <div className="text-center">
+    <h2 className="text-2xl font-semibold tracking-wide text-white">
+      Create Account
+    </h2>
+    <p className="text-sm text-white/50 mt-1">
+      Join the CineSocial community
+    </p>
+  </div>
+
+  {/* NAME */}
+  <div className="space-y-2">
+    <input
+      type="text"
+      placeholder="Full Name"
+      {...register("name", { required: true })}
+      className="w-full px-4 py-3 rounded-lg 
+                 bg-white/5 border border-white/10 
+                 text-white placeholder-white/40
+                 focus:outline-none focus:border-red-500 
+                 focus:ring-2 focus:ring-red-500/20 transition"
+    />
+    {errors.name && (
+      <p className="text-xs text-red-400">Name is required</p>
+    )}
+  </div>
+
+  {/* EMAIL */}
+  <div className="space-y-2">
+    <input
+      type="email"
+      placeholder="Email address"
+      {...register("email", { required: true })}
+      className="w-full px-4 py-3 rounded-lg 
+                 bg-white/5 border border-white/10 
+                 text-white placeholder-white/40
+                 focus:outline-none focus:border-red-500 
+                 focus:ring-2 focus:ring-red-500/20 transition"
+    />
+    {errors.email && (
+      <p className="text-xs text-red-400">Email is required</p>
+    )}
+  </div>
+
+  {/* PASSWORD */}
+  <div className="space-y-2">
+    <input
+      type="password"
+      placeholder="Password"
+      {...register("password", { required: true })}
+      className="w-full px-4 py-3 rounded-lg 
+                 bg-white/5 border border-white/10 
+                 text-white placeholder-white/40
+                 focus:outline-none focus:border-red-500 
+                 focus:ring-2 focus:ring-red-500/20 transition"
+    />
+    {errors.password && (
+      <p className="text-xs text-red-400">Password is required</p>
+    )}
+  </div>
+  {/* BUTTON */}
+  <button
+    type="submit"
+    className="w-full py-3 rounded-lg font-semibold 
+               bg-gradient-to-r from-red-500 to-orange-400 
+               hover:brightness-110 transition 
+               text-white shadow-[0_0_20px_rgba(239,68,68,0.5)]"
+  >
+    Create Account
+  </button>
+<p className="text-sm text-white/50 text-center mt-4">
+  Already have an account?{" "}
+  <Link href="./Login">
+    <span className="text-red-400 font-medium hover:text-orange-400 transition cursor-pointer">
+      Sign in
+    </span>
+  </Link>
+</p>
+</form>
 </div>
     </div>
     </>
