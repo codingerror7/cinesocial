@@ -2,13 +2,32 @@
 import React from 'react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import axios from 'axios';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 const Signup = () => {
+
+  const router = useRouter();
+
+  const onSubmit = async (data) => {
+    try {
+
+      let res = await axios.post("http://localhost:8000/api/auth/signup",data);
+      console.log(res.data);
+      localStorage.setItem("accesstoken",res.data.accessToken);
+      router.push("/");
+      reset();
+
+    } catch (error) {
+      console.log(error || "something went wrong...");
+    }
+  }
 
    const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm();
 
@@ -56,8 +75,9 @@ const Signup = () => {
 
 </div>
 <div className='w-[50vw] min-h-screen px-20 relative overflow-hidden'>
-  <form
-  onSubmit={handleSubmit((data) => console.log(data))}
+
+  <form onSubmit={handleSubmit(onSubmit)}
+
   className="w-full max-w-md mx-auto mt-40 p-8 rounded-2xl 
              bg-white/[0.04] backdrop-blur-xl border border-white/10 
              shadow-[0_0_40px_rgba(0,0,0,0.6)] space-y-6"

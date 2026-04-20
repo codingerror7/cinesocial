@@ -8,7 +8,7 @@ const authMiddleware = (req,res,next) => {
 // If authentication succeeds → next()
 //If fails → send error response
 
-    const header = req.header.authorization;
+    const header = req.headers.authorization;
     //Reads the Authorization header from request.
     if(!header){
         return res.status(401).json({message : "user not authorized."});
@@ -17,7 +17,7 @@ const authMiddleware = (req,res,next) => {
     const token = header.split(" ")[1];
     //it extracts token from header of request and seperates it with single spacing. here, [1] means token.
     try {
-        const decode = jwt.verify(token,process.env.JWT_SECRET);
+        const decode = jwt.verify(token,process.env.ACCESS_SECRET);
         //compares secret string present in token and dotenv, if valid then moves forward.
         req.user = decode;
         //now, attach extract user data from token like phone,userID and give it to decode. the authcontroller can directly use the user info and hence there is no need for it to again verify token.

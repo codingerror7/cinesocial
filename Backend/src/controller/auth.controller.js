@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 import {generateAccessToken , generateRefreshToken} from "../config/token.config.js";
 import User from "../model/User.models.js";
 
@@ -22,7 +23,7 @@ export const signUp = async (req,res) => {
             sameSite : "none",
             maxAge : 7*24*60*60*1000
         })
-        return res.status(201).json({accessToken});
+        return res.status(201).json({user,accessToken});
 
     } catch (error) {
         console.log(error);
@@ -50,10 +51,10 @@ export const logIn = async (req,res) => {
         sameSite : "none",
         maxAge : 7*24*60*60*1000
     })
-    return res.status(201).json({accessToken});
+    return res.status(200).json({user: existUser,accessToken});
     } catch (error) {
         console.log(error);
-        return res.status(400).json({message : "something went wrong,",error});
+        return res.status(400).json({message : "something went wrong", error});
     }
 }
 

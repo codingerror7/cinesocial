@@ -1,12 +1,30 @@
 "use client"
 import React from 'react'
 import { useForm } from 'react-hook-form';
+import axios from 'axios';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 const Login = () => {
+  let router = useRouter();
+
+  const onSubmit = async (data) => {
+    try {
+
+      let res = await axios.post("http://localhost:8000/api/auth/login",data);
+      console.log(data);
+      localStorage.setItem("accesstoken",res.data.accessToken);
+      router.push("/");
+      reset();
+
+    } catch (error) {
+      console.log(error.response.data);
+    }
+  }
   const {
       register,
       handleSubmit,
+      reset,
       formState: { errors },
     } = useForm();
   return (
@@ -54,7 +72,7 @@ const Login = () => {
 </div>
 <div className='w-[50vw] min-h-screen px-20 relative overflow-hidden'>
   <form
-  onSubmit={handleSubmit((data) => console.log(data))}
+  onSubmit={handleSubmit(onSubmit)}
   className="w-full max-w-md mx-auto mt-40 p-8 rounded-2xl 
              bg-white/[0.04] backdrop-blur-xl border border-white/10 
              shadow-[0_0_40px_rgba(0,0,0,0.6)] space-y-6"
@@ -63,7 +81,7 @@ const Login = () => {
   {/* TITLE */}
   <div className="text-center">
     <h2 className="text-2xl font-semibold tracking-wide text-white">
-      Create Account
+      Login to Your Account
     </h2>
     <p className="text-sm text-white/50 mt-1">
       Join the CineSocial community
@@ -73,7 +91,7 @@ const Login = () => {
   {/* EMAIL */}
   <div className="space-y-2">
     <input
-      type="email"
+      type="email" name='email'
       placeholder="Email address"
       {...register("email", { required: true })}
       className="w-full px-4 py-3 rounded-lg 
@@ -90,8 +108,8 @@ const Login = () => {
   {/* PASSWORD */}
   <div className="space-y-2">
     <input
-      type="password"
-      placeholder="Password"
+      type="password" name='password'
+      placeholder="password"
       {...register("password", { required: true })}
       className="w-full px-4 py-3 rounded-lg 
                  bg-white/5 border border-white/10 
@@ -112,7 +130,7 @@ const Login = () => {
                hover:brightness-110 transition 
                text-white shadow-[0_0_20px_rgba(239,68,68,0.5)]"
   >
-    Create Account
+    Login
   </button>
 <p className="text-sm text-white/50 text-center mt-4">
   Dont have an account?{" "}

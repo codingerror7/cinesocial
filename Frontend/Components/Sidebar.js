@@ -26,7 +26,7 @@ const Sidebar = () => {
 
         <NavItem icon="🏠" text="Home Feed" active />
         <NavItem icon="📢" text="Communities" />
-        <NavItem icon="✏️" text="Create Post" />
+        <Link href="./Post"><NavItem icon="✏️" text="Create Post" /></Link>
 
         {/* LIBRARY */}
         <div className="text-[10px] font-semibold tracking-[1.5px] uppercase text-white/40 px-3 mt-5 mb-2">
