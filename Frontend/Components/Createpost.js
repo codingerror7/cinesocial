@@ -1,0 +1,405 @@
+"use client";
+import React from "react";
+import { useState } from "react";
+
+const MOVIE_SUGGESTIONS = [
+  "Inception (2010)", "Parasite (2019)", "The Godfather (1972)",
+  "2001: A Space Odyssey (1968)", "Mulholland Drive (2001)",
+  "Blade Runner 2049 (2017)", "Interstellar (2014)",
+  "The Dark Knight (2008)", "Spirited Away (2001)", "Roma (2018)",
+];
+
+const PLACEHOLDERS = {
+  story: "Share your thoughts on a movie, theory, or idea…",
+  poll: "Ask a question for your poll…",
+  whatif: "Set the scene for your alternate universe…",
+  image: "Describe what you're sharing…",
+};
+
+// ─── Sub-components ────────────────────────────────────────────────────────
+
+function Avatar({ initials }) {
+  return (
+    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-red-700
+      flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+      {initials}
+    </div>
+  );
+}
+
+function PostTypeTabs({ active, onChange }) {
+  const tabs = [
+    { id: "story",  label: "Story",   icon: "✍" },
+    { id: "poll",   label: "Poll",    icon: "◎" },
+    { id: "whatif", label: "What If", icon: "◈" },
+    { id: "image",  label: "Image",   icon: "⊞" },
+  ];
+  return (
+    <div className="flex gap-1 bg-[#0F1016] p-1 rounded-xl border border-white/5">
+      {tabs.map((tab) => (
+        <button
+          key={tab.id}
+          onClick={() => onChange(tab.id)}
+          className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg
+            text-sm font-medium border transition-all duration-200
+            ${active === tab.id
+              ? "bg-orange-500/15 text-orange-400 border-orange-500/30 shadow-[0_0_14px_rgba(249,115,22,0.22)]"
+              : "text-white/40 hover:text-white/65 hover:bg-white/5 border-transparent"
+            }`}
+        >
+          <span className="text-[15px] leading-none">{tab.icon}</span>
+          <span className="hidden sm:inline text-[12px]">{tab.label}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function PollSection() {
+  const [options, setOptions] = useState(["", ""]);
+  return (
+    <div className="p-4 rounded-xl bg-[#0F1016] border border-white/5 space-y-2.5">
+      <p className="text-[10px] text-white/28 uppercase tracking-widest font-semibold">Poll Options</p>
+      {options.map((opt, i) => (
+        <input
+          key={i}
+          type="text"
+          value={opt}
+          onChange={(e) => {
+            const next = [...options];
+            next[i] = e.target.value;
+            setOptions(next);
+          }}
+          placeholder={`Option ${i + 1}`}
+          className="w-full bg-[#14151A] border border-white/8 rounded-lg px-4 py-2.5 text-sm
+            text-white placeholder-white/20 focus:outline-none focus:border-orange-500/55
+            focus:ring-1 focus:ring-orange-500/25 transition-all"
+        />
+      ))}
+      {options.length < 4 && (
+        <button
+          onClick={() => setOptions([...options, ""])}
+          className="w-full py-2 rounded-lg border border-dashed border-white/10 text-white/28
+            text-sm hover:border-orange-500/28 hover:text-orange-400/55 transition-all"
+        >
+          + Add option
+        </button>
+      )}
+    </div>
+  );
+}
+
+function WhatIfSection() {
+  return (
+    <div className="p-4 rounded-xl bg-[#0F1016] border border-white/5 space-y-3">
+      <div className="flex items-center gap-2">
+        <div className="w-[3px] h-4 rounded-full bg-orange-500 flex-shrink-0" />
+        <p className="text-[10px] text-white/28 uppercase tracking-widest font-semibold">
+          Alternate Storyline
+        </p>
+      </div>
+      <textarea
+        rows={3}
+        placeholder="What if Thanos used the infinity gauntlet to create more resources instead of destroying half the universe?"
+        className="w-full bg-[#14151A] border border-white/8 rounded-lg px-4 py-3 text-sm
+          text-white placeholder-white/20 resize-none focus:outline-none
+          focus:border-orange-500/55 focus:ring-1 focus:ring-orange-500/25 transition-all"
+      />
+    </div>
+  );
+}
+
+function ImageSection() {
+  return (
+    <div className="p-6 rounded-xl bg-[#0F1016] border-2 border-dashed border-white/9
+      hover:border-orange-500/28 transition-all group cursor-pointer text-center space-y-3">
+      <div className="mx-auto w-12 h-12 rounded-xl bg-white/4 group-hover:bg-orange-500/10
+        flex items-center justify-center transition-colors text-[22px]">
+        🎞
+      </div>
+      <div>
+        <p className="text-sm text-white/55 font-medium group-hover:text-white/75 transition-colors">
+          Upload movie posters or images
+        </p>
+        <p className="text-xs text-white/22 mt-1">
+          Drag & drop or click to browse · PNG, JPG up to 10MB
+        </p>
+      </div>
+      <div className="grid grid-cols-4 gap-2 mt-2">
+        {[1, 2, 3, 4].map((n) => (
+          <div key={n} className="aspect-[2/3] rounded-lg bg-white/3 border border-white/5
+            flex items-center justify-center text-white/10 text-lg">
+            ⊞
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function MovieTag({ label, onRemove }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-orange-500/12
+      border border-orange-500/22 rounded-full text-orange-400 text-xs font-medium">
+      🎬 {label}
+      <button
+        onClick={onRemove}
+        className="text-orange-400/45 hover:text-orange-300 transition-colors leading-none"
+      >
+        ✕
+      </button>
+    </span>
+  );
+}
+
+function MovieTagging({ tags, onAdd, onRemove }) {
+  const [query, setQuery] = useState("");
+  const [open, setOpen]   = useState(false);
+
+  const filtered = MOVIE_SUGGESTIONS.filter(
+    (m) => m.toLowerCase().includes(query.toLowerCase()) && !tags.includes(m)
+  );
+
+  return (
+    <div className="space-y-2">
+      {tags.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {tags.map((t) => (
+            <MovieTag key={t} label={t} onRemove={() => onRemove(t)} />
+          ))}
+        </div>
+      )}
+      <div className="relative">
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => { setQuery(e.target.value); setOpen(true); }}
+          onFocus={() => setOpen(true)}
+          onBlur={() => setTimeout(() => setOpen(false), 180)}
+          placeholder="🎬  Tag a movie (e.g., Inception)"
+          className="w-full bg-[#14151A] border border-white/8 rounded-lg px-4 py-2.5 text-sm
+            text-white placeholder-white/22 focus:outline-none focus:border-orange-500/55
+            focus:ring-1 focus:ring-orange-500/25 transition-all"
+        />
+        {open && query.length > 0 && filtered.length > 0 && (
+          <div className="absolute z-20 mt-1 w-full bg-[#1A1C24] border border-white/10
+            rounded-xl shadow-2xl overflow-hidden">
+            {filtered.slice(0, 5).map((m) => (
+              <button
+                key={m}
+                onMouseDown={() => { onAdd(m); setQuery(""); setOpen(false); }}
+                className="w-full text-left px-4 py-2.5 text-sm text-white/65
+                  hover:bg-orange-500/10 hover:text-orange-300 transition-colors"
+              >
+                {m}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function SpoilerToggle({ active, onChange }) {
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <p className="text-sm font-medium text-white/65">Mark as Spoiler</p>
+          <p className="text-xs text-white/28 mt-0.5">
+            Blurs content for users who haven't seen it
+          </p>
+        </div>
+        <button
+          onClick={() => onChange(!active)}
+          className={`relative w-11 h-6 rounded-full transition-all duration-300 flex-shrink-0
+            ${active ? "bg-orange-500" : "bg-white/10"}`}
+        >
+          <span
+            className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-md
+              transition-transform duration-300 ${active ? "translate-x-5" : "translate-x-0"}`}
+          />
+        </button>
+      </div>
+      {active && (
+        <div className="rounded-lg overflow-hidden relative">
+          <div className="px-4 py-5 bg-[#1A1C24] text-sm text-white/50 italic text-center
+            select-none blur-sm">
+            This content contains major plot spoilers that have been intentionally hidden.
+          </div>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="text-xs font-semibold text-white/55 bg-black/60 px-3 py-1
+              rounded-full backdrop-blur-sm border border-white/10">
+              🚨 Spoiler Hidden
+            </span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ActionBar({ onImageClick, onPollClick, onPost }) {
+  const actions = [
+    { icon: "🖼", label: "Image", onClick: onImageClick },
+    { icon: "◎", label: "Poll",  onClick: onPollClick },
+    { icon: "🎬", label: "Tag" },
+    { icon: "😊", label: "Mood" },
+  ];
+  return (
+    <div className="flex items-center justify-between pt-3 border-t border-white/5">
+      <div className="flex items-center gap-1">
+        {actions.map(({ icon, label, onClick }) => (
+          <button
+            key={label}
+            onClick={onClick}
+            title={label}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-white/28
+              hover:text-orange-400 hover:bg-orange-500/9 transition-all"
+          >
+            <span className="text-sm">{icon}</span>
+            <span className="hidden sm:inline text-xs">{label}</span>
+          </button>
+        ))}
+      </div>
+      <button
+        onClick={onPost}
+        className="px-6 py-2.5 bg-orange-500 hover:bg-orange-400 text-white font-semibold
+          text-sm rounded-xl transition-all duration-200 hover:scale-[1.025] active:scale-[0.975]
+          shadow-[0_4px_20px_rgba(249,115,22,0.4)] hover:shadow-[0_4px_28px_rgba(249,115,22,0.58)]"
+      >
+        Post
+      </button>
+    </div>
+  );
+}
+
+// ─── Main Page ──────────────────────────────────────────────────────────────
+
+const CreatePost = () => {
+  const [postType, setPostType] = useState("story");
+  const [spoiler,  setSpoiler]  = useState(false);
+  const [tags,     setTags]     = useState([]);
+  const [text,     setText]     = useState("");
+  const [posted,   setPosted]   = useState(false);
+
+  const handlePost = () => {
+    setPosted(true);
+    setTimeout(() => setPosted(false), 2500);
+  };
+
+  return (
+    <div className="min-h-screen bg-[#0B0B0F] text-white font-sans">
+      {/* Ambient background glow */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-[-200px] left-1/2 -translate-x-1/2 w-[600px] h-[600px]
+          rounded-full bg-orange-500/5 blur-[140px]" />
+      </div>
+
+      {/* Sticky header */}
+      <header className="sticky top-0 z-30 bg-[#0B0B0F]/82 backdrop-blur-xl
+        border-b border-white/5 px-4 sm:px-6 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-red-700
+            flex items-center justify-center text-md font-black text-white">
+            🎬
+          </div>
+          <span className="font-bold text-lg text-white tracking-tight hidden sm:block">
+            CineSocial
+          </span>
+        </div>
+      </header>
+
+      {/* Main content */}
+      <main className="max-w-2xl mx-auto px-4 py-8 sm:py-12 relative z-10">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white mb-1">
+          Create a post
+        </h1>
+        <p className="text-sm text-white/28 mb-7">
+          Share theories, reviews, polls, or start a conversation.
+        </p>
+
+        {/* Post card */}
+        <div className="bg-[#14151A] rounded-2xl border border-white/6 shadow-2xl overflow-hidden">
+          <div className="p-5 sm:p-6 flex flex-col gap-5">
+
+            {/* User identity */}
+            <div className="flex items-center gap-3">
+              <Avatar initials="RV" />
+              <div className="flex-1">
+                <p className="font-semibold text-sm text-white">reel_viewer</p>
+                <p className="text-xs text-white/28 mt-0.5">Cinephile · 412 followers</p>
+              </div>
+              <select className="text-xs px-3 py-1 rounded-full border border-white/8
+                bg-[#0F1016] text-white/32 outline-none cursor-pointer">
+                <option>Public</option>
+                <option>Followers</option>
+                <option>Only me</option>
+              </select>
+            </div>
+
+            {/* Post type tabs */}
+            <PostTypeTabs active={postType} onChange={setPostType} />
+
+            {/* Main textarea */}
+            <textarea
+              rows={postType === "story" ? 5 : 3}
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              placeholder={PLACEHOLDERS[postType]}
+              maxLength={1000}
+              className="w-full bg-[#0F1016] border border-white/6 rounded-xl px-4 py-3.5
+                text-white text-sm leading-relaxed resize-none placeholder-white/20
+                focus:outline-none focus:border-orange-500/48 focus:ring-1
+                focus:ring-orange-500/18 transition-all duration-200"
+            />
+
+            {/* Dynamic section */}
+            {postType === "poll"   && <PollSection />}
+            {postType === "whatif" && <WhatIfSection />}
+            {postType === "image"  && <ImageSection />}
+
+            {/* Movie tagging */}
+            <div>
+              <p className="text-[10px] text-white/22 uppercase tracking-widest font-semibold mb-2">
+                Tag a Movie
+              </p>
+              <MovieTagging
+                tags={tags}
+                onAdd={(m) => setTags([...tags, m])}
+                onRemove={(m) => setTags(tags.filter((t) => t !== m))}
+              />
+            </div>
+
+            {/* Spoiler toggle */}
+            <div className="p-4 rounded-xl bg-[#0F1016] border border-white/5">
+              <SpoilerToggle active={spoiler} onChange={setSpoiler} />
+            </div>
+
+            {/* Action bar */}
+            <ActionBar
+              onImageClick={() => setPostType("image")}
+              onPollClick={() => setPostType("poll")}
+              onPost={handlePost}
+            />
+
+            {/* Success flash */}
+            {posted && (
+              <div className="text-center py-2 rounded-lg bg-green-500/12 border border-green-500/20
+                text-green-400 text-sm font-medium animate-pulse">
+                ✓ Post published successfully!
+              </div>
+            )}
+          </div>
+        </div>
+
+        <p className="text-center text-white/13 text-xs mt-6">
+          By posting, you agree to CineSocial's community guidelines.
+        </p>
+      </main>
+    </div>
+  );
+}
+
+export default CreatePost;
