@@ -1,13 +1,15 @@
-"use client";
+"use client"
 import React from "react";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import axios from "axios";
+import { useRouter } from "next/navigation";
 
-const MOVIE_SUGGESTIONS = [
-  "Inception (2010)", "Parasite (2019)", "The Godfather (1972)",
-  "2001: A Space Odyssey (1968)", "Mulholland Drive (2001)",
-  "Blade Runner 2049 (2017)", "Interstellar (2014)",
-  "The Dark Knight (2008)", "Spirited Away (2001)", "Roma (2018)",
-];
+// const MOVIE_SUGGESTIONS = [
+//   "Inception (2010)", "Parasite (2019)", "The Godfather (1972)",
+//   "2001: A Space Odyssey (1968)", "Mulholland Drive (2001)",
+//   "Blade Runner 2049 (2017)", "Interstellar (2014)",
+//   "The Dark Knight (2008)", "Spirited Away (2001)", "Roma (2018)",
+// ];
 
 const PLACEHOLDERS = {
   story: "Share your thoughts on a movie, theory, or idea…",
@@ -18,11 +20,11 @@ const PLACEHOLDERS = {
 
 // ─── Sub-components ────────────────────────────────────────────────────────
 
-function Avatar({ initials }) {
+function Avatar() {
   return (
     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-red-700
       flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-      {initials}
+        SS
     </div>
   );
 }
@@ -55,8 +57,7 @@ function PostTypeTabs({ active, onChange }) {
   );
 }
 
-function PollSection() {
-  const [options, setOptions] = useState(["", ""]);
+function PollSection({options, setOptions}) {
   return (
     <div className="p-4 rounded-xl bg-[#0F1016] border border-white/5 space-y-2.5">
       <p className="text-[10px] text-white/28 uppercase tracking-widest font-semibold">Poll Options</p>
@@ -89,7 +90,7 @@ function PollSection() {
   );
 }
 
-function WhatIfSection() {
+function WhatIfSection({value, setValue}) {
   return (
     <div className="p-4 rounded-xl bg-[#0F1016] border border-white/5 space-y-3">
       <div className="flex items-center gap-2">
@@ -100,6 +101,8 @@ function WhatIfSection() {
       </div>
       <textarea
         rows={3}
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
         placeholder="What if Thanos used the infinity gauntlet to create more resources instead of destroying half the universe?"
         className="w-full bg-[#14151A] border border-white/8 rounded-lg px-4 py-3 text-sm
           text-white placeholder-white/20 resize-none focus:outline-none
@@ -109,97 +112,154 @@ function WhatIfSection() {
   );
 }
 
-function ImageSection() {
+function ImageSection({ file, setFile }) {
+  const fileInputRef = useRef(null);
+
+  const handleClick = () => {
+    fileInputRef.current.click();
+  };
+
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files[0];
+
+    if (!selectedFile) return;
+
+    // Optional validation
+    if (!selectedFile.type.startsWith("image/")) {
+      alert("Only image files allowed");
+      return;
+    }
+
+    if (selectedFile.size > 10 * 1024 * 1024) {
+      alert("Max file size is 10MB");
+      return;
+    }
+
+    setFile(selectedFile);
+  };
+
   return (
-    <div className="p-6 rounded-xl bg-[#0F1016] border-2 border-dashed border-white/9
-      hover:border-orange-500/28 transition-all group cursor-pointer text-center space-y-3">
+    <div
+      onClick={handleClick}
+      className="p-6 rounded-xl bg-[#0F1016] border-2 border-dashed border-white/9
+      hover:border-orange-500/28 transition-all group cursor-pointer text-center space-y-3"
+    >
+      {/* Hidden input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleFileChange}
+      />
+
       <div className="mx-auto w-12 h-12 rounded-xl bg-white/4 group-hover:bg-orange-500/10
         flex items-center justify-center transition-colors text-[22px]">
         🎞
       </div>
+
       <div>
         <p className="text-sm text-white/55 font-medium group-hover:text-white/75 transition-colors">
           Upload movie posters or images
         </p>
         <p className="text-xs text-white/22 mt-1">
-          Drag & drop or click to browse · PNG, JPG up to 10MB
+          Click to browse · PNG, JPG up to 10MB
         </p>
       </div>
-      <div className="grid grid-cols-4 gap-2 mt-2">
-        {[1, 2, 3, 4].map((n) => (
-          <div key={n} className="aspect-[2/3] rounded-lg bg-white/3 border border-white/5
-            flex items-center justify-center text-white/10 text-lg">
-            ⊞
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
 
-function MovieTag({ label, onRemove }) {
-  return (
-    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-orange-500/12
-      border border-orange-500/22 rounded-full text-orange-400 text-xs font-medium">
-      🎬 {label}
-      <button
-        onClick={onRemove}
-        className="text-orange-400/45 hover:text-orange-300 transition-colors leading-none"
-      >
-        ✕
-      </button>
-    </span>
-  );
-}
+      {/* Preview */}
+      {file && (
+        <div className="mt-3">
+          <img
+            src={URL.createObjectURL(file)}
+            alt="preview"
+            className="w-24 h-36 object-cover rounded-lg mx-auto border border-white/10"
+          />
+          <p className="text-xs text-green-400 mt-1">{file.name}</p>
+        </div>
+      )}
 
-function MovieTagging({ tags, onAdd, onRemove }) {
-  const [query, setQuery] = useState("");
-  const [open, setOpen]   = useState(false);
-
-  const filtered = MOVIE_SUGGESTIONS.filter(
-    (m) => m.toLowerCase().includes(query.toLowerCase()) && !tags.includes(m)
-  );
-
-  return (
-    <div className="space-y-2">
-      {tags.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {tags.map((t) => (
-            <MovieTag key={t} label={t} onRemove={() => onRemove(t)} />
+      {/* Placeholder grid */}
+      {!file && (
+        <div className="grid grid-cols-4 gap-2 mt-2">
+          {[1, 2, 3, 4].map((n) => (
+            <div
+              key={n}
+              className="aspect-[2/3] rounded-lg bg-white/3 border border-white/5
+              flex items-center justify-center text-white/10 text-lg"
+            >
+              ⊞
+            </div>
           ))}
         </div>
       )}
-      <div className="relative">
-        <input
-          type="text"
-          value={query}
-          onChange={(e) => { setQuery(e.target.value); setOpen(true); }}
-          onFocus={() => setOpen(true)}
-          onBlur={() => setTimeout(() => setOpen(false), 180)}
-          placeholder="🎬  Tag a movie (e.g., Inception)"
-          className="w-full bg-[#14151A] border border-white/8 rounded-lg px-4 py-2.5 text-sm
-            text-white placeholder-white/22 focus:outline-none focus:border-orange-500/55
-            focus:ring-1 focus:ring-orange-500/25 transition-all"
-        />
-        {open && query.length > 0 && filtered.length > 0 && (
-          <div className="absolute z-20 mt-1 w-full bg-[#1A1C24] border border-white/10
-            rounded-xl shadow-2xl overflow-hidden">
-            {filtered.slice(0, 5).map((m) => (
-              <button
-                key={m}
-                onMouseDown={() => { onAdd(m); setQuery(""); setOpen(false); }}
-                className="w-full text-left px-4 py-2.5 text-sm text-white/65
-                  hover:bg-orange-500/10 hover:text-orange-300 transition-colors"
-              >
-                {m}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
     </div>
   );
 }
+
+// function MovieTag({ label, onRemove }) {
+//   return (
+//     <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-orange-500/12
+//       border border-orange-500/22 rounded-full text-orange-400 text-xs font-medium">
+//       🎬 {label}
+//       <button
+//         onClick={onRemove}
+//         className="text-orange-400/45 hover:text-orange-300 transition-colors leading-none"
+//       >
+//         ✕
+//       </button>
+//     </span>
+//   );
+// }
+
+// function MovieTagging({ tags, onAdd, onRemove }) {
+//   const [query, setQuery] = useState("");
+//   const [open, setOpen]   = useState(false);
+
+//   const filtered = MOVIE_SUGGESTIONS.filter(
+//     (m) => m.toLowerCase().includes(query.toLowerCase()) && !tags.includes(m)
+//   );
+
+//   return (
+//     <div className="space-y-2">
+//       {tags.length > 0 && (
+//         <div className="flex flex-wrap gap-2">
+//           {tags.map((t) => (
+//             <MovieTag key={t} label={t} onRemove={() => onRemove(t)} />
+//           ))}
+//         </div>
+//       )}
+//       <div className="relative">
+//         <input
+//           type="text"
+//           value={query}
+//           onChange={(e) => { setQuery(e.target.value); setOpen(true); }}
+//           onFocus={() => setOpen(true)}
+//           onBlur={() => setTimeout(() => setOpen(false), 180)}
+//           placeholder="🎬  Tag a movie (e.g., Inception)"
+//           className="w-full bg-[#14151A] border border-white/8 rounded-lg px-4 py-2.5 text-sm
+//             text-white placeholder-white/22 focus:outline-none focus:border-orange-500/55
+//             focus:ring-1 focus:ring-orange-500/25 transition-all"
+//         />
+//         {open && query.length > 0 && filtered.length > 0 && (
+//           <div className="absolute z-20 mt-1 w-full bg-[#1A1C24] border border-white/10
+//             rounded-xl shadow-2xl overflow-hidden">
+//             {filtered.slice(0, 5).map((m) => (
+//               <button
+//                 key={m}
+//                 onMouseDown={() => { onAdd(m); setQuery(""); setOpen(false); }}
+//                 className="w-full text-left px-4 py-2.5 text-sm text-white/65
+//                   hover:bg-orange-500/10 hover:text-orange-300 transition-colors"
+//               >
+//                 {m}
+//               </button>
+//             ))}
+//           </div>
+//         )}
+//       </div>
+//     </div>
+//   );
+// }
 
 function SpoilerToggle({ active, onChange }) {
   return (
@@ -283,11 +343,56 @@ const CreatePost = () => {
   const [tags,     setTags]     = useState([]);
   const [text,     setText]     = useState("");
   const [posted,   setPosted]   = useState(false);
+  const [options, setOptions] = useState(["", ""]);
+  const [whatIfText, setWhatIfText] = useState("");
+  const [file, setFile] = useState(null);
 
-  const handlePost = () => {
+  const handlePost = async () => {
+  try {
+    const formData = new FormData();
+
+    formData.append("username", "reel_viewer");
+    formData.append("userId", "661e123abc456def78900000"); // replace real
+    formData.append("postedAt", new Date().toISOString());
+    formData.append("postType", postType);
+
+    // content logic based on type
+    if (postType === "whatif") {
+      formData.append("content", whatIfText);
+    } else {
+      formData.append("content", text);
+    }
+
+    // poll data
+    if (postType === "poll") {
+      formData.append("pollOptions", JSON.stringify(options));
+    }
+
+    // file
+    if (file) {
+      formData.append("media", file); // MUST match multer
+    }
+
+    const res = await axios.post("http://localhost:8000/api/post/create-post", formData, {
+    });
+
+    if (res.status !== 201) throw new Error(res.data.message);
+
+
+
+    // reset UI
     setPosted(true);
+    setText("");
+    setWhatIfText("");
+    setOptions(["", ""]);
+    setFile(null);
+
     setTimeout(() => setPosted(false), 2500);
-  };
+
+  } catch (err) {
+    console.error("Post failed:", err.message);
+  }
+};
 
   return (
     <div className="min-h-screen bg-[#0B0B0F] text-white font-sans">
@@ -331,16 +436,11 @@ const CreatePost = () => {
                 <p className="font-semibold text-sm text-white">reel_viewer</p>
                 <p className="text-xs text-white/28 mt-0.5">Cinephile · 412 followers</p>
               </div>
-              <select className="text-xs px-3 py-1 rounded-full border border-white/8
-                bg-[#0F1016] text-white/32 outline-none cursor-pointer">
-                <option>Public</option>
-                <option>Followers</option>
-                <option>Only me</option>
-              </select>
+              <div className="w-20 border border-white/20 rounded-[20px] px-2 text-center text-sm font-[gilroy]"><h2>Public</h2></div>
             </div>
 
             {/* Post type tabs */}
-            <PostTypeTabs active={postType} onChange={setPostType} />
+            <PostTypeTabs active={postType} onChange={setPostType} />    
 
             {/* Main textarea */}
             <textarea
@@ -356,21 +456,15 @@ const CreatePost = () => {
             />
 
             {/* Dynamic section */}
-            {postType === "poll"   && <PollSection />}
-            {postType === "whatif" && <WhatIfSection />}
-            {postType === "image"  && <ImageSection />}
-
-            {/* Movie tagging */}
-            <div>
-              <p className="text-[10px] text-white/22 uppercase tracking-widest font-semibold mb-2">
-                Tag a Movie
-              </p>
-              <MovieTagging
-                tags={tags}
-                onAdd={(m) => setTags([...tags, m])}
-                onRemove={(m) => setTags(tags.filter((t) => t !== m))}
-              />
-            </div>
+            {postType === "poll" && (
+  <PollSection options={options} setOptions={setOptions} />
+)}
+            {postType === "whatif" && (
+  <WhatIfSection value={whatIfText} setValue={setWhatIfText} />
+)}
+            {postType === "image" && (
+  <ImageSection file={file} setFile={setFile} />
+)}
 
             {/* Spoiler toggle */}
             <div className="p-4 rounded-xl bg-[#0F1016] border border-white/5">

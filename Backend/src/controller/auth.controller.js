@@ -26,9 +26,13 @@ export const signUp = async (req,res) => {
         return res.status(201).json({user,accessToken});
 
     } catch (error) {
-        console.log(error);
-        return res.status(500).json({message : `${error}`});
+        //to get the actual and exact validation error
+    if (error.name === 'ValidationError') {
+       const messages = Object.values(error.errors).map(val => val.message);
+       return res.status(400).json({ success: false, message: messages[0], details: messages });
     }
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
 }
 
 export const logIn = async (req,res) => {
@@ -53,9 +57,12 @@ export const logIn = async (req,res) => {
     })
     return res.status(200).json({user: existUser,accessToken});
     } catch (error) {
-        console.log(error);
-        return res.status(400).json({message : "something went wrong", error});
+    if (error.name === 'ValidationError') {
+       const messages = Object.values(error.errors).map(val => val.message);
+       return res.status(400).json({ success: false, message: messages[0], details: messages });
     }
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
 }
 
 //refresh token

@@ -8,7 +8,6 @@ const postSchema = new mongoose.Schema({
         },
         userName : {
             type : String,
-            required : true,
             lowercase : true,
             trim : true,
         },
@@ -24,13 +23,12 @@ const postSchema = new mongoose.Schema({
     },
     postType : {
         type : String,
-        enum : ["story","review","poll"]
+        enum : ["story","poll","what-if","image"]
     },
     content : {
         type : String,
         required : true,
         minlength : 5,
-        maxlength : 500
     },
     media : [
         {

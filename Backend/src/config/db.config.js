@@ -10,6 +10,7 @@ const connectDB = () => {
         console.log("database connected...no error");
     } catch (error) {
         console.log("error:",error);
+        process.exit(1);
     }
 }
 export default connectDB;
