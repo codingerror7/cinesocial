@@ -55,12 +55,15 @@ export const createPost = async (req,res) => {
 
 export const getPost = async (req,res) => {
     try {
-        const {id} = req.params;
-        const post = await Post.findById(id).populate("user.userId");
+        const post = await Post.find().sort({ createdAt: -1 }).limit(10);
         if(!post){
             return res.status(404).json({message:"post not found"});
         }
-        return res.status(200).json(post);
+        return res.status(200).json({
+            success : true,
+            message : "post fetched successfully.",
+            post
+        });
     } catch (error) {
         return res.status(500).json({message : error.message});
     }
