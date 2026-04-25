@@ -1,6 +1,7 @@
 "use client"
 import React from 'react'
 import { useState, useEffect } from 'react';
+import Image from 'next/image';     //image optimization in nextjs, lazy loading, responsive images, making images light-weight and more efficient image handling.
 import axios from 'axios';
 
 const Postcard = ({ variant = "default"}) => {
@@ -70,12 +71,16 @@ const Postcard = ({ variant = "default"}) => {
   <p>Loading...</p>
 ) : (
   Array.isArray(postData) && postData.map((post) => (
-    <div className="p-4 border border-white/10 rounded-xl mb-4 bg-white/2 font-[gilroy]">
+    <div key={post._id} className="p-4 border border-white/10 rounded-xl mb-4 bg-white/2 font-[gilroy]">
       
-      <div key={post._id} className='w-full flex items-center justify-between'>
+      <div className='w-full flex items-center justify-between'>
       <div className='flex items-center justify-between gap-2'>
-        <div className=' border border-white/10 rounded-[50%] w-10 h-10 overflow-hidden'>
-        <img className='' src={post.user.avatar} alt="avatar" />    {/*avatar*/}
+        <div className=' border border-white/10 rounded-[50%] w-10 h-10 overflow-hidden bg-white/5 flex items-center justify-center'>
+        {post.user.avatar && post.user.avatar.startsWith('http') ? (
+          <Image className='' src={post.user.avatar} alt="avatar" width={40} height={40} />
+        ) : (
+          <span className="text-lg">👤</span>
+        )}
         </div>
         <h2 className="text-lg font-bold text-white/70">
         {post.user.userName}
@@ -93,7 +98,7 @@ const Postcard = ({ variant = "default"}) => {
       </p>
 
       {/* media */}
-      {post.media?.length > 0 && (
+      {post.media?.length > 0 && post.media[0] && post.media[0].startsWith('http') && (
         <img
           src={post.media[0]}
           alt="post"

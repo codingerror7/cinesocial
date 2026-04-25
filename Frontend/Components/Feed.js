@@ -13,10 +13,10 @@ const Feed = () => {
         <Herocard />
 
         <div className="space-y-5">
-          <Postcard variant="default" />
-          <Postcard variant="spoiler" />
-          <Postcard variant="default" />
-          <Postcard variant="default" />
+          <Postcard key="postcard-1" variant="default" />
+          <Postcard key="postcard-2" variant="spoiler" />
+          <Postcard key="postcard-3" variant="default" />
+          <Postcard key="postcard-4" variant="default" />
         </div>
       </div>
 
