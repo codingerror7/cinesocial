@@ -12,7 +12,10 @@ const Postcard = ({ variant = "default"}) => {
 
       try {
         const response = await axios.get('http://localhost:8000/api/post/feed');
-        setpostData(response.data?.post || []);
+        
+          setpostData(response.data.post);
+
+        console.log("Fetched post data:", response.data.post);
       } catch (error) {
         console.error('Error fetching post data:', error);
         setpostData([]);
@@ -23,7 +26,27 @@ const Postcard = ({ variant = "default"}) => {
     };
 
     fetchData();
+
   }, []);
+
+  const handleVote = async (postId, optionIndex) => {
+  try {
+    const res = await axios.post(
+      `http://localhost:8000/api/post/vote/${postId}`,
+      { optionIndex }
+    );
+
+    // update feed state
+    setpostData(prev =>
+      prev.map(p =>
+        p._id === postId ? res.data.post : p
+      )
+    );
+
+  } catch (err) {
+    console.error("Vote failed:", err.message);
+  }
+};
 
 //     function ActionBtn({ icon, count, active = false }) {
 //   return (
@@ -47,18 +70,25 @@ const Postcard = ({ variant = "default"}) => {
   <p>Loading...</p>
 ) : (
   Array.isArray(postData) && postData.map((post) => (
-    <div className="p-4 border border-white/10 rounded-xl mb-4">
+    <div className="p-4 border border-white/10 rounded-xl mb-4 bg-white/2 font-[gilroy]">
       
-      <div className='w-full flex items-center justify-between '>
-      <h2 className="text-lg font-bold text-white/70">
+      <div key={post._id} className='w-full flex items-center justify-between'>
+      <div className='flex items-center justify-between gap-2'>
+        <div className=' border border-white/10 rounded-[50%] w-10 h-10 overflow-hidden'>
+        <img className='' src={post.user.avatar} alt="avatar" />    {/*avatar*/}
+        </div>
+        <h2 className="text-lg font-bold text-white/70">
         {post.user.userName}
       </h2>
+
+      </div>
       <p className="text-sm text-white/70">
         {post.postType === "poll" ? "📊 Poll" : "📝 Post"}
       </p>
       </div>
+      <h1 className="text-xl font-bold text-white mt-4 px-3">{post.title}</h1>
 
-      <p className="text-white mt-2">
+      <p className="text-white mt-1 px-3 py-1">
         {post.content}
       </p>
 
@@ -72,17 +102,41 @@ const Postcard = ({ variant = "default"}) => {
       )}
 
       {/* poll */}
-      {post.postType === "poll" && (
-        <div className="mt-3 space-y-1">
-          {post.pollOptions.map((opt, i) => (
-            <div key={i} className="text-sm bg-white/5 p-2 rounded">
-              {opt}
-            </div>
-          ))}
+      {post.postType === "poll" && post.poll?.options && (
+  <div className="mt-3 space-y-2">
+    {post.poll.options.map((opt, i) => {
+
+      const totalVotes = post.poll.options.reduce(
+        (sum, o) => sum + o.votes,
+        0
+      );
+
+      const percentage = totalVotes
+        ? Math.round((opt.votes / totalVotes) * 100)
+        : 0;
+
+      return (
+        <div
+          key={i}
+          onClick={() => handleVote(post._id, i)}
+          className="relative p-2 bg-white/5 rounded cursor-pointer"
+        >
+          <div
+            className="absolute top-0 left-0 h-full bg-orange-500/30"
+            style={{ width: `${percentage}%` }}
+          />
+
+          <div className="relative flex justify-between">
+            <span>{opt.text}</span>
+            <span>{percentage}%</span>
+          </div>
         </div>
-      )}
-      <p className="text-sm text-white/70 py-2 border-t border-white/10 mt-3">
-        {new Date(post.postedAt).toLocaleString()}
+      );
+    })}
+  </div>
+)}
+      <p className="text-sm text-white/70 py-2 border-t border-white/10 mt-4">
+        {new Date(post.postedAt).toDateString().split(" ").slice(1, 4).join("-")}
       </p>
 
     </div>

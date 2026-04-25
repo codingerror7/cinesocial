@@ -1,6 +1,7 @@
 "use client"
 import React from "react";
 import { useState, useEffect, useRef } from "react";
+import { useAuth } from "../context/AuthContext.js"; // Update the path as needed
 import axios from "axios";
 import { useRouter } from "next/navigation";
 
@@ -19,15 +20,6 @@ const PLACEHOLDERS = {
 };
 
 // ─── Sub-components ────────────────────────────────────────────────────────
-
-function Avatar() {
-  return (
-    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-red-700
-      flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-        SS
-    </div>
-  );
-}
 
 function PostTypeTabs({ active, onChange }) {
   const tabs = [
@@ -57,31 +49,32 @@ function PostTypeTabs({ active, onChange }) {
   );
 }
 
-function PollSection({options, setOptions}) {
+function PollSection({ options, setOptions }) {
   return (
     <div className="p-4 rounded-xl bg-[#0F1016] border border-white/5 space-y-2.5">
-      <p className="text-[10px] text-white/28 uppercase tracking-widest font-semibold">Poll Options</p>
+      <p className="text-[10px] text-white/28 uppercase tracking-widest font-semibold">
+        Poll Options
+      </p>
+
       {options.map((opt, i) => (
         <input
           key={i}
           type="text"
           value={opt}
           onChange={(e) => {
-            const next = [...options];
-            next[i] = e.target.value;
-            setOptions(next);
+            const newOptions = [...options];
+            newOptions[i] = e.target.value;
+            setOptions(newOptions);
           }}
           placeholder={`Option ${i + 1}`}
-          className="w-full bg-[#14151A] border border-white/8 rounded-lg px-4 py-2.5 text-sm
-            text-white placeholder-white/20 focus:outline-none focus:border-orange-500/55
-            focus:ring-1 focus:ring-orange-500/25 transition-all"
+          className="w-full bg-[#14151A] border border-white/8 rounded-lg px-4 py-2.5 text-sm text-white cursor-pointer"
         />
       ))}
+
       {options.length < 4 && (
         <button
           onClick={() => setOptions([...options, ""])}
-          className="w-full py-2 rounded-lg border border-dashed border-white/10 text-white/28
-            text-sm hover:border-orange-500/28 hover:text-orange-400/55 transition-all"
+          className="w-full py-2 border border-dashed border-white/10 text-white/28 text-sm cursor-pointer"
         >
           + Add option
         </button>
@@ -104,7 +97,7 @@ function WhatIfSection({value, setValue}) {
         value={value}
         onChange={(e) => setValue(e.target.value)}
         placeholder="What if Thanos used the infinity gauntlet to create more resources instead of destroying half the universe?"
-        className="w-full bg-[#14151A] border border-white/8 rounded-lg px-4 py-3 text-sm
+        className="w-full bg-[#14151A] border border-white/8 rounded-lg px-4 py-3 text-sm cursor-pointer
           text-white placeholder-white/20 resize-none focus:outline-none
           focus:border-orange-500/55 focus:ring-1 focus:ring-orange-500/25 transition-all"
       />
@@ -302,8 +295,6 @@ function SpoilerToggle({ active, onChange }) {
 
 function ActionBar({ onImageClick, onPollClick, onPost }) {
   const actions = [
-    { icon: "🖼", label: "Image", onClick: onImageClick },
-    { icon: "◎", label: "Poll",  onClick: onPollClick },
     { icon: "🎬", label: "Tag" },
     { icon: "😊", label: "Mood" },
   ];
@@ -315,8 +306,7 @@ function ActionBar({ onImageClick, onPollClick, onPost }) {
             key={label}
             onClick={onClick}
             title={label}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-white/28
-              hover:text-orange-400 hover:bg-orange-500/9 transition-all"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-white/28 hover:text-orange-400 hover:bg-orange-500/9 transition-all"
           >
             <span className="text-sm">{icon}</span>
             <span className="hidden sm:inline text-xs">{label}</span>
@@ -325,9 +315,7 @@ function ActionBar({ onImageClick, onPollClick, onPost }) {
       </div>
       <button
         onClick={onPost}
-        className="px-6 py-2.5 bg-orange-500 hover:bg-orange-400 text-white font-semibold
-          text-sm rounded-xl transition-all duration-200 hover:scale-[1.025] active:scale-[0.975]
-          shadow-[0_4px_20px_rgba(249,115,22,0.4)] hover:shadow-[0_4px_28px_rgba(249,115,22,0.58)]"
+          className="px-6 py-2.5 bg-orange-500 hover:bg-orange-400 text-white font-semibold text-sm rounded-xl transition-all duration-200 hover:scale-[1.025] active:scale-[0.975] shadow-[0_4px_20px_rgba(249,115,22,0.4)] hover:shadow-[0_4px_28px_rgba(249,115,22,0.58)]"
       >
         Post
       </button>
@@ -338,21 +326,48 @@ function ActionBar({ onImageClick, onPollClick, onPost }) {
 // ─── Main Page ──────────────────────────────────────────────────────────────
 
 const CreatePost = () => {
+  
+  const router = useRouter();
+
   const [postType, setPostType] = useState("story");
   const [spoiler,  setSpoiler]  = useState(false);
   const [tags,     setTags]     = useState([]);
   const [text,     setText]     = useState("");
   const [posted,   setPosted]   = useState(false);
+  const [error,    setError]    = useState("");
   const [options, setOptions] = useState(["", ""]);
   const [whatIfText, setWhatIfText] = useState("");
   const [file, setFile] = useState(null);
+  const [title, settitle] = useState("");
+
+
+const { user } = useAuth();
+const username = user?.displayName || "Anonymous";
 
   const handlePost = async () => {
   try {
+    setError("");
+
+    // Validation for poll type
+    if (postType === "poll") {
+      const nonEmptyOptions = options.filter(opt => opt.trim() !== "");
+      if (nonEmptyOptions.length < 2) {
+        setError("Poll must have at least 2 options");
+        return;
+      }
+    }
+
+    // Validation for other types
+    if (postType !== "poll" && !text.trim() && !file) {
+      setError("Please add some content");
+      return;
+    }
+
     const formData = new FormData();
 
-    formData.append("username", "reel_viewer");
-    formData.append("userId", "661e123abc456def78900000"); // replace real
+    formData.append("avatar", "url_to_avatar");
+    formData.append("username", username);
+    formData.append("userId", "661e123abc456def78900000");
     formData.append("postedAt", new Date().toISOString());
     formData.append("postType", postType);
 
@@ -361,24 +376,23 @@ const CreatePost = () => {
       formData.append("content", whatIfText);
     } else {
       formData.append("content", text);
+      formData.append("title", title || text.split("\n")[0] || "Untitled");
     }
 
-    // poll data
+    // poll data - only send non-empty options
     if (postType === "poll") {
-      formData.append("pollOptions", JSON.stringify(options));
+      const nonEmptyOptions = options.filter(opt => opt.trim() !== "");
+      formData.append("pollOptions", JSON.stringify(nonEmptyOptions));
     }
 
     // file
     if (file) {
-      formData.append("media", file); // MUST match multer
+      formData.append("media", file);
     }
 
-    const res = await axios.post("http://localhost:8000/api/post/create-post", formData, {
-    });
+    const res = await axios.post("http://localhost:8000/api/post/create-post", formData);
 
     if (res.status !== 201) throw new Error(res.data.message);
-
-
 
     // reset UI
     setPosted(true);
@@ -386,11 +400,15 @@ const CreatePost = () => {
     setWhatIfText("");
     setOptions(["", ""]);
     setFile(null);
+    setError("");
 
     setTimeout(() => setPosted(false), 2500);
 
+    router.push("/");
+
   } catch (err) {
-    console.error("Post failed:", err.message);
+    setError(err.response?.data?.message || err.message || "Post failed");
+    console.error("Post failed:", err);
   }
 };
 
@@ -431,9 +449,11 @@ const CreatePost = () => {
 
             {/* User identity */}
             <div className="flex items-center gap-3">
-              <Avatar initials="RV" />
+              <div className=' border border-white/10 rounded-[50%] w-10 h-10 overflow-hidden'>
+        <img className='' />    {/*avatar*/}
+        </div>
               <div className="flex-1">
-                <p className="font-semibold text-sm text-white">reel_viewer</p>
+                <p className="font-semibold text-sm text-white">{username}</p>
                 <p className="text-xs text-white/28 mt-0.5">Cinephile · 412 followers</p>
               </div>
               <div className="w-20 border border-white/20 rounded-[20px] px-2 text-center text-sm font-[gilroy]"><h2>Public</h2></div>
@@ -441,6 +461,12 @@ const CreatePost = () => {
 
             {/* Post type tabs */}
             <PostTypeTabs active={postType} onChange={setPostType} />    
+
+            <input className="w-full bg-[#0F1016] border border-white/6 rounded-xl px-4 py-2.5 text-xl text-extrabold font-[gilroy] cursor-pointer
+                text-white text-sm leading-relaxed resize-none placeholder-white/20
+                focus:outline-none focus:border-orange-500/48 focus:ring-1
+                focus:ring-orange-500/18 transition-all duration-200"
+              type="text" value={title} onChange={(e) => settitle(e.target.value)} placeholder="Post title" />
 
             {/* Main textarea */}
             <textarea
@@ -483,6 +509,14 @@ const CreatePost = () => {
               <div className="text-center py-2 rounded-lg bg-green-500/12 border border-green-500/20
                 text-green-400 text-sm font-medium animate-pulse">
                 ✓ Post published successfully!
+              </div>
+            )}
+
+            {/* Error message */}
+            {error && (
+              <div className="text-center py-2 rounded-lg bg-red-500/12 border border-red-500/20
+                text-red-400 text-sm font-medium">
+                ✕ {error}
               </div>
             )}
           </div>

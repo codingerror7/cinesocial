@@ -5,10 +5,13 @@ import Post from "../model/Post.models.js";
 
 export const createPost = async (req,res) => {
     try {
-        const {username, userId, postedAt, postType, content} = req.body;
+        console.log("Received createPost request");
+        console.log("Body:", req.body);
+        console.log("File:", req.file);
+        const {username, userId, postedAt, postType, title, content, avatar} = req.body;
         //check for validation
-        if(!username || !content){
-            return res.status(400).json({message : "required fields missing..username or content missing"})
+        if(!username){
+            return res.status(400).json({message : "required fields missing..username missing"})
         }
 
         let mediaUrls = [];
@@ -22,22 +25,35 @@ export const createPost = async (req,res) => {
             mediaUrls.push(cloudinaryResponse.url);
 
         }
-        let parsedPollOptions = [];
-    if (req.body.pollOptions) {
-      parsedPollOptions = JSON.parse(req.body.pollOptions);
-    }
+
+
+        let pollData = null;
+
+       if (postType === "poll") {
+  const options = JSON.parse(req.body.pollOptions);
+
+  pollData = {
+    question: content,
+    options: options.map(opt => ({
+      text: opt,
+      votes: 0
+    }))
+  };
+}
+
 
         const post = await Post.create({
             user: {
                 userId: new mongoose.Types.ObjectId(userId),
                 userName: username,
-                profilePic: ""
+                avatar: avatar || " "
             },
             postedAt,
             postType,
-            content,
+            title: title || " ",
+            content: content || " ", // Allow empty content
             media: mediaUrls,
-            pollOptions: parsedPollOptions
+            poll : pollData
         })
 
         return res.status(201).json({success : true , message : "post saved successfully.", post});
@@ -68,3 +84,37 @@ export const getPost = async (req,res) => {
         return res.status(500).json({message : error.message});
     }
 }
+
+export const voteOnPoll = async (req, res) => {
+  try {
+    const { postId } = req.params;
+    const { optionIndex } = req.body;
+
+    const post = await Post.findById(postId);
+
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    if (post.postType !== "poll") {
+      return res.status(400).json({ message: "Not a poll post" });
+    }
+
+    if (!post.poll || !post.poll.options[optionIndex]) {
+  return res.status(400).json({ message: "Invalid option" });
+}
+
+    // increment vote
+    post.poll.options[optionIndex].votes += 1;
+
+    await post.save();
+
+    return res.status(200).json({
+      success: true,
+      post
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

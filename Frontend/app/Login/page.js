@@ -14,6 +14,7 @@ const Login = () => {
       let res = await axios.post("http://localhost:8000/api/auth/login",data);
       console.log(data);
       localStorage.setItem("accesstoken",res.data.accessToken);
+      localStorage.setItem("user", JSON.stringify({ displayName: res.data.user.name }));
       router.push("/");
       reset();
 

@@ -7,11 +7,12 @@ const postSchema = new mongoose.Schema({
             ref : "User"
         },
         userName : {
-            type : String,
+            type : mongoose.Schema.Types.String,
+            ref : "User",
             lowercase : true,
             trim : true,
         },
-        profilePic : {
+        avatar : {
             type : String,
             default : ""
         }
@@ -23,12 +24,15 @@ const postSchema = new mongoose.Schema({
     },
     postType : {
         type : String,
-        enum : ["story","poll","what-if","image"]
+        enum : ["story","poll","whatif","image"]
+    },
+    title : {
+        type : String,
+        default : "",
     },
     content : {
         type : String,
-        required : true,
-        minlength : 5,
+        default : "",
     },
     media : [
         {
@@ -37,19 +41,18 @@ const postSchema = new mongoose.Schema({
     }
 ],
     poll : {
-        questions : String,
+        question : String,
         options : [
             {
                 text : String,
-                votes : Number
+                votes : {
+                    type : Number,
+                    default : 0
+                }
             }
         ]
     },
-    pollOptions : [
-        {
-            type : String
-        }
-    ],
+
     comment : [
         {
             type : mongoose.Schema.Types.ObjectId,
