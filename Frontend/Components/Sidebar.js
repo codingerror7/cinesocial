@@ -1,8 +1,22 @@
 "use client"
 import React from "react";
 import Link from "next/link";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+
 
 const Sidebar = () => {
+  
+  const router = useRouter();
+  const [popup, setpopup] = useState(false);
+  
+  function handleLogOut(){
+    localStorage.removeItem("user");
+    localStorage.removeItem("accessToken");
+    console.log("Logged out successfully.");
+    router.push("/");
+  }
+
   return (
     <aside className="fixed left-0 top-0 h-screen w-68 bg-gradient-to-b from-[#0e0e14] to-black border-r border-white/10 flex flex-col z-100 py-2">
       
@@ -17,45 +31,56 @@ const Sidebar = () => {
       </div>
 
       {/* NAVIGATION */}
-      <nav className="flex-1 px-3">
+      <nav>
 
         {/* MAIN */}
         <div className="text-[10px] font-semibold tracking-[1.5px] uppercase text-white/40 px-3 mt-5 mb-2">
           Main
         </div>
 
-        <NavItem icon="🏠" text="Home Feed" active />
-        <NavItem icon="📢" text="Communities" />
-        <Link href="./Post"><NavItem icon="✏️" text="Create Post" /></Link>
+        <Link href="/"><NavItem text="Home" /></Link>
+        <Link href="./Post"><NavItem text="Communities" /></Link>
+        <Link href="./Post"><NavItem text="Create Post" /></Link>
 
         {/* LIBRARY */}
         <div className="text-[10px] font-semibold tracking-[1.5px] uppercase text-white/40 px-3 mt-5 mb-2">
           Library
         </div>
 
-        <NavItem icon="🤖" text="Chatbot" />
-        <NavItem icon="🔔" text="Notifications" badge="7" />
-        <Link href="./Signup"><NavItem icon="👤" text="Profile" /></Link>
+        <NavItem text="Chatbot" />
+        <NavItem text="Notifications" badge="7" />
+        <Link href="./Signup"><NavItem text="Profile" /></Link>
 
         {/* MORE */}
         <div className="text-[10px] font-semibold tracking-[1.5px] uppercase text-white/40 px-3 mt-5 mb-2">
           More
         </div>
 
-        <NavItem icon="📋" text="Watchlist" />
-        <NavItem icon="⚙️" text="Settings" />
+        <NavItem text="Watchlist" />
+        <NavItem text="Settings" />
       </nav>
 
       {/* USER */}
-      <div className="mt-auto px-5 pt-4 border-t border-white/10">
+      <div onMouseEnter={()=>setpopup(true)} 
+           onMouseLeave={()=>setpopup(false)}   
+           className="mt-auto px-5 border-t border-white/10">
         <div className="flex items-center gap-2.5 p-2 rounded-md hover:bg-white/5 cursor-pointer transition">
+              {/* USER POPUP */}
+         {popup && <div className="absolute mb-30 py-2 w-50 border border-white/10 rounded-xl px-2 py-3 bg-black">
+            <ul>
+              <li className="w-full cursor-pointer text-md text-left px-2 py-1 text-white/60 hover:bg-white/5 hover:text-white">Login</li>
+              <button onClick={handleLogOut}
+                className="w-full cursor-pointer text-md text-left px-2 py-1 text-white/60 hover:bg-white/5 hover:text-white">Logout
+              </button>
+            </ul>
+          </div>}
           
           <div className="w-[34px] h-[34px] rounded-full flex items-center justify-center text-sm font-bold bg-gradient-to-br from-purple-500 to-red-500 border-2 border-purple-400/40">
             AK
           </div>
 
           <div className="overflow-hidden">
-            <div className="text-[13px] font-semibold truncate">
+            <div className="text-[15px] font-semibold truncate">
               Arjun Kapoor
             </div>
             <div className="text-[11px] text-white/40 truncate">
@@ -66,6 +91,7 @@ const Sidebar = () => {
         </div>
       </div>
 
+
     </aside>
   );
 }
@@ -75,7 +101,7 @@ const Sidebar = () => {
 function NavItem({ icon, text, active = false, badge }) {
   return (
     <div
-      className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium cursor-pointer relative mb-1 transition
+      className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-md font-bold cursor-pointer relative mb-1 transition
         ${active 
           ? "bg-gradient-to-r from-red-500/15 to-transparent text-white border border-red-500/20" 
           : "text-white/60 hover:bg-white/5 hover:text-white"
