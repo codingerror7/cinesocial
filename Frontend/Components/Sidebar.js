@@ -9,6 +9,7 @@ const Sidebar = () => {
   
   const router = useRouter();
   const [popup, setpopup] = useState(false);
+  const userId = 123; // Replace with actual user ID from auth context or state
   
   function handleLogOut(){
     localStorage.removeItem("user");
@@ -49,7 +50,7 @@ const Sidebar = () => {
 
         <NavItem text="Chatbot" />
         <NavItem text="Notifications" badge="7" />
-        <Link href="./Signup"><NavItem text="Profile" /></Link>
+        <Link href={`/Profile/${userId}`}><NavItem text="Profile" /></Link>
 
         {/* MORE */}
         <div className="text-[10px] font-semibold tracking-[1.5px] uppercase text-white/40 px-3 mt-5 mb-2">
@@ -68,7 +69,7 @@ const Sidebar = () => {
               {/* USER POPUP */}
          {popup && <div className="absolute mb-30 py-2 w-50 border border-white/10 rounded-xl px-2 py-3 bg-black">
             <ul>
-              <li className="w-full cursor-pointer text-md text-left px-2 py-1 text-white/60 hover:bg-white/5 hover:text-white">Login</li>
+              <Link href="./Signup" className="w-full cursor-pointer text-md text-left px-2 py-1 text-white/60 hover:bg-white/5 hover:text-white">Login</Link>
               <button onClick={handleLogOut}
                 className="w-full cursor-pointer text-md text-left px-2 py-1 text-white/60 hover:bg-white/5 hover:text-white">Logout
               </button>
@@ -80,7 +81,7 @@ const Sidebar = () => {
           </div>
 
           <div className="overflow-hidden">
-            <div className="text-[15px] font-semibold truncate">
+            <div className="text-[15px] text-white font-semibold truncate">
               Arjun Kapoor
             </div>
             <div className="text-[11px] text-white/40 truncate">
