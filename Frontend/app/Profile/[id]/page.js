@@ -1,8 +1,8 @@
 "use client"
 import React from 'react'
 import Sidebar from '@/Components/Sidebar'
-import Navbar from '@/Components/Navbar'
-import Link from 'next/navigation'
+import Navbar2 from '@/Components/Navbar2'
+import Link from 'next/link'
 import { useState } from 'react'
 import Image from 'next/image'
 import axios from 'axios'
@@ -14,7 +14,7 @@ const page = () => {
     <div className="w-full min-h-screen bg-gradient-to-b from-black via-[#0a0a0a] to-black text-white relative">
 
   <Sidebar />
-  <Navbar />
+  <Navbar2 />
 
   <div className="max-w-5xl mx-auto px-6 pt-24">
 
@@ -25,9 +25,9 @@ const page = () => {
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
 
       {/* Edit Button */}
-      <button className="absolute top-5 right-5 px-5 py-2 rounded-xl border border-white/20 bg-white/10 backdrop-blur-md hover:bg-white hover:text-black transition-all duration-300 text-sm">
+      <Link href="/Editprofile" className="absolute top-5 right-5 px-5 py-2 rounded-xl border border-white/20 bg-white/10 backdrop-blur-md hover:bg-white hover:text-black transition-all duration-300 text-sm">
         Edit Profile
-      </button>
+      </Link>
     </div>
 
     {/* 🔹 Profile Section */}
