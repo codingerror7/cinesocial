@@ -24,7 +24,7 @@ const page = () => {
     <div className="w-full min-h-screen bg-gradient-to-b from-black via-[#0a0a0a] to-black text-white relative">
     <Sidebar />
     <Navbar2 />
-     <div className='py-30 px-5'>
+     <div className='py-30 px-5'>          
         <div className="max-w-4xl mx-auto">
 
         {/* 🔹 Header */}
