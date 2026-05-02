@@ -2,28 +2,25 @@ import mongoose from "mongoose";
 const userSchema = new mongoose.Schema({
     name : {
         type : String,
-        required : [true,"username is required"],
         trim : true,
         minlength : 3,
         maxlength : 20
     },
+    title : {
+        type : String,
+        maxlength : 30
+    },
     email : {
         type : String,
-        required : [true,"email is required"],
         unique : [true,"email must be unique"],   //basic indexing.
         trim : true,
     },
     password : {
         type : String,
-        required : [true,"password is required"]
     },
     avatar : {
         type : String,
-        default : " ",
-    },
-    coverPhoto : {
-        type : String,
-        default : "default.jpg"
+        default : "",
     },
     bio : {
         type : String,
@@ -31,9 +28,14 @@ const userSchema = new mongoose.Schema({
         minlength : 5,
         maxlength : 300
     },
-    genre : {
+    genre : [{
         type : String,
-        enum : ["action","thriller","emotional","gen-z","anime"],
+        enum : ["action","thriller","sci-fi","drama","mystery","emotional","horror","anime"],
+    }],
+    fantag : {
+        type : String,
+        trim : true,
+        maxlength : 30
     },
     dob : {
         type : Date,

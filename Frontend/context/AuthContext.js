@@ -14,14 +14,13 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
 
-  // Simulate user login or load from localStorage/session
+  // Load user from localStorage if available
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     } else {
-      // Set a default user if none
-      setUser({ displayName: 'reel_viewer' });
+      setUser(null);
     }
   }, []);
 

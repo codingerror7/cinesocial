@@ -4,17 +4,31 @@ import { useForm } from 'react-hook-form';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useAuth } from '@/context/AuthContext.js';
 
 const Login = () => {
   let router = useRouter();
+  const { login } = useAuth();
 
   const onSubmit = async (data) => {
     try {
 
       let res = await axios.post("http://localhost:8000/api/auth/login",data);
       console.log(data);
+      const safeUser = {
+        _id: res.data.user._id,
+        name: res.data.user.name,
+        email: res.data.user.email,
+        avatar: res.data.user.avatar || "",
+        title: res.data.user.title || "",
+        bio: res.data.user.bio || "",
+        fantag: res.data.user.fantag || "",
+        genre: res.data.user.genre || [],
+        dob: res.data.user.dob || ""
+      };
       localStorage.setItem("accesstoken",res.data.accessToken);
-      localStorage.setItem("user", JSON.stringify({ displayName: res.data.user.name }));
+      localStorage.setItem("user", JSON.stringify(safeUser));
+      login(safeUser);
       router.push("/");
       reset();
 

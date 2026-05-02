@@ -5,6 +5,7 @@ import cors from "cors";
 import connectDB from "./src/config/db.config.js";
 import authRouter from "./src/routes/auth.route.js";
 import postRouter from "./src/routes/post.routes.js";
+import profileRouter from "./src/routes/profile.routes.js";
 
 dotenv.config({
     path : "./.env"     //exact .env path, we have to call dotenv.config() only in server.js
@@ -18,7 +19,11 @@ app.use(cors({
     credentials : true
 }));
 
+
+app.use(express.static("public"));
+
 app.use(express.json({limit : "16kb"}));    //to read users data like name,email,password through req.body, and 1 req me 1 time per 16kb se jyada data nhi ayga, basic security feature. agr 16 kb se jyada aya to error dega server.
+
 app.use(cookieParser());    //to read data in cookies coming from users browser and to validate user and to set cookies in user's browser
 app.use(express.urlencoded({   //its main task is to handle url encoded form data coming from client and is used in post request to read and store form data in db.
     extended : true , 
@@ -28,6 +33,7 @@ app.use(express.urlencoded({   //its main task is to handle url encoded form dat
 
 app.use("/api/auth",authRouter);
 app.use("/api",postRouter);
+app.use("/api",profileRouter);
 
 app.get("/home",(req,res)=>{
     res.send("db connected..");
@@ -35,6 +41,7 @@ app.get("/home",(req,res)=>{
 app.get("/what",(req,res)=>{
     res.send("app for cinephile!");
 })
+
 app.listen(PORT,()=>{
     console.log(`running at ${PORT}`);
     connectDB();

@@ -1,105 +1,134 @@
 "use client"
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import Sidebar from '@/Components/Sidebar'
 import Navbar2 from '@/Components/Navbar2'
 import Link from 'next/link'
-import { useState } from 'react'
-import Image from 'next/image'
+import { useParams } from 'next/navigation'
 import axios from 'axios'
-import { useEffect } from 'react'
 
 const page = () => {
+  const params = useParams();
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const id = params?.id;
+    if (!id) {
+      setLoading(false);
+      return;
+    }
+
+    const fetchProfile = async () => {
+      try {
+        const res = await axios.get(`http://localhost:8000/api/get-profile/${id}`);
+        setProfile(res.data);
+      } catch (error) {
+        console.error("Failed to load profile:", error);
+        setProfile(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, [params]);
+
+  const profileGenres = profile
+    ? Array.isArray(profile.genre)
+      ? profile.genre
+      : profile.genre
+        ? [profile.genre]
+        : []
+    : [];
+
+  const profileName = profile?.name || "Cinephile";
+  const profileTag = profile?.fantag
+    ? `@${profile.fantag.replace(/\s+/g, '_')}`
+    : `@${profileName.toLowerCase().replace(/\s+/g, '_')}`;
+
+  if (loading) {
+    return (
+      <div className="w-full min-h-screen bg-gradient-to-b from-black via-[#0a0a0a] to-black text-white relative">
+        <Sidebar />
+        <Navbar2 />
+        <div className="text-white flex justify-center px-4 py-30">
+          <div className="w-full max-w-2xl text-center text-white/70">Loading profile...</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <>
     <div className="w-full min-h-screen bg-gradient-to-b from-black via-[#0a0a0a] to-black text-white relative">
+      <Sidebar />
+      <Navbar2 />
+      <div className="text-white flex justify-center px-4 py-30">
+        <div className="w-full max-w-2xl space-y-6">
+          <div className="bg-[#14151A] rounded-2xl p-6 shadow-lg border border-white/5">
+            <div className="flex items-center gap-5">
+              <div className="relative">
+                <img
+                  src={profile?.avatar || 'https://i.pravatar.cc/150'}
+                  alt="avatar"
+                  className="w-20 h-20 rounded-full object-cover border-2 border-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.4)]"
+                />
+              </div>
 
-  <Sidebar />
-  <Navbar2 />
+              <div className="flex-1">
+                <h2 className="text-xl font-semibold">{profile?.title || profileName}</h2>
+                <p className="text-sm text-gray-400">{profileTag}</p>
+                <div className="mt-2 inline-block px-3 py-1 text-xs rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20 shadow-[0_0_10px_rgba(168,85,247,0.2)]">
+                  {profile?.fantag || '?? Movie Lover'}
+                </div>
+              </div>
 
-  <div className="max-w-5xl mx-auto px-6 pt-24">
+              <Link href="/Editprofile" className="px-4 py-2 text-sm rounded-lg bg-purple-600 hover:bg-purple-700 transition shadow-[0_0_12px_rgba(168,85,247,0.4)]">
+                Edit Profile
+              </Link>
+            </div>
 
-    {/* 🔹 Cover Section */}
-    <div className="relative w-full h-64 rounded-3xl overflow-hidden bg-gradient-to-r from-zinc-900 to-zinc-800 shadow-xl">
-      
-      {/* Cover Overlay */}
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+            <p className="mt-4 text-gray-300 text-sm leading-relaxed">
+              {profile?.bio || 'Start by telling the world a little about your love for cinema.'}
+            </p>
 
-      {/* Edit Button */}
-      <Link href="/Editprofile" className="absolute top-5 right-5 px-5 py-2 rounded-xl border border-white/20 bg-white/10 backdrop-blur-md hover:bg-white hover:text-black transition-all duration-300 text-sm">
-        Edit Profile
-      </Link>
-    </div>
-
-    {/* 🔹 Profile Section */}
-    <div className="relative -mt-20 px-6">
-
-      {/* Profile Image */}
-      <div className="w-36 h-36 rounded-full border-4 border-black overflow-hidden shadow-2xl">
-        <div className="w-full h-full bg-zinc-700"></div>
-      </div>
-
-      {/* User Info */}
-      <div className="mt-4">
-        <h2 className="text-2xl font-semibold">Sujal Saraswat</h2>
-        <p className="text-zinc-400">@sujal.dev</p>
-      </div>
-
-      {/* Stats */}
-      <div className="flex gap-10 mt-4 text-sm">
-        <div>
-          <p className="font-semibold text-lg">120</p>
-          <p className="text-zinc-400">Posts</p>
-        </div>
-        <div>
-          <p className="font-semibold text-lg">2.3K</p>
-          <p className="text-zinc-400">Followers</p>
-        </div>
-        <div>
-          <p className="font-semibold text-lg">180</p>
-          <p className="text-zinc-400">Following</p>
-        </div>
-      </div>
-
-      {/* Bio */}
-      <div className="mt-6 max-w-2xl">
-        <p className="text-zinc-300 leading-relaxed">
-          Full Stack Developer • React • Node • Building Cinephile 🎬  
-          Passionate about crafting modern UI & interactive experiences.
-        </p>
-      </div>
-
-    </div>
-
-    {/* 🔹 Divider */}
-    <div className="border-t border-white/10 my-10"></div>
-
-    {/* 🔹 Posts Section */}
-    <div>
-      <h3 className="text-xl font-semibold mb-6">Posts</h3>
-
-      <div className="grid grid-cols-3 gap-6">
-        
-        {/* Post Card */}
-        {[1,2,3,4,5,6].map((item) => (
-          <div 
-            key={item} 
-            className="group relative h-52 rounded-2xl overflow-hidden bg-zinc-900 hover:scale-[1.03] transition-all duration-300 cursor-pointer"
-          >
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
-
-            {/* Hover Overlay */}
-            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
-              <p className="text-sm text-white/80">View Post</p>
+            <div className="flex gap-6 mt-5 text-sm">
+              <div>
+                <p className="font-semibold text-white">{profile?.posts || 0}</p>
+                <p className="text-gray-400">Posts</p>
+              </div>
+              <div>
+                <p className="font-semibold text-white">{profile?.followers?.length || 0}</p>
+                <p className="text-gray-400">Followers</p>
+              </div>
+              <div>
+                <p className="font-semibold text-white">{profile?.following?.length || 0}</p>
+                <p className="text-gray-400">Following</p>
+              </div>
             </div>
           </div>
-        ))}
 
+          <div className="bg-[#14151A] rounded-2xl p-6 shadow-lg border border-white/5">
+            <h3 className="text-sm text-gray-400 mb-3">Favorite Genres</h3>
+            <div className="flex flex-wrap gap-2">
+              {profileGenres.length > 0 ? (
+                profileGenres.map((genre) => (
+                  <span
+                    key={genre}
+                    className="px-3 py-1 text-xs rounded-full bg-white/5 border border-white/10 hover:border-purple-400 hover:text-purple-400 transition"
+                  >
+                    {genre}
+                  </span>
+                ))
+              ) : (
+                <span className="px-3 py-1 text-xs rounded-full bg-white/5 border border-white/10 text-gray-400">
+                  No favorite genres selected yet.
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-
-  </div>
-</div>
-    </>
   )
 }
 

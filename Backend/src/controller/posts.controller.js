@@ -58,7 +58,8 @@ export const createPost = async (req,res) => {
 
         return res.status(201).json({success : true , message : "post saved successfully.", post});
 
-    } catch (error) {
+    }
+     catch (error) {
         //to get the actual and exact validation error
     if (error.name === 'ValidationError') {
        const messages = Object.values(error.errors).map(val => val.message);

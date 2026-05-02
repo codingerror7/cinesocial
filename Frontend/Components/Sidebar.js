@@ -3,17 +3,20 @@ import React from "react";
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-
+import { useAuth } from "../context/AuthContext.js";
 
 const Sidebar = () => {
-  
   const router = useRouter();
   const [popup, setpopup] = useState(false);
-  const userId = 123; // Replace with actual user ID from auth context or state
-  
-  function handleLogOut(){
+  const { user } = useAuth();
+  const userId = user?._id || 123;
+  const displayName = user?.name || "CineFan";
+  const { logout } = useAuth();
+
+  const handleLogOut = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("accessToken");
+    logout();
     console.log("Logged out successfully.");
     router.push("/");
   }
@@ -77,15 +80,15 @@ const Sidebar = () => {
           </div>}
           
           <div className="w-[34px] h-[34px] rounded-full flex items-center justify-center text-sm font-bold bg-gradient-to-br from-purple-500 to-red-500 border-2 border-purple-400/40">
-            AK
+            {displayName?.charAt(0) || "A"}
           </div>
 
           <div className="overflow-hidden">
             <div className="text-[15px] text-white font-semibold truncate">
-              Arjun Kapoor
+              {displayName}
             </div>
             <div className="text-[11px] text-white/40 truncate">
-              @cinematic_arjun
+              @{displayName?.toLowerCase().replace(/\s+/g, "_") || "cinematic_user"}
             </div>
           </div>
 
