@@ -188,7 +188,7 @@ External Services:
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/cinesocial.git
+git clone https://github.com/codingerror7/cinesocial.git
 
 # Navigate to project
 cd cinesocial
