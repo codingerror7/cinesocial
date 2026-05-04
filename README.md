@@ -100,6 +100,7 @@ Each user gets a personalized dashboard to track activity and preferences.
 * JWT (authentication)
 * Socket.IO (real-time chat & updates)
 * AI API integration (for chatbot)
+* Redis (caching)
 
 ---
 
