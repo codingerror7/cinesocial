@@ -114,6 +114,7 @@ const page = () => {
       };
       localStorage.setItem('user', JSON.stringify(updatedUser));
       router.push(`/Profile/${storedUser._id}`);
+      reset();
     } catch (error) {
       console.error("Something went wrong in create-profile frontend:", error);
     }

@@ -70,14 +70,14 @@ const page = () => {
                 <img
                   src={profile?.avatar || 'https://i.pravatar.cc/150'}
                   alt="avatar"
-                  className="w-20 h-20 rounded-full object-cover border-2 border-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.4)]"
+                  className="w-30 h-30 rounded-full object-cover border-2 border-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.4)]"
                 />
               </div>
 
               <div className="flex-1">
-                <h2 className="text-xl font-semibold">{profile?.title || profileName}</h2>
-                <p className="text-sm text-gray-400">{profileTag}</p>
-                <div className="mt-2 inline-block px-3 py-1 text-xs rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20 shadow-[0_0_10px_rgba(168,85,247,0.2)]">
+                <h2 className="text-2xl font-semibold">{profile?.title || profileName}</h2>
+                <p className="text-md text-gray-400">{profileTag}</p>
+                <div className="mt-4 inline-block px-3 py-1 text-xs rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20 shadow-[0_0_10px_rgba(168,85,247,0.2)]">
                   {profile?.fantag || '?? Movie Lover'}
                 </div>
               </div>
@@ -87,11 +87,11 @@ const page = () => {
               </Link>
             </div>
 
-            <p className="mt-4 text-gray-300 text-sm leading-relaxed">
+            <p className="mt-4 text-gray-300 text-md leading-relaxed">
               {profile?.bio || 'Start by telling the world a little about your love for cinema.'}
             </p>
 
-            <div className="flex gap-6 mt-5 text-sm">
+            <div className="flex gap-6 mt-5 text-md">
               <div>
                 <p className="font-semibold text-white">{profile?.posts || 0}</p>
                 <p className="text-gray-400">Posts</p>
@@ -108,19 +108,19 @@ const page = () => {
           </div>
 
           <div className="bg-[#14151A] rounded-2xl p-6 shadow-lg border border-white/5">
-            <h3 className="text-sm text-gray-400 mb-3">Favorite Genres</h3>
+            <h3 className="text-md text-gray-400 mb-3">Favorite Genres</h3>
             <div className="flex flex-wrap gap-2">
               {profileGenres.length > 0 ? (
                 profileGenres.map((genre) => (
                   <span
                     key={genre}
-                    className="px-3 py-1 text-xs rounded-full bg-white/5 border border-white/10 hover:border-purple-400 hover:text-purple-400 transition"
+                    className="px-3 py-1 text-md rounded-full bg-white/5 border border-white/10 hover:border-purple-400 hover:text-purple-400 transition"
                   >
                     {genre}
                   </span>
                 ))
               ) : (
-                <span className="px-3 py-1 text-xs rounded-full bg-white/5 border border-white/10 text-gray-400">
+                <span className="px-3 py-1 text-md rounded-full bg-white/5 border border-white/10 text-gray-400">
                   No favorite genres selected yet.
                 </span>
               )}
