@@ -13,6 +13,15 @@ const avatars = [
   { id: "avatar3", url: "/avatar3.jpg" },
   { id: "avatar4", url: "/avatar4.jpg" },
   { id: "avatar5", url: "/avatar5.jpg" },
+  { id: "avatar6", url: "/avatar6.jpg" },
+  { id: "avatar7", url: "/avatar7.jpg" },
+  { id: "avatar8", url: "/avatar8.jpg" },
+  { id: "avatar9", url: "/avatar9.jpg" },
+  { id: "avatar10", url: "/avatar10.jpg" },
+  { id: "avatar11", url: "/avatar11.jpg" },
+  { id: "avatar12", url: "/avatar12.jpg" },
+  { id: "avatar13", url: "/avatar13.jpg" },
+  { id: "avatar14", url: "/avatar14.jpg" }
 ];
 
 const genresList = ["action","thriller","sci-fi","drama","mystery","emotional","horror","anime"];

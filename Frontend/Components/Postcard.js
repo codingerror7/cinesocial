@@ -1,33 +1,55 @@
 "use client"
 import React from 'react'
 import { useState, useEffect } from 'react';
-import Image from 'next/image';     //image optimization in nextjs, lazy loading, responsive images, making images light-weight and more efficient image handling.
 import axios from 'axios';
+import Image from 'next/image';     //image optimization in nextjs, lazy loading, responsive images, making images light-weight and more efficient image handling.
 
 const Postcard = ({ variant = "default"}) => {
-  const [postData, setpostData] = useState([]);
+  const [postData, setpostData] = useState([]);   //jab multiple data backend se aa rha hai tab empty array use krte hain and jab single document aa rha hai tab null use krte hain.
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
-
       try {
         const response = await axios.get('http://localhost:8000/api/post/feed');
-        
-          setpostData(response.data.post);
+        const posts = response.data.post;
 
-        console.log("Fetched post data:", response.data.post);
+        // Fetch missing avatars from profile endpoint
+        const postsWithAvatars = await Promise.all(posts.map(async (post) => {
+          if (!post.user?.avatar || post.user.avatar === "" || post.user.avatar === undefined) {
+            // Try to fetch profile by userId if available
+            if (post.user?.userId) {
+              try {
+                const profileRes = await axios.get(`http://localhost:8000/api/get-profile/${post.user.userId}`);
+                const profile = profileRes.data;
+                return {
+                  ...post,
+                  user: {
+                    ...post.user,
+                    avatar: profile?.avatar || "",
+                    userName: profile?.name || post.user.userName,
+                    title: profile?.title || post.user.title,
+                  }
+                };
+              } catch (e) {
+                // fallback to original post if profile fetch fails
+                return post;
+              }
+            }
+          }
+          return post;
+        }));
+
+        setpostData(postsWithAvatars);
+        console.log("Fetched post data with avatars:", postsWithAvatars);
       } catch (error) {
         console.error('Error fetching post data:', error);
         setpostData([]);
-      }
-      finally{
+      } finally {
         setLoading(false);
       }
     };
-
     fetchData();
-
   }, []);
 
   const handleVote = async (postId, optionIndex) => {
@@ -68,42 +90,57 @@ const Postcard = ({ variant = "default"}) => {
     <div>
       
      {loading ? (
-  <p>Loading...</p>
+  <p>Loading...</p>  
 ) : (
   Array.isArray(postData) && postData.map((post) => (
     <div key={post._id} className="p-4 border border-white/10 rounded-xl mb-4 bg-white/2 font-[gilroy]">
       
       <div className='w-full flex items-center justify-between'>
-      <div className='flex items-center justify-between gap-2'>
-        <div className=' border border-white/10 rounded-[50%] w-10 h-10 overflow-hidden bg-white/5 flex items-center justify-center'>
-        {post.user.avatar && post.user.avatar.startsWith('http') ? (
-          <Image className='' src={post.user.avatar} alt="avatar" width={40} height={40} />
-        ) : (
-          <span className="text-lg">👤</span>
-        )}
+        <div className='flex items-center justify-between gap-2'>
+          <div className='border border-white/10 rounded-[50%] w-10 h-10 overflow-hidden bg-white/5 flex items-center justify-center'>
+            {post.user?.avatar && post.user.avatar.startsWith('http') ? (
+              <Image className='' src={post.user.avatar} alt="avatar" width={40} height={40} />
+            ) : (
+              <span className="text-lg">👤</span>
+            )}
+          </div>
+          <div className="flex flex-col">
+            <h2 className="text-lg font-bold text-white/70">
+              {post.user?.userName || "Anonymous"}
+            </h2>
+            <span className="text-xs text-white/40 font-normal">{post.user?.title || "Cinephile"}</span>
+          </div>
         </div>
-        <h2 className="text-lg font-bold text-white/70">
-        {post.user.userName}
-      </h2>
-
+        <p className="text-sm text-white/70">
+          {post.postType === "poll" ? "📊 Poll" : "📝 Post"}
+        </p>
       </div>
-      <p className="text-sm text-white/70">
-        {post.postType === "poll" ? "📊 Poll" : "📝 Post"}
-      </p>
-      </div>
-      <h1 className="text-xl font-bold text-white mt-4 px-3">{post.title}</h1>
+      <h1 className="text-xl font-bold text-white mt-4 px-3">{post.title || "Untitled"}</h1>
 
       <p className="text-white mt-1 px-3 py-1">
         {post.content}
       </p>
 
-      {/* media */}
+
+      {/* media with user avatar */}
       {post.media?.length > 0 && post.media[0] && post.media[0].startsWith('http') && (
-        <img
-          src={post.media[0]}
-          alt="post"
-          className="mt-3 rounded-lg"
-        />
+        <div className="relative mt-3 mb-2">
+          <img
+            src={post.media[0]}
+            alt="post"
+            className="rounded-lg w-full"
+          />
+          <div className="absolute top-2 left-2 flex items-center gap-2 bg-black/40 px-2 py-1 rounded-full">
+            <div className="w-8 h-8 rounded-full overflow-hidden border border-white/20 bg-white/10 flex items-center justify-center">
+              {post.user?.avatar && post.user.avatar.startsWith('http') ? (
+                <Image src={post.user.avatar} alt="avatar" width={32} height={32} />
+              ) : (
+                <span className="text-lg">👤</span>
+              )}
+            </div>
+            <span className="text-xs text-white/80 font-semibold">{post.user?.userName || "Anonymous"}</span>
+          </div>
+        </div>
       )}
 
       {/* poll */}

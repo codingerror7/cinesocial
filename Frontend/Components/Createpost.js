@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../context/AuthContext.js"; // Update the path as needed
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 
 // const MOVIE_SUGGESTIONS = [
 //   "Inception (2010)", "Parasite (2019)", "The Godfather (1972)",
@@ -323,12 +324,13 @@ function ActionBar({ onImageClick, onPollClick, onPost }) {
   );
 }
 
-// ─── Main Page ──────────────────────────────────────────────────────────────
+// ─── Main Page ─────────────────────────────────────────────────────────────
 
 const CreatePost = () => {
   
   const router = useRouter();
 
+  const params = useParams();
   const [postType, setPostType] = useState("story");
   const [spoiler,  setSpoiler]  = useState(false);
   const [tags,     setTags]     = useState([]);
@@ -339,10 +341,13 @@ const CreatePost = () => {
   const [whatIfText, setWhatIfText] = useState("");
   const [file, setFile] = useState(null);
   const [title, settitle] = useState("");
+  const [profile, setprofile] = useState(null);
 
-
-const { user } = useAuth();
-const username = user?.displayName || "Anonymous";
+  const { user } = useAuth();
+  // Use user context for avatar, username, and title
+  const avatar = user?.avatar || profile?.avatar || "https://ui-avatars.com/api/?name=Anonymous";
+  const username = user?.name || user?.displayName || profile?.name || "Anonymous";
+  const titleName = user?.title || profile?.title || "Cinephile";
 
   const handlePost = async () => {
   try {
@@ -412,6 +417,26 @@ const username = user?.displayName || "Anonymous";
   }
 };
 
+useEffect(()=>{
+  const id = params?.id;
+  if(!id){
+    console.log("id missing");
+    return;
+  }
+
+  const fetchProfile = async () => {
+    try {
+      const res = await axios.get(`http://localhost:8000/api/get-profile/${id}`);
+      setprofile(res.data);
+    } catch (error) {
+      console.log("failed to fetch data");
+      setprofile(null);
+    }
+  }
+  fetchProfile();
+},[params])
+
+
   return (
     <div className="min-h-screen bg-[#0B0B0F] text-white font-sans">
       {/* Ambient background glow */}
@@ -449,12 +474,16 @@ const username = user?.displayName || "Anonymous";
 
             {/* User identity */}
             <div className="flex items-center gap-3">
-              <div className=' border border-white/10 rounded-[50%] w-10 h-10 overflow-hidden'>
-        <img className='' />    {/*avatar*/}
-        </div>
+              <div className='border border-white/10 rounded-[50%] w-10 h-10 overflow-hidden bg-white/5 flex items-center justify-center'>
+                {avatar ? (
+                  <img src={avatar} className='bg-center object-cover w-10 h-10' alt="avatar" />
+                ) : (
+                  <span className="text-lg">👤</span>
+                )}
+              </div>
               <div className="flex-1">
                 <p className="font-semibold text-sm text-white">{username}</p>
-                <p className="text-xs text-white/28 mt-0.5">Cinephile · 412 followers</p>
+                <p className="text-xs text-white/28 mt-0.5">{titleName} · 412 followers</p>
               </div>
               <div className="w-20 border border-white/20 rounded-[20px] px-2 text-center text-sm font-[gilroy]"><h2>Public</h2></div>
             </div>

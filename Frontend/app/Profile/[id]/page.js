@@ -70,19 +70,19 @@ const page = () => {
                 <img
                   src={profile?.avatar || 'https://i.pravatar.cc/150'}
                   alt="avatar"
-                  className="w-30 h-30 rounded-full object-cover border-2 border-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.4)]"
+                  className="w-30 h-30 rounded-full object-cover border-2 border-white shadow-[0_0_15px_rgba(168,85,247,0.4)]"
                 />
               </div>
 
               <div className="flex-1">
                 <h2 className="text-2xl font-semibold">{profile?.title || profileName}</h2>
                 <p className="text-md text-gray-400">{profileTag}</p>
-                <div className="mt-4 inline-block px-3 py-1 text-xs rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20 shadow-[0_0_10px_rgba(168,85,247,0.2)]">
+                <div className="mt-4 inline-block px-3 py-1 text-xs rounded-full bg-white/10 text-white/80 border border-white/20 shadow-[0_0_10px_rgba(168,85,247,0.2)]">
                   {profile?.fantag || '?? Movie Lover'}
                 </div>
               </div>
 
-              <Link href="/Editprofile" className="px-4 py-2 text-sm rounded-lg bg-purple-600 hover:bg-purple-700 transition shadow-[0_0_12px_rgba(168,85,247,0.4)]">
+              <Link href="/Editprofile" className="px-4 py-2 text-sm rounded-lg bg-transparent hover:bg-purple-700 transition shadow-[0_0_12px_rgba(168,85,247,0.4)]">
                 Edit Profile
               </Link>
             </div>
