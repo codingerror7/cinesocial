@@ -10,7 +10,7 @@ function SuggestedUser({ name, info, variant = "v1", following = false }) {
   };
 
   return (
-    <div className="flex items-center gap-3 px-5 py-3 border-t border-white/10 hover:bg-white/5 transition cursor-pointer">
+    <div className="flex items-center gap-3 px-5 py-3 border-t border-white/10 hover:bg-white/5 transition cursor-pointer ">
       
       {/* AVATAR */}
       <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold bg-gradient-to-br ${avatarStyles[variant]}`}>

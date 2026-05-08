@@ -21,7 +21,7 @@ function TabButton({ text, active = false }) {
   return (
     <>
       {/* TABS */}
-      <div className="flex gap-1 bg-white/5 border border-white/10 rounded-lg p-1">
+      <div className="flex gap-1 bg-white/5 border border-white/10 rounded-lg p-1 lg:block hidden">
         
         <TabButton text="🔥 Trending" active />
         <TabButton text="⚡ Latest" />

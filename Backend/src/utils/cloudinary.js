@@ -14,12 +14,26 @@ const uploadOnCloudinary = async (localFilePath) => {
         if(!localFilePath) return null;
         //upload on cloudinary
         const response = await cloudinary.uploader.upload(localFilePath,{
-            resource_type : "auto"  //cloudinary automatically detect kr lega kis type ki file hai?(image,video,json,audio,pdf)
+            resource_type : "auto",  //cloudinary automatically detect kr lega kis type ki file hai?(image,video,json,audio,pdf)
+            secure: true
         });
-        console.log("file uploaded successfully",response.url);
-        return response;
+        
+        const imageUrl = response.secure_url || response.url;
+        console.log("File uploaded successfully to Cloudinary");
+        console.log("Image URL:", imageUrl);
+        
+        // Return the full response object so we have access to all properties
+        return {
+            ...response,
+            url: imageUrl,
+            secure_url: imageUrl
+        };
     } catch (error) {
-        fs.unlinkSync(localFilePath);  //code to remove temporary file from server.
+        try {
+            fs.unlinkSync(localFilePath);  //code to remove temporary file from server.
+        } catch (unlinkError) {
+            console.error("Error deleting temp file:", unlinkError);
+        }
         console.error("Error uploading to Cloudinary:", error);
         return null;
     }

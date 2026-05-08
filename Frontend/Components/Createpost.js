@@ -370,9 +370,22 @@ const CreatePost = () => {
 
     const formData = new FormData();
 
-    formData.append("avatar", "url_to_avatar");
+    // Generate a consistent userId if none exists
+    let userId = user?.id || user?.uid;
+    if (!userId || userId === "anonymous") {
+      // Generate a temporary userId for anonymous users
+      userId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    }
+
+    // Generate avatar URL if not available
+    let userAvatar = avatar;
+    if (!userAvatar || userAvatar.trim() === "") {
+      userAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(username || "Anonymous")}&background=6366f1&color=fff&size=128`;
+    }
+
+    formData.append("avatar", userAvatar);
     formData.append("username", username);
-    formData.append("userId", "661e123abc456def78900000");
+    formData.append("userId", userId);
     formData.append("postedAt", new Date().toISOString());
     formData.append("postType", postType);
 
@@ -390,14 +403,33 @@ const CreatePost = () => {
       formData.append("pollOptions", JSON.stringify(nonEmptyOptions));
     }
 
-    // file
+    // file - IMPORTANT: field name must match multer field "media"
     if (file) {
+      console.log("Appending file to FormData:", file.name, file.size, file.type);
       formData.append("media", file);
     }
 
-    const res = await axios.post("http://localhost:8000/api/post/create-post", formData);
+    console.log("📤 Sending post data:", {
+      username,
+      userId,
+      postType,
+      hasFile: !!file,
+      fileName: file?.name,
+      contentLength: text?.length || whatIfText?.length
+    });
 
-    if (res.status !== 201) throw new Error(res.data.message);
+    const response = await axios.post("http://localhost:8000/api/post/create-post", formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+      timeout: 30000
+    });
+
+    console.log("✓ Post created successfully:", response.data);
+
+    if (response.status !== 201) {
+      throw new Error(response.data.message || "Failed to create post");
+    }
 
     // reset UI
     setPosted(true);
@@ -406,14 +438,20 @@ const CreatePost = () => {
     setOptions(["", ""]);
     setFile(null);
     setError("");
+    settitle("");
 
     setTimeout(() => setPosted(false), 2500);
 
     router.push("/");
 
   } catch (err) {
-    setError(err.response?.data?.message || err.message || "Post failed");
-    console.error("Post failed:", err);
+    const errorMessage = err.response?.data?.message || err.message || "Post failed";
+    setError(errorMessage);
+    console.error("❌ Post failed:", {
+      status: err.response?.status,
+      data: err.response?.data,
+      message: err.message
+    });
   }
 };
 

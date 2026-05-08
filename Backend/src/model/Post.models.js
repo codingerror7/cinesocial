@@ -3,14 +3,14 @@ import mongoose from "mongoose";
 const postSchema = new mongoose.Schema({
     user : {
         userId : {
-            type : mongoose.Schema.Types.ObjectId,
-            ref : "User"
+            type : String,
+            required : true
         },
         userName : {
-            type : mongoose.Schema.Types.String,
-            ref : "User",
+            type : String,
             lowercase : true,
             trim : true,
+            required : true
         },
         avatar : {
             type : String,
@@ -61,8 +61,8 @@ const postSchema = new mongoose.Schema({
     ],
     likes : [
         {
-            type : mongoose.Schema.Types.ObjectId,
-            ref : "User"
+            type : String,
+            required : true
         }
     ],
     likesCount : {

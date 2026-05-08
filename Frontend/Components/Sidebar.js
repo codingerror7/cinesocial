@@ -4,6 +4,19 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../context/AuthContext.js";
+import { FaHome } from "react-icons/fa";
+import { MdGroups2 } from "react-icons/md";
+import { IoIosCreate } from "react-icons/io";
+import { GiArtificialIntelligence } from "react-icons/gi";
+import { CgProfile } from "react-icons/cg";
+import { IoSettingsOutline } from "react-icons/io5";
+import { MdLocalMovies } from "react-icons/md";
+import { IoIosNotifications } from "react-icons/io";
+
+
+
+
+
 
 const Sidebar = () => {
   const router = useRouter();
@@ -22,7 +35,7 @@ const Sidebar = () => {
   }
 
   return (
-    <aside className="fixed left-0 top-0 h-screen w-68 bg-gradient-to-b from-[#0e0e14] to-black border-r border-white/10 flex flex-col z-100 py-2">
+    <aside className="fixed left-0 top-0 h-screen w-68 bg-gradient-to-b from-[#0e0e14] to-black border-r border-white/10 flex flex-col z-100 py-2 lg:block hidden">
       
       {/* LOGO */}
       <div className="px-6 pb-6 py-6 flex items-center gap-2.5">
@@ -42,26 +55,26 @@ const Sidebar = () => {
           Main
         </div>
 
-        <Link href="/"><NavItem text="Home" /></Link>
-        <Link href="./Post"><NavItem text="Communities" /></Link>
-        <Link href="./Post"><NavItem text="Create Post" /></Link>
+        <Link href="/"><NavItem text="Home" icon={<FaHome />} /></Link>
+        <Link href="./Post"><NavItem text="Communities" icon={<MdGroups2 />} /></Link>
+        <Link href="./Post"><NavItem text="Create Post" icon={<IoIosCreate />} /></Link>
 
         {/* LIBRARY */}
         <div className="text-[10px] font-semibold tracking-[1.5px] uppercase text-white/40 px-3 mt-5 mb-2">
           Library
         </div>
 
-        <NavItem text="Chatbot" />
-        <NavItem text="Notifications" badge="7" />
-        <Link href={`/Profile/${userId}`}><NavItem text="Profile" /></Link>
+        <NavItem text="Chatbot" icon={<GiArtificialIntelligence />} />
+        <NavItem text="Notifications" icon={<IoIosNotifications />}/>
+        <Link href={`/Profile/${userId}`}><NavItem text="Profile" icon={<CgProfile />} /></Link>
 
         {/* MORE */}
         <div className="text-[10px] font-semibold tracking-[1.5px] uppercase text-white/40 px-3 mt-5 mb-2">
           More
         </div>
 
-        <NavItem text="Watchlist" />
-        <NavItem text="Settings" />
+        <NavItem text="Watchlist" icon={<MdLocalMovies />} />
+        <NavItem text="Settings" icon={<IoSettingsOutline />} />
       </nav>
 
       {/* USER */}

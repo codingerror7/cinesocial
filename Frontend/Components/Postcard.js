@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import Image from 'next/image';     //image optimization in nextjs, lazy loading, responsive images, making images light-weight and more efficient image handling.
 
-const Postcard = ({ variant = "default"}) => {
+const Postcard = () => {
   const [postData, setpostData] = useState([]);   //jab multiple data backend se aa rha hai tab empty array use krte hain and jab single document aa rha hai tab null use krte hain.
   const [loading, setLoading] = useState(true);
 
@@ -13,35 +13,33 @@ const Postcard = ({ variant = "default"}) => {
       try {
         const response = await axios.get('http://localhost:8000/api/post/feed');
         const posts = response.data.post;
+        console.log("Raw posts from backend:", posts);
 
-        // Fetch missing avatars from profile endpoint
-        const postsWithAvatars = await Promise.all(posts.map(async (post) => {
-          if (!post.user?.avatar || post.user.avatar === "" || post.user.avatar === undefined) {
-            // Try to fetch profile by userId if available
-            if (post.user?.userId) {
-              try {
-                const profileRes = await axios.get(`http://localhost:8000/api/get-profile/${post.user.userId}`);
-                const profile = profileRes.data;
-                return {
-                  ...post,
-                  user: {
-                    ...post.user,
-                    avatar: profile?.avatar || "",
-                    userName: profile?.name || post.user.userName,
-                    title: profile?.title || post.user.title,
-                  }
-                };
-              } catch (e) {
-                // fallback to original post if profile fetch fails
-                return post;
-              }
-            }
+        // Process posts and ensure avatars are available
+        const processedPosts = posts.map((post) => {
+          // Use avatar from post data, or provide a default
+          let avatar = post.user?.avatar && post.user.avatar.trim() !== "" && post.user.avatar !== " " && post.user.avatar !== "url_to_avatar"
+            ? post.user.avatar
+            : `https://ui-avatars.com/api/?name=${encodeURIComponent(post.user?.userName || "Anonymous")}&background=6366f1&color=fff&size=128`;
+
+          // If avatar is a relative path (starts with /), make it a full URL
+          if (avatar.startsWith('/avatar')) {
+            avatar = `http://localhost:3000${avatar}`;
           }
-          return post;
-        }));
 
-        setpostData(postsWithAvatars);
-        console.log("Fetched post data with avatars:", postsWithAvatars);
+          return {
+            ...post,
+            user: {
+              ...post.user,
+              avatar: avatar,
+              userName: post.user?.userName || "Anonymous",
+              title: post.user?.title || "Cinephile",
+            }
+          };
+        });
+
+        console.log("Processed posts with avatars:", processedPosts);
+        setpostData(processedPosts);
       } catch (error) {
         console.error('Error fetching post data:', error);
         setpostData([]);
@@ -86,146 +84,187 @@ const Postcard = ({ variant = "default"}) => {
 //   );
 // }
   return (
-    <>
-    <div>
-      
-     {loading ? (
-  <p>Loading...</p>  
-) : (
-  Array.isArray(postData) && postData.map((post) => (
-    <div key={post._id} className="p-4 border border-white/10 rounded-xl mb-4 bg-white/2 font-[gilroy]">
-      
-      <div className='w-full flex items-center justify-between'>
-        <div className='flex items-center justify-between gap-2'>
-          <div className='border border-white/10 rounded-[50%] w-10 h-10 overflow-hidden bg-white/5 flex items-center justify-center'>
-            {post.user?.avatar && post.user.avatar.startsWith('http') ? (
-              <Image className='' src={post.user.avatar} alt="avatar" width={40} height={40} />
-            ) : (
-              <span className="text-lg">👤</span>
-            )}
-          </div>
-          <div className="flex flex-col">
-            <h2 className="text-lg font-bold text-white/70">
-              {post.user?.userName || "Anonymous"}
-            </h2>
-            <span className="text-xs text-white/40 font-normal">{post.user?.title || "Cinephile"}</span>
-          </div>
-        </div>
-        <p className="text-sm text-white/70">
-          {post.postType === "poll" ? "📊 Poll" : "📝 Post"}
+  <>
+    <div className="w-full max-sm:px-0 overflow-x-hidden">
+      {loading ? (
+        <p className="text-center text-sm sm:text-base text-white/70 py-6 overflow-hidden">
+          Loading...
         </p>
-      </div>
-      <h1 className="text-xl font-bold text-white mt-4 px-3">{post.title || "Untitled"}</h1>
-
-      <p className="text-white mt-1 px-3 py-1">
-        {post.content}
-      </p>
-
-
-      {/* media with user avatar */}
-      {post.media?.length > 0 && post.media[0] && post.media[0].startsWith('http') && (
-        <div className="relative mt-3 mb-2">
-          <img
-            src={post.media[0]}
-            alt="post"
-            className="rounded-lg w-full"
-          />
-          <div className="absolute top-2 left-2 flex items-center gap-2 bg-black/40 px-2 py-1 rounded-full">
-            <div className="w-8 h-8 rounded-full overflow-hidden border border-white/20 bg-white/10 flex items-center justify-center">
-              {post.user?.avatar && post.user.avatar.startsWith('http') ? (
-                <Image src={post.user.avatar} alt="avatar" width={32} height={32} />
-              ) : (
-                <span className="text-lg">👤</span>
-              )}
-            </div>
-            <span className="text-xs text-white/80 font-semibold">{post.user?.userName || "Anonymous"}</span>
-          </div>
-        </div>
-      )}
-
-      {/* poll */}
-      {post.postType === "poll" && post.poll?.options && (
-  <div className="mt-3 space-y-2">
-    {post.poll.options.map((opt, i) => {
-
-      const totalVotes = post.poll.options.reduce(
-        (sum, o) => sum + o.votes,
-        0
-      );
-
-      const percentage = totalVotes
-        ? Math.round((opt.votes / totalVotes) * 100)
-        : 0;
-
-      return (
-        <div
-          key={i}
-          onClick={() => handleVote(post._id, i)}
-          className="relative p-2 bg-white/5 rounded cursor-pointer"
-        >
+      ) : (
+        Array.isArray(postData) &&
+        postData.map((post) => (
           <div
-            className="absolute top-0 left-0 h-full bg-orange-500/30"
-            style={{ width: `${percentage}%` }}
-          />
+            key={post._id}
+            className="p-3 sm:p-4 border border-white/10 rounded-2xl mb-4 bg-black/30 font-[gilroy] w-full overflow-hidden max-sm:rounded-xl"
+          >
+            {/* TOP */}
+            <div className="w-full flex items-start justify-between gap-3">
+              
+              {/* LEFT */}
+              <div className="flex items-center gap-2 min-w-0 flex-1">
+                <div className="border border-white/10 rounded-full w-10 h-10 sm:w-11 sm:h-11 overflow-hidden bg-white/5 flex items-center justify-center shrink-0">
+                  {post.user?.avatar ? (
+                    <Image
+                      className="rounded-full object-cover w-full h-full"
+                      src={post.user.avatar}
+                      alt="avatar"
+                      width={44}
+                      height={44}
+                      onError={(e) => {
+                        console.log("Avatar failed to load, using fallback");
+                        e.currentTarget.style.display = "none";
+                        e.currentTarget.parentElement.innerHTML =
+                          '<span class="text-lg">👤</span>';
+                      }}
+                      unoptimized={post.user.avatar.startsWith(
+                        "http://localhost:3000"
+                      )}
+                    />
+                  ) : (
+                    <span className="text-lg">👤</span>
+                  )}
+                </div>
 
-          <div className="relative flex justify-between">
-            <span>{opt.text}</span>
-            <span>{percentage}%</span>
-          </div>
-        </div>
-      );
-    })}
-  </div>
-)}
-      <p className="text-sm text-white/70 py-2 border-t border-white/10 mt-4">
-        {new Date(post.postedAt).toDateString().split(" ").slice(1, 4).join("-")}
-      </p>
+                <div className="flex flex-col min-w-0 overflow-hidden">
+                  <h2 className="text-sm sm:text-base md:text-lg font-bold text-white/80 truncate">
+                    {post.user?.userName || "Anonymous"}
+                  </h2>
 
-    </div>
-  ))
-)}
+                  <span className="text-[10px] sm:text-xs text-white/40 font-normal truncate">
+                    {post.user?.title || "Cinephile"}
+                  </span>
+                </div>
+              </div>
 
-        {/* SPOILER BLOCK
-        {variant === "spoiler" && (
-          <div className="mt-3 p-3 border border-white/10 bg-white/5 rounded-md relative">
-            
-            <div className="text-[10px] mb-2 px-2 py-1 inline-block rounded bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 uppercase font-bold">
-              ⚠️ Spoiler
+              {/* RIGHT */}
+              <p className="text-[10px] sm:text-sm text-white/70 whitespace-nowrap shrink-0">
+                {post.postType === "poll" ? "📊 Poll" : "📝 Post"}
+              </p>
             </div>
 
-            <p className="text-xs text-white/60 blur-sm">
-              The final conversation between Oppenheimer and Einstein...
+            {/* TITLE */}
+            <h1 className="text-[17px] sm:text-xl font-bold text-white mt-4 px-1 sm:px-3 leading-snug break-words">
+              {post.title || "Untitled"}
+            </h1>
+
+            {/* CONTENT */}
+            <p className="text-[13px] sm:text-base text-white/85 mt-2 px-1 sm:px-3 py-1 leading-relaxed break-words whitespace-pre-wrap">
+              {post.content}
             </p>
 
-            <div className="absolute inset-0 flex items-center justify-center text-xs text-white/50">
-              👁 Tap to reveal spoiler
-            </div>
+            {/* MEDIA */}
+            {post.media?.length > 0 &&
+              post.media[0] &&
+              typeof post.media[0] === "string" &&
+              post.media[0].trim() !== "" && (
+                <div className="relative mt-3 mb-2">
+                  <div className="relative w-full bg-black/30 rounded-xl overflow-hidden">
+                    <Image
+                      src={post.media[0]}
+                      alt="post media"
+                      width={800}
+                      height={600}
+                      className="rounded-xl w-full h-auto object-cover max-h-[520px] max-sm:max-h-[350px]"
+                      priority={false}
+                      quality={75}
+                      unoptimized={true}
+                      onError={(e) => {
+                        console.error(
+                          "Image failed to load from URL:",
+                          post.media[0]
+                        );
+                        e.currentTarget.style.display = "none";
+                      }}
+                    />
+                  </div>
 
+                  {/* MEDIA USER OVERLAY */}
+                  <div className="absolute top-2 left-2 flex items-center gap-2 bg-black/50 backdrop-blur-md px-2 py-1 rounded-full max-w-[80%]">
+                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden border border-white/20 bg-white/10 flex items-center justify-center shrink-0">
+                      {post.user?.avatar ? (
+                        <Image
+                          src={post.user.avatar}
+                          alt="avatar"
+                          width={32}
+                          height={32}
+                          className="rounded-full object-cover w-full h-full"
+                          onError={(e) => {
+                            console.log(
+                              "Overlay avatar failed to load, using fallback"
+                            );
+                            e.currentTarget.style.display = "none";
+                            e.currentTarget.parentElement.innerHTML =
+                              '<span class="text-sm">👤</span>';
+                          }}
+                          unoptimized={post.user.avatar.startsWith(
+                            "http://localhost:3000"
+                          )}
+                        />
+                      ) : (
+                        <span className="text-sm">👤</span>
+                      )}
+                    </div>
+
+                    <span className="text-[10px] sm:text-xs text-white/90 font-semibold truncate">
+                      {post.user?.userName || "Anonymous"}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+            {/* POLL */}
+            {post.postType === "poll" && post.poll?.options && (
+              <div className="mt-3 space-y-2">
+                {post.poll.options.map((opt, i) => {
+                  const totalVotes = post.poll.options.reduce(
+                    (sum, o) => sum + o.votes,
+                    0
+                  );
+
+                  const percentage = totalVotes
+                    ? Math.round((opt.votes / totalVotes) * 100)
+                    : 0;
+
+                  return (
+                    <div
+                      key={i}
+                      onClick={() => handleVote(post._id, i)}
+                      className="relative p-2.5 sm:p-3 bg-white/5 rounded-xl cursor-pointer overflow-hidden"
+                    >
+                      <div
+                        className="absolute top-0 left-0 h-full bg-orange-500/30"
+                        style={{ width: `${percentage}%` }}
+                      />
+
+                      <div className="relative flex items-center justify-between gap-3">
+                        <span className="text-[13px] sm:text-base text-white break-words flex-1">
+                          {opt.text}
+                        </span>
+
+                        <span className="text-[11px] sm:text-sm text-white/80 shrink-0">
+                          {percentage}%
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* DATE */}
+            <p className="text-[10px] sm:text-sm text-white/60 py-2 border-t border-white/10 mt-4">
+              {new Date(post.postedAt)
+                .toDateString()
+                .split(" ")
+                .slice(1, 4)
+                .join("-")}
+            </p>
           </div>
-        )}
-      </div> */}
-
-      {/* MOVIE CARD */}
-      {/* <div className="mx-4 mb-4 flex gap-3 p-3 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition">
-        
-
-      </div> */}
-
-      {/* ACTIONS */}
-      {/* <div className="flex items-center gap-2 px-4 py-3 border-t border-white/10">
-        
-        <ActionBtn icon="❤️" count="2.4k" active />
-        <ActionBtn icon="💬" count="318" />
-        <ActionBtn icon="🔄" count="94" />
-
-        <div className="flex-1" /> */}
-
-        {/* <button className="text-sm text-white/60 hover:text-white">
-          🔖
-        </button> */}
-      </div>
-    </>
-  )
+        ))
+      )}
+    </div>
+  </>
+);
 }
 
 export default Postcard;
