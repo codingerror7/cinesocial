@@ -1,8 +1,13 @@
 "use client"
 import React from 'react'
 import { useState, useEffect } from 'react';
-import axios from 'axios';
 import Image from 'next/image';     //image optimization in nextjs, lazy loading, responsive images, making images light-weight and more efficient image handling.
+import { api } from '@/utils/api.js';
+
+const getFrontendOrigin = () =>
+  typeof window !== 'undefined'
+    ? window.location.origin
+    : 'http://localhost:3000';
 
 const Postcard = () => {
   const [postData, setpostData] = useState([]);   //jab multiple data backend se aa rha hai tab empty array use krte hain and jab single document aa rha hai tab null use krte hain.
@@ -11,7 +16,7 @@ const Postcard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/api/post/feed');
+        const response = await api.get('/api/post/feed');
         const posts = response.data.post;
         console.log("Raw posts from backend:", posts);
 
@@ -24,7 +29,7 @@ const Postcard = () => {
 
           // If avatar is a relative path (starts with /), make it a full URL
           if (avatar.startsWith('/avatar')) {
-            avatar = `http://localhost:3000${avatar}`;
+            avatar = `${getFrontendOrigin()}${avatar}`;
           }
 
           return {
@@ -51,23 +56,29 @@ const Postcard = () => {
   }, []);
 
   const handleVote = async (postId, optionIndex) => {
-  try {
-    const res = await axios.post(
-      `http://localhost:8000/api/post/vote/${postId}`,
-      { optionIndex }
-    );
+    if (typeof optionIndex !== 'number' || optionIndex < 0) {
+      console.warn('Invalid poll option index', optionIndex);
+      return;
+    }
 
-    // update feed state
-    setpostData(prev =>
-      prev.map(p =>
-        p._id === postId ? res.data.post : p
-      )
-    );
+    try {
+      const res = await api.post(`/api/post/vote/${postId}`, { optionIndex });
+      const updatedPost = res.data?.post;
 
-  } catch (err) {
-    console.error("Vote failed:", err.message);
-  }
-};
+      if (!updatedPost) {
+        console.warn('Vote response missing updated post', res.data);
+        return;
+      }
+
+      setpostData(prev =>
+        Array.isArray(prev)
+          ? prev.map(p => (p._id === postId ? updatedPost : p))
+          : prev
+      );
+    } catch (err) {
+      console.error('Vote failed:', err);
+    }
+  };
 
 //     function ActionBtn({ icon, count, active = false }) {
 //   return (
@@ -116,9 +127,7 @@ const Postcard = () => {
                         e.currentTarget.parentElement.innerHTML =
                           '<span class="text-lg">👤</span>';
                       }}
-                      unoptimized={post.user.avatar.startsWith(
-                        "http://localhost:3000"
-                      )}
+                      unoptimized={post.user.avatar.startsWith(getFrontendOrigin())}
                     />
                   ) : (
                     <span className="text-lg">👤</span>
@@ -196,9 +205,7 @@ const Postcard = () => {
                             e.currentTarget.parentElement.innerHTML =
                               '<span class="text-sm">👤</span>';
                           }}
-                          unoptimized={post.user.avatar.startsWith(
-                            "http://localhost:3000"
-                          )}
+                          unoptimized={post.user.avatar.startsWith(getFrontendOrigin())}
                         />
                       ) : (
                         <span className="text-sm">👤</span>

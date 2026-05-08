@@ -5,7 +5,7 @@ import Navbar2 from '@/Components/Navbar2'
 import MobileTopBar from '@/Components/MobileTopBar'
 import { useForm } from 'react-hook-form'
 import { useRouter } from 'next/navigation'
-import axios from 'axios'
+import { api } from '@/utils/api.js';
 import { useAuth } from '@/context/AuthContext.js'
 
 const avatars = [
@@ -56,7 +56,7 @@ const page = () => {
 
     const fetchProfile = async () => {
       try {
-        const res = await axios.get(`http://localhost:8000/api/get-profile/${storedUser._id}`);
+        const res = await api.get(`/api/get-profile/${storedUser._id}`);
         const profile = res.data;
         const profileGenres = Array.isArray(profile.genre)
           ? profile.genre
@@ -110,7 +110,7 @@ const page = () => {
         userId: storedUser._id,
       };
 
-      const res = await axios.post("http://localhost:8000/api/create-profile", payload);
+      const res = await api.post("/api/create-profile", payload);
       console.log(res.data);
 
       const updatedUser = {

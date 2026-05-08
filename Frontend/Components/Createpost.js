@@ -2,9 +2,12 @@
 import React from "react";
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../context/AuthContext.js"; // Update the path as needed
-import axios from "axios";
+import { api } from "@/utils/api.js";
 import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
+import Navbar2 from "./Navbar2.js";
+import MobileTopBar from "./MobileTopBar.js";
+import Sidebar from "./Sidebar.js";
 
 // const MOVIE_SUGGESTIONS = [
 //   "Inception (2010)", "Parasite (2019)", "The Godfather (1972)",
@@ -30,79 +33,92 @@ function PostTypeTabs({ active, onChange }) {
     { id: "image",  label: "Image",   icon: "⊞" },
   ];
   return (
-    <div className="flex gap-1 bg-[#0F1016] p-1 rounded-xl border border-white/5">
-      {tabs.map((tab) => (
-        <button
-          key={tab.id}
-          onClick={() => onChange(tab.id)}
-          className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg
-            text-sm font-medium border transition-all duration-200
-            ${active === tab.id
-              ? "bg-orange-500/15 text-orange-400 border-orange-500/30 shadow-[0_0_14px_rgba(249,115,22,0.22)]"
-              : "text-white/40 hover:text-white/65 hover:bg-white/5 border-transparent"
-            }`}
-        >
-          <span className="text-[15px] leading-none">{tab.icon}</span>
-          <span className="hidden sm:inline text-[12px]">{tab.label}</span>
-        </button>
-      ))}
-    </div>
+    <div className="flex gap-2 bg-[#0F1016] p-2 rounded-xl border border-white/5 w-full overflow-x-auto scrollbar-hide">
+  
+  {tabs.map((tab) => (
+    <button
+      key={tab.id}
+      onClick={() => onChange(tab.id)}
+      className={`flex-1 min-w-[64px] sm:min-w-0 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-2 rounded-lg
+      text-[11px] sm:text-sm font-medium border transition-all duration-200 whitespace-nowrap
+      ${
+        active === tab.id
+          ? "bg-orange-500/15 text-orange-400 border-orange-500/30 shadow-[0_0_14px_rgba(249,115,22,0.22)]"
+          : "text-white/40 hover:text-white/65 hover:bg-white/5 border-transparent"
+      }`}
+    >
+      
+      <span className="text-[16px] sm:text-[15px] leading-none shrink-0">
+        {tab.icon}
+      </span>
+
+      <span className="text-[10px] sm:text-[12px] leading-none">
+        {tab.label}
+      </span>
+    </button>
+  ))}
+</div>
   );
 }
 
 function PollSection({ options, setOptions }) {
   return (
-    <div className="p-4 rounded-xl bg-[#0F1016] border border-white/5 space-y-2.5">
-      <p className="text-[10px] text-white/28 uppercase tracking-widest font-semibold">
-        Poll Options
-      </p>
+    <div className="p-3 sm:p-4 rounded-xl bg-[#0F1016] border border-white/5 space-y-2.5 w-full overflow-hidden">
+  
+  <p className="text-[9px] sm:text-[10px] text-white/28 uppercase tracking-widest font-semibold">
+    Poll Options
+  </p>
 
-      {options.map((opt, i) => (
-        <input
-          key={i}
-          type="text"
-          value={opt}
-          onChange={(e) => {
-            const newOptions = [...options];
-            newOptions[i] = e.target.value;
-            setOptions(newOptions);
-          }}
-          placeholder={`Option ${i + 1}`}
-          className="w-full bg-[#14151A] border border-white/8 rounded-lg px-4 py-2.5 text-sm text-white cursor-pointer"
-        />
-      ))}
+  {options.map((opt, i) => (
+    <input
+      key={i}
+      type="text"
+      value={opt}
+      onChange={(e) => {
+        const newOptions = [...options];
+        newOptions[i] = e.target.value;
+        setOptions(newOptions);
+      }}
+      placeholder={`Option ${i + 1}`}
+      className="w-full bg-[#14151A] border border-white/8 rounded-lg px-3 sm:px-4 py-2.5 text-[13px] sm:text-sm text-white placeholder:text-white/25 focus:outline-none focus:border-orange-500/30"
+    />
+  ))}
 
-      {options.length < 4 && (
-        <button
-          onClick={() => setOptions([...options, ""])}
-          className="w-full py-2 border border-dashed border-white/10 text-white/28 text-sm cursor-pointer"
-        >
-          + Add option
-        </button>
-      )}
-    </div>
+  {options.length < 4 && (
+    <button
+      onClick={() => setOptions([...options, ""])}
+      className="w-full py-2.5 border border-dashed border-white/10 text-white/28 text-[13px] sm:text-sm rounded-lg hover:bg-white/[0.03] transition cursor-pointer"
+    >
+      + Add option
+    </button>
+  )}
+</div>
   );
 }
 
 function WhatIfSection({value, setValue}) {
   return (
-    <div className="p-4 rounded-xl bg-[#0F1016] border border-white/5 space-y-3">
-      <div className="flex items-center gap-2">
-        <div className="w-[3px] h-4 rounded-full bg-orange-500 flex-shrink-0" />
-        <p className="text-[10px] text-white/28 uppercase tracking-widest font-semibold">
-          Alternate Storyline
-        </p>
-      </div>
-      <textarea
-        rows={3}
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-        placeholder="What if Thanos used the infinity gauntlet to create more resources instead of destroying half the universe?"
-        className="w-full bg-[#14151A] border border-white/8 rounded-lg px-4 py-3 text-sm cursor-pointer
-          text-white placeholder-white/20 resize-none focus:outline-none
-          focus:border-orange-500/55 focus:ring-1 focus:ring-orange-500/25 transition-all"
-      />
-    </div>
+    <div className="p-3 sm:p-4 rounded-xl bg-[#0F1016] border border-white/5 space-y-3 w-full overflow-hidden">
+  
+  <div className="flex items-center gap-2">
+    
+    <div className="w-[3px] h-4 rounded-full bg-orange-500 flex-shrink-0" />
+
+    <p className="text-[9px] sm:text-[10px] text-white/28 uppercase tracking-[2px] sm:tracking-widest font-semibold">
+      Alternate Storyline
+    </p>
+  </div>
+
+  <textarea
+    rows={3}
+    value={value}
+    onChange={(e) => setValue(e.target.value)}
+    placeholder="What if Thanos used the infinity gauntlet to create more resources instead of destroying half the universe?"
+    className="w-full min-h-[110px] sm:min-h-[120px] bg-[#14151A] border border-white/8 rounded-lg px-3 sm:px-4 py-3 text-[13px] sm:text-sm cursor-pointer
+    text-white placeholder-white/20 resize-none focus:outline-none
+    focus:border-orange-500/55 focus:ring-1 focus:ring-orange-500/25 transition-all leading-relaxed"
+  />
+</div>
   );
 }
 
@@ -163,11 +179,11 @@ function ImageSection({ file, setFile }) {
 
       {/* Preview */}
       {file && (
-        <div className="mt-3">
+        <div className="mt-3 flex justify-center">
           <img
             src={URL.createObjectURL(file)}
             alt="preview"
-            className="w-24 h-36 object-cover rounded-lg mx-auto border border-white/10"
+            className="w-full max-w-[180px] aspect-[2/3] object-cover rounded-lg border border-white/10"
           />
           <p className="text-xs text-green-400 mt-1">{file.name}</p>
         </div>
@@ -175,7 +191,7 @@ function ImageSection({ file, setFile }) {
 
       {/* Placeholder grid */}
       {!file && (
-        <div className="grid grid-cols-4 gap-2 mt-2">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2">
           {[1, 2, 3, 4].map((n) => (
             <div
               key={n}
@@ -257,40 +273,61 @@ function ImageSection({ file, setFile }) {
 
 function SpoilerToggle({ active, onChange }) {
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <p className="text-sm font-medium text-white/65">Mark as Spoiler</p>
-          <p className="text-xs text-white/28 mt-0.5">
-            Blurs content for users who haven't seen it
-          </p>
-        </div>
-        <button
-          onClick={() => onChange(!active)}
-          className={`relative w-11 h-6 rounded-full transition-all duration-300 flex-shrink-0
-            ${active ? "bg-orange-500" : "bg-white/10"}`}
-        >
-          <span
-            className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-md
-              transition-transform duration-300 ${active ? "translate-x-5" : "translate-x-0"}`}
-          />
-        </button>
-      </div>
-      {active && (
-        <div className="rounded-lg overflow-hidden relative">
-          <div className="px-4 py-5 bg-[#1A1C24] text-sm text-white/50 italic text-center
-            select-none blur-sm">
-            This content contains major plot spoilers that have been intentionally hidden.
-          </div>
-          <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-xs font-semibold text-white/55 bg-black/60 px-3 py-1
-              rounded-full backdrop-blur-sm border border-white/10">
-              🚨 Spoiler Hidden
-            </span>
-          </div>
-        </div>
-      )}
+    <div className="space-y-3 w-full overflow-hidden">
+  
+  {/* TOP */}
+  <div className="flex items-start sm:items-center justify-between gap-3 sm:gap-4">
+    
+    {/* TEXT */}
+    <div className="min-w-0 flex-1">
+      
+      <p className="text-[13px] sm:text-sm font-medium text-white/65 leading-snug">
+        Mark as Spoiler
+      </p>
+
+      <p className="text-[11px] sm:text-xs text-white/28 mt-0.5 leading-relaxed">
+        Blurs content for users who haven't seen it
+      </p>
     </div>
+
+    {/* TOGGLE */}
+    <button
+      onClick={() => onChange(!active)}
+      className={`relative w-11 h-6 rounded-full transition-all duration-300 flex-shrink-0
+      ${active ? "bg-orange-500" : "bg-white/10"}`}
+    >
+      <span
+        className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-md
+        transition-transform duration-300 ${
+          active ? "translate-x-5" : "translate-x-0"
+        }`}
+      />
+    </button>
+  </div>
+
+  {/* SPOILER PREVIEW */}
+  {active && (
+    <div className="rounded-lg overflow-hidden relative">
+      
+      <div
+        className="px-3 sm:px-4 py-4 sm:py-5 bg-[#1A1C24] text-[12px] sm:text-sm text-white/50 italic text-center
+        select-none blur-sm leading-relaxed"
+      >
+        This content contains major plot spoilers that have been intentionally hidden.
+      </div>
+
+      <div className="absolute inset-0 flex items-center justify-center px-3">
+        
+        <span
+          className="text-[10px] sm:text-xs font-semibold text-white/55 bg-black/60 px-3 py-1
+          rounded-full backdrop-blur-sm border border-white/10 text-center"
+        >
+          🚨 Spoiler Hidden
+        </span>
+      </div>
+    </div>
+  )}
+</div>
   );
 }
 
@@ -300,27 +337,38 @@ function ActionBar({ onImageClick, onPollClick, onPost }) {
     { icon: "😊", label: "Mood" },
   ];
   return (
-    <div className="flex items-center justify-between pt-3 border-t border-white/5">
-      <div className="flex items-center gap-1">
-        {actions.map(({ icon, label, onClick }) => (
-          <button
-            key={label}
-            onClick={onClick}
-            title={label}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-white/28 hover:text-orange-400 hover:bg-orange-500/9 transition-all"
-          >
-            <span className="text-sm">{icon}</span>
-            <span className="hidden sm:inline text-xs">{label}</span>
-          </button>
-        ))}
-      </div>
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-3 border-t border-white/5 w-full overflow-hidden">
+  
+  {/* ACTIONS */}
+  <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide w-full sm:w-auto">
+    
+    {actions.map(({ icon, label, onClick }) => (
       <button
-        onClick={onPost}
-          className="px-6 py-2.5 bg-orange-500 hover:bg-orange-400 text-white font-semibold text-sm rounded-xl transition-all duration-200 hover:scale-[1.025] active:scale-[0.975] shadow-[0_4px_20px_rgba(249,115,22,0.4)] hover:shadow-[0_4px_28px_rgba(249,115,22,0.58)]"
+        key={label}
+        onClick={onClick}
+        title={label}
+        className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-white/28 hover:text-orange-400 hover:bg-orange-500/9 transition-all whitespace-nowrap shrink-0"
       >
-        Post
+        
+        <span className="text-sm sm:text-base leading-none">
+          {icon}
+        </span>
+
+        <span className="text-[11px] sm:text-xs">
+          {label}
+        </span>
       </button>
-    </div>
+    ))}
+  </div>
+
+  {/* POST BUTTON */}
+  <button
+    onClick={onPost}
+    className="w-full sm:w-auto px-6 py-3 sm:py-2.5 bg-orange-500 hover:bg-orange-400 text-white font-semibold text-sm rounded-xl transition-all duration-200 hover:scale-[1.025] active:scale-[0.975] shadow-[0_4px_20px_rgba(249,115,22,0.4)] hover:shadow-[0_4px_28px_rgba(249,115,22,0.58)]"
+  >
+    Post
+  </button>
+</div>
   );
 }
 
@@ -418,7 +466,7 @@ const CreatePost = () => {
       contentLength: text?.length || whatIfText?.length
     });
 
-    const response = await axios.post("http://localhost:8000/api/post/create-post", formData, {
+    const response = await api.post("/api/post/create-post", formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -464,7 +512,7 @@ useEffect(()=>{
 
   const fetchProfile = async () => {
     try {
-      const res = await axios.get(`http://localhost:8000/api/get-profile/${id}`);
+      const res = await api.get(`/api/get-profile/${id}`);
       setprofile(res.data);
     } catch (error) {
       console.log("failed to fetch data");
@@ -476,124 +524,216 @@ useEffect(()=>{
 
 
   return (
-    <div className="min-h-screen bg-[#0B0B0F] text-white font-sans">
-      {/* Ambient background glow */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-[-200px] left-1/2 -translate-x-1/2 w-[600px] h-[600px]
-          rounded-full bg-orange-500/5 blur-[140px]" />
-      </div>
+    <div className="min-h-screen w-full bg-[#0B0B0F] text-white font-sans overflow-x-hidden">
 
-      {/* Sticky header */}
-      <header className="sticky top-0 z-30 bg-[#0B0B0F]/82 backdrop-blur-xl
-        border-b border-white/5 px-4 sm:px-6 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-red-700
-            flex items-center justify-center text-md font-black text-white">
-            🎬
-          </div>
-          <span className="font-bold text-lg text-white tracking-tight hidden sm:block">
-            CineSocial
-          </span>
-        </div>
-      </header>
+  {/* Main content */}
+  <main
+    className="relative z-10
+  w-full
+  max-w-2xl
+  mx-auto
+  px-3
+  sm:px-5
+  lg:px-6
+  pt-22
+  sm:pt-28
+  pb-28
+  sm:pb-14
+  lg:ml-64
+  overflow-x-hidden"
+  >
 
-      {/* Main content */}
-      <main className="max-w-2xl mx-auto px-4 py-8 sm:py-12 relative z-10">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white mb-1">
-          Create a post
-        </h1>
-        <p className="text-sm text-white/28 mb-7">
-          Share theories, reviews, polls, or start a conversation.
-        </p>
+    {/* Heading */}
+    <div className="mb-6 sm:mb-8">
+      
+      <h1
+        className="text-[26px] sm:text-3xl font-bold tracking-tight text-white leading-tight"
+      >
+        Create a post
+      </h1>
 
-        {/* Post card */}
-        <div className="bg-[#14151A] rounded-2xl border border-white/6 shadow-2xl overflow-hidden">
-          <div className="p-5 sm:p-6 flex flex-col gap-5">
-
-            {/* User identity */}
-            <div className="flex items-center gap-3">
-              <div className='border border-white/10 rounded-[50%] w-10 h-10 overflow-hidden bg-white/5 flex items-center justify-center'>
-                {avatar ? (
-                  <img src={avatar} className='bg-center object-cover w-10 h-10' alt="avatar" />
-                ) : (
-                  <span className="text-lg">👤</span>
-                )}
-              </div>
-              <div className="flex-1">
-                <p className="font-semibold text-sm text-white">{username}</p>
-                <p className="text-xs text-white/28 mt-0.5">{titleName} · 412 followers</p>
-              </div>
-              <div className="w-20 border border-white/20 rounded-[20px] px-2 text-center text-sm font-[gilroy]"><h2>Public</h2></div>
-            </div>
-
-            {/* Post type tabs */}
-            <PostTypeTabs active={postType} onChange={setPostType} />    
-
-            <input className="w-full bg-[#0F1016] border border-white/6 rounded-xl px-4 py-2.5 text-xl text-extrabold font-[gilroy] cursor-pointer
-                text-white text-sm leading-relaxed resize-none placeholder-white/20
-                focus:outline-none focus:border-orange-500/48 focus:ring-1
-                focus:ring-orange-500/18 transition-all duration-200"
-              type="text" value={title} onChange={(e) => settitle(e.target.value)} placeholder="Post title" />
-
-            {/* Main textarea */}
-            <textarea
-              rows={postType === "story" ? 5 : 3}
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              placeholder={PLACEHOLDERS[postType]}
-              maxLength={1000}
-              className="w-full bg-[#0F1016] border border-white/6 rounded-xl px-4 py-3.5
-                text-white text-sm leading-relaxed resize-none placeholder-white/20
-                focus:outline-none focus:border-orange-500/48 focus:ring-1
-                focus:ring-orange-500/18 transition-all duration-200"
-            />
-
-            {/* Dynamic section */}
-            {postType === "poll" && (
-  <PollSection options={options} setOptions={setOptions} />
-)}
-            {postType === "whatif" && (
-  <WhatIfSection value={whatIfText} setValue={setWhatIfText} />
-)}
-            {postType === "image" && (
-  <ImageSection file={file} setFile={setFile} />
-)}
-
-            {/* Spoiler toggle */}
-            <div className="p-4 rounded-xl bg-[#0F1016] border border-white/5">
-              <SpoilerToggle active={spoiler} onChange={setSpoiler} />
-            </div>
-
-            {/* Action bar */}
-            <ActionBar
-              onImageClick={() => setPostType("image")}
-              onPollClick={() => setPostType("poll")}
-              onPost={handlePost}
-            />
-
-            {/* Success flash */}
-            {posted && (
-              <div className="text-center py-2 rounded-lg bg-green-500/12 border border-green-500/20
-                text-green-400 text-sm font-medium animate-pulse">
-                ✓ Post published successfully!
-              </div>
-            )}
-
-            {/* Error message */}
-            {error && (
-              <div className="text-center py-2 rounded-lg bg-red-500/12 border border-red-500/20
-                text-red-400 text-sm font-medium">
-                ✕ {error}
-              </div>
-            )}
-          </div>
-        </div>
-
-        <p className="text-center text-white/13 text-xs mt-6">
-          By posting, you agree to CineSocial's community guidelines.
-        </p>
-      </main>
+      <p
+        className="text-[12px] sm:text-sm text-white/35 mt-2 leading-relaxed max-w-md"
+      >
+        Share theories, reviews, polls, or start a conversation.
+      </p>
     </div>
+
+    {/* Post card */}
+    <div
+      className="bg-[#14151A]/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl 
+      border border-white/6 shadow-[0_0_40px_rgba(0,0,0,0.45)] overflow-hidden"
+    >
+      
+      <div className="p-3 sm:p-6 flex flex-col gap-5">
+
+        {/* User identity */}
+        <div className="flex items-center justify-between gap-3">
+
+          {/* LEFT */}
+          <div className="flex items-center gap-3 min-w-0 flex-1">
+
+            {/* Avatar */}
+            <div
+              className="border border-white/10 rounded-full 
+              w-13 h-13 sm:w-12 sm:h-12 overflow-hidden 
+              bg-white/5 flex items-center justify-center shrink-0"
+            >
+              {avatar ? (
+                <img
+                  src={avatar}
+                  className="object-cover w-full h-full"
+                  alt="avatar"
+                />
+              ) : (
+                <span className="text-lg">👤</span>
+              )}
+            </div>
+
+            {/* User Info */}
+            <div className="min-w-0 overflow-hidden">
+
+              <p
+                className="font-semibold text-[14px] sm:text-base text-white truncate"
+              >
+                {username}
+              </p>
+
+              <p
+                className="text-[10px] sm:text-xs text-white/35 mt-0.5 truncate"
+              >
+                {titleName} · 412 followers
+              </p>
+            </div>
+          </div>
+
+          {/* Public tag */}
+          <div
+            className="border border-white/15 bg-white/[0.03]
+            rounded-full px-3 py-1
+            text-[10px] sm:text-xs font-medium text-white/70
+            shrink-0"
+          >
+            Public
+          </div>
+        </div>
+
+        {/* Tabs */}
+        <div className="overflow-hidden">
+          <PostTypeTabs
+            active={postType}
+            onChange={setPostType}
+          />
+        </div>
+
+        {/* Title */}
+        <input
+          className="w-full bg-[#0F1016] border border-white/6 rounded-xl 
+          px-4 py-3 text-[15px] sm:text-lg font-bold font-[gilroy]
+          text-white placeholder-white/20
+          focus:outline-none focus:border-orange-500/50 focus:ring-1
+          focus:ring-orange-500/20 transition-all duration-200"
+          type="text"
+          value={title}
+          onChange={(e) => settitle(e.target.value)}
+          placeholder="Post title"
+        />
+
+        {/* Main textarea */}
+        <textarea
+          rows={postType === "story" ? 5 : 4}
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder={PLACEHOLDERS[postType]}
+          maxLength={1000}
+          className="w-full bg-[#0F1016] border border-white/6 rounded-xl 
+          px-4 py-3.5 text-[13px] sm:text-sm leading-relaxed resize-none 
+          placeholder-white/20 text-white
+          focus:outline-none focus:border-orange-500/50 focus:ring-1
+          focus:ring-orange-500/20 transition-all duration-200"
+        />
+
+        {/* Dynamic sections */}
+        <div className="space-y-4 overflow-hidden">
+          
+          {postType === "poll" && (
+            <PollSection
+              options={options}
+              setOptions={setOptions}
+            />
+          )}
+
+          {postType === "whatif" && (
+            <WhatIfSection
+              value={whatIfText}
+              setValue={setWhatIfText}
+            />
+          )}
+
+          {postType === "image" && (
+            <ImageSection
+              file={file}
+              setFile={setFile}
+            />
+          )}
+        </div>
+
+        {/* Spoiler */}
+        <div
+          className="p-3 sm:p-4 rounded-xl bg-[#0F1016]
+          border border-white/5"
+        >
+          <SpoilerToggle
+            active={spoiler}
+            onChange={setSpoiler}
+          />
+        </div>
+
+        {/* Action bar */}
+        <div className="overflow-hidden">
+          <ActionBar
+            onImageClick={() => setPostType("image")}
+            onPollClick={() => setPostType("poll")}
+            onPost={handlePost}
+          />
+        </div>
+
+        {/* Success */}
+        {posted && (
+          <div
+            className="text-center py-2.5 rounded-xl 
+            bg-green-500/12 border border-green-500/20
+            text-green-400 text-[12px] sm:text-sm 
+            font-medium animate-pulse"
+          >
+            ✓ Post published successfully!
+          </div>
+        )}
+
+        {/* Error */}
+        {error && (
+          <div
+            className="text-center py-2.5 rounded-xl 
+            bg-red-500/12 border border-red-500/20
+            text-red-400 text-[12px] sm:text-sm 
+            font-medium break-words"
+          >
+            ✕ {error}
+          </div>
+        )}
+      </div>
+    </div>
+
+    {/* Footer */}
+    <p
+      className="text-center text-white/15 
+      text-[10px] sm:text-xs 
+      mt-6 px-3 leading-relaxed"
+    >
+      By posting, you agree to CineSocial's community guidelines.
+    </p>
+  </main>
+</div>
   );
 }
 

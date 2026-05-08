@@ -1,7 +1,7 @@
 "use client"
 import React from 'react'
 import { useForm } from 'react-hook-form';
-import axios from 'axios';
+import { api } from '@/utils/api.js';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext.js';
@@ -13,7 +13,7 @@ const Login = () => {
   const onSubmit = async (data) => {
     try {
 
-      let res = await axios.post("http://localhost:8000/api/auth/login",data);
+      let res = await api.post("/api/auth/login",data);
       console.log(data);
       const safeUser = {
         _id: res.data.user._id,

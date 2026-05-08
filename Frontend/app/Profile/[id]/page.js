@@ -5,7 +5,7 @@ import Navbar2 from '@/Components/Navbar2'
 import MobileTopBar from '@/Components/MobileTopBar'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import axios from 'axios'
+import { api } from '@/utils/api.js';
 
 const page = () => {
   const params = useParams();
@@ -21,7 +21,7 @@ const page = () => {
 
     const fetchProfile = async () => {
       try {
-        const res = await axios.get(`http://localhost:8000/api/get-profile/${id}`);
+        const res = await api.get(`/api/get-profile/${id}`);
         setProfile(res.data);
       } catch (error) {
         console.error("Failed to load profile:", error);

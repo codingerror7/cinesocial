@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@/context/AuthContext.js";
 
 import { FaHome } from "react-icons/fa";
 import { MdGroups2 } from "react-icons/md";
@@ -13,28 +14,36 @@ import { CgProfile } from "react-icons/cg";
 const navItems = [
   {
     href: "/",
+    label: "Home",
     icon: FaHome,
   },
   {
     href: "/Community",
+    label: "Community",
     icon: MdGroups2,
   },
   {
     href: "/Post",
+    label: "Create",
     icon: IoIosCreate,
   },
   {
     href: "/chatbot",
+    label: "Chat",
     icon: GiArtificialIntelligence,
   },
   {
     href: "/Profile",
+    label: "Profile",
     icon: CgProfile,
   },
 ];
 
 const MobileBottomNav = () => {
   const pathname = usePathname();
+  const { user } = useAuth();
+
+  const profileHref = user?._id ? `/Profile/${user._id}` : "/";
 
   return (
     <nav className="fixed bottom-4 left-1/2 z-[100] w-[95%] max-w-md -translate-x-1/2 lg:hidden overflow-hidden">
@@ -44,16 +53,17 @@ const MobileBottomNav = () => {
         
         {navItems.map((item) => {
           const Icon = item.icon;
+          const href = item.href === "/Profile" ? profileHref : item.href;
 
           const isActive =
-            item.href === "/"
+            href === "/"
               ? pathname === "/"
-              : pathname.startsWith(item.href);
+              : pathname.startsWith(href);
 
           return (
             <Link
               key={item.label}
-              href={item.href}
+              href={href}
               className={`relative flex h-[60px] w-[60px] flex-col items-center justify-center rounded-2xl transition-all duration-300 ${
                 isActive
                   ? "bg-white/15 text-white shadow-lg"

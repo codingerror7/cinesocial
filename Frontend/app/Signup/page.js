@@ -2,7 +2,7 @@
 import React from 'react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import axios from 'axios';
+import { api } from '@/utils/api.js';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext.js';
@@ -15,7 +15,7 @@ const Signup = () => {
   const onSubmit = async (data) => {
     try {
 
-      let res = await axios.post("http://localhost:8000/api/auth/signup",data);
+      let res = await api.post("/api/auth/signup",data);
       console.log(res.data);
       const safeUser = {
         _id: res.data.user._id,

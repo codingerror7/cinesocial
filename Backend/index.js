@@ -50,7 +50,7 @@ app.get("/what",(req,res)=>{
     res.send("app for cinephile!");
 })
 
-app.listen(PORT,()=>{
+app.listen(PORT, "0.0.0.0",()=>{
     console.log(`running at ${PORT}`);
     connectDB();
 });
