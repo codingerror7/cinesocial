@@ -45,38 +45,60 @@ const Login = () => {
   return (
     <>
     <div className='min-h-screen w-full flex flex-col lg:flex-row bg-gradient-to-b from-[#0e0e14] to-black overflow-x-hidden'>
-  
+
   {/* LEFT SECTION */}
-  <div className="w-full lg:w-[50vw] min-h-screen flex flex-col justify-center px-5 sm:px-8 md:px-12 lg:px-20 relative overflow-hidden py-16 lg:py-0">
+  <div className="
+    w-full lg:w-[50vw]
+    min-h-[42vh] lg:min-h-screen
+    flex flex-col justify-center
+    px-4 sm:px-8 md:px-12 lg:px-20
+    pt-8 pb-3 lg:py-0
+    relative overflow-hidden
+  ">
 
     {/* Background glow */}
-    <div className="absolute top-[-100px] left-[-100px] w-[220px] sm:w-[300px] h-[220px] sm:h-[300px] bg-purple-600/20 blur-[120px] rounded-full"></div>
+    <div className="absolute top-[-80px] left-[-80px] w-[160px] sm:w-[260px] h-[160px] sm:h-[260px] bg-purple-600/20 blur-[100px] rounded-full"></div>
 
-    <div className="absolute bottom-[-120px] right-[-100px] w-[220px] sm:w-[280px] h-[220px] sm:h-[280px] bg-red-500/20 blur-[120px] rounded-full"></div>
+    <div className="absolute bottom-[-100px] right-[-80px] w-[160px] sm:w-[240px] h-[160px] sm:h-[240px] bg-red-500/20 blur-[100px] rounded-full"></div>
 
     {/* Logo */}
-    <div className="flex items-center gap-3 sm:gap-4 mb-10 sm:mb-12 relative z-10">
-      
+    <div className="flex items-center gap-2.5 sm:gap-4 mb-6 sm:mb-10 relative z-10">
+
       <div
-        className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center text-lg sm:text-xl 
-        bg-gradient-to-br from-red-500 to-orange-400 
-        shadow-[0_0_30px_rgba(239,68,68,0.6)]"
+        className="
+        w-9 h-9 sm:w-12 sm:h-12
+        rounded-xl flex items-center justify-center
+        text-base sm:text-xl
+        bg-gradient-to-br from-red-500 to-orange-400
+        shadow-[0_0_20px_rgba(239,68,68,0.5)]
+      "
       >
         🎬
       </div>
 
       <div
-        className="text-3xl sm:text-4xl font-bold tracking-wide 
-        bg-gradient-to-r from-white to-white/50 
-        text-transparent bg-clip-text"
+        className="
+        text-[28px] sm:text-4xl
+        font-bold tracking-wide
+        bg-gradient-to-r from-white to-white/50
+        text-transparent bg-clip-text
+      "
       >
         CineSocial
       </div>
     </div>
 
     {/* Heading */}
-    <h1 className="text-[34px] sm:text-[42px] lg:text-[48px] leading-[1.1] font-bold max-w-xl mb-5 sm:mb-6 relative z-10">
-      
+    <h1
+      className="
+      text-[28px] sm:text-[42px] lg:text-[48px]
+      leading-[1.08]
+      font-bold
+      max-w-xl
+      mb-3 sm:mb-6
+      relative z-10
+    "
+    >
       <span className="bg-gradient-to-r from-white to-white/60 text-transparent bg-clip-text">
         Every film has a story.
       </span>
@@ -89,73 +111,117 @@ const Login = () => {
     </h1>
 
     {/* Subtext */}
-    <p className="text-[15px] sm:text-[18px] lg:text-[20px] text-white/60 leading-relaxed max-w-lg relative z-10">
+    <p
+      className="
+      text-[13px] sm:text-[18px] lg:text-[20px]
+      text-white/60
+      leading-relaxed
+      max-w-md sm:max-w-lg
+      relative z-10
+    "
+    >
       Share your thoughts, explore perspectives, and connect with people who
       experience cinema the way you do.
     </p>
   </div>
 
   {/* RIGHT SECTION */}
-  <div className='w-full lg:w-[50vw] min-h-screen px-4 sm:px-8 lg:px-20 relative overflow-hidden flex items-center justify-center py-10 lg:py-0'>
-    
+  <div
+    className="
+    w-full lg:w-[50vw]
+    min-h-[58vh] lg:min-h-screen
+    px-3 sm:px-8 lg:px-20
+    relative overflow-hidden
+    flex items-start lg:items-center justify-center
+    pt-2 pb-8 lg:py-0
+  "
+  >
+
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="w-full max-w-md mx-auto p-5 sm:p-8 rounded-2xl 
-      bg-white/[0.04] backdrop-blur-xl border border-white/10 
-      shadow-[0_0_40px_rgba(0,0,0,0.6)] space-y-5 sm:space-y-6"
+      className="
+      w-full max-w-sm sm:max-w-md
+      mx-auto
+      p-4 mt-5 lg:mt-0 sm:p-8
+      rounded-2xl
+      bg-black/40 border border-white/10 shadow-2xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 backdrop-blur-2xl
+      space-y-4 sm:space-y-6
+    "
     >
 
       {/* TITLE */}
       <div className="text-center">
-        
-        <h2 className="text-xl sm:text-2xl font-semibold tracking-wide text-white">
+
+        <h2 className="text-lg sm:text-2xl font-semibold tracking-wide text-white">
           Login to Your Account
         </h2>
 
-        <p className="text-xs sm:text-sm text-white/50 mt-1">
+        <p className="text-[11px] sm:text-sm text-white/50 mt-1">
           Join the CineSocial community
         </p>
       </div>
 
       {/* EMAIL */}
-      <div className="space-y-2">
-        
+      <div className="space-y-1.5">
+
         <input
           type="email"
-          name='email'
+          name="email"
           placeholder="Email address"
           {...register("email", { required: true })}
-          className="w-full px-4 py-3 rounded-lg 
-          bg-white/5 border border-white/10 
-          text-sm sm:text-base text-white placeholder-white/40
-          focus:outline-none focus:border-red-500 
-          focus:ring-2 focus:ring-red-500/20 transition"
+          className="
+          w-full
+          px-3.5 sm:px-4
+          py-2.5 sm:py-3
+          rounded-lg
+          bg-white/5
+          border border-white/10
+          text-[13px] sm:text-base
+          text-white
+          placeholder-white/40
+          focus:outline-none
+          focus:border-red-500
+          focus:ring-2
+          focus:ring-red-500/20
+          transition
+        "
         />
 
         {errors.email && (
-          <p className="text-xs text-red-400">
+          <p className="text-[11px] text-red-400">
             Email is required
           </p>
         )}
       </div>
 
       {/* PASSWORD */}
-      <div className="space-y-2">
-        
+      <div className="space-y-1.5">
+
         <input
           type="password"
-          name='password'
-          placeholder="password"
+          name="password"
+          placeholder="Password"
           {...register("password", { required: true })}
-          className="w-full px-4 py-3 rounded-lg 
-          bg-white/5 border border-white/10 
-          text-sm sm:text-base text-white placeholder-white/40
-          focus:outline-none focus:border-red-500 
-          focus:ring-2 focus:ring-red-500/20 transition"
+          className="
+          w-full
+          px-3.5 sm:px-4
+          py-2.5 sm:py-3
+          rounded-lg
+          bg-white/5
+          border border-white/10
+          text-[13px] sm:text-base
+          text-white
+          placeholder-white/40
+          focus:outline-none
+          focus:border-red-500
+          focus:ring-2
+          focus:ring-red-500/20
+          transition
+        "
         />
 
         {errors.password && (
-          <p className="text-xs text-red-400">
+          <p className="text-[11px] text-red-400">
             Password is required
           </p>
         )}
@@ -164,16 +230,24 @@ const Login = () => {
       {/* BUTTON */}
       <button
         type="submit"
-        className="w-full py-3 rounded-lg font-semibold text-sm sm:text-base
-        bg-gradient-to-r from-red-500 to-orange-400 
-        hover:brightness-110 transition 
-        text-white shadow-[0_0_20px_rgba(239,68,68,0.5)]"
+        className="
+        w-full
+        py-2.5 sm:py-3
+        rounded-lg
+        font-semibold
+        text-[13px] sm:text-base
+        bg-gradient-to-r from-red-500 to-orange-400
+        hover:brightness-110
+        transition
+        text-white
+        shadow-[0_0_18px_rgba(239,68,68,0.4)]
+      "
       >
         Login
       </button>
 
       {/* SIGNUP */}
-      <p className="text-xs sm:text-sm text-white/50 text-center mt-4">
+      <p className="text-[11px] sm:text-sm text-white/50 text-center pt-1">
         Dont have an account?{" "}
 
         <Link href="./Signup">
