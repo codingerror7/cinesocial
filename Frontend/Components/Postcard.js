@@ -9,6 +9,65 @@ const getFrontendOrigin = () =>
     ? window.location.origin
     : 'http://localhost:3000';
 
+const isValidAvatarUrl = (url) => {
+  return (
+    typeof url === 'string' &&
+    url.trim() !== '' &&
+    url.trim().toLowerCase() !== 'url_to_avatar' &&
+    url.trim() !== ' ' &&
+    (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('/'))
+  );
+};
+
+const normalizeAvatar = (rawAvatar, userName) => {
+  if (isValidAvatarUrl(rawAvatar)) {
+    if (rawAvatar.startsWith('/')) {
+      return `${getFrontendOrigin()}${rawAvatar}`;
+    }
+    return rawAvatar;
+  }
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    userName || 'Anonymous'
+  )}&background=6366f1&color=fff&size=128`;
+};
+
+const sanitizeMediaUrl = (mediaUrl) => {
+  if (typeof mediaUrl !== 'string') return null;
+  const trimmed = mediaUrl.trim();
+  if (trimmed === '' || trimmed.toLowerCase() === 'url_to_avatar') return null;
+  if (trimmed.startsWith('/')) {
+    return `${getFrontendOrigin()}${trimmed}`;
+  }
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+    return trimmed;
+  }
+  return null;
+};
+
+const sanitizePost = (post) => {
+  if (!post || typeof post !== 'object') return post;
+
+  const userName = post.user?.userName || post.user?.name || 'Anonymous';
+  const avatar = normalizeAvatar(post.user?.avatar, userName);
+
+  const sanitizedMedia = Array.isArray(post.media)
+    ? post.media
+        .map((mediaUrl) => sanitizeMediaUrl(mediaUrl))
+        .filter(Boolean)
+    : [];
+
+  return {
+    ...post,
+    user: {
+      ...post.user,
+      avatar,
+      userName: post.user?.userName || userName,
+      title: post.user?.title || 'Cinephile',
+    },
+    media: sanitizedMedia,
+  };
+};
+
 const Postcard = () => {
   const [postData, setpostData] = useState([]);   //jab multiple data backend se aa rha hai tab empty array use krte hain and jab single document aa rha hai tab null use krte hain.
   const [loading, setLoading] = useState(true);
@@ -21,27 +80,7 @@ const Postcard = () => {
         console.log("Raw posts from backend:", posts);
 
         // Process posts and ensure avatars are available
-        const processedPosts = posts.map((post) => {
-          // Use avatar from post data, or provide a default
-          let avatar = post.user?.avatar && post.user.avatar.trim() !== "" && post.user.avatar !== " " && post.user.avatar !== "url_to_avatar"
-            ? post.user.avatar
-            : `https://ui-avatars.com/api/?name=${encodeURIComponent(post.user?.userName || "Anonymous")}&background=6366f1&color=fff&size=128`;
-
-          // If avatar is a relative path (starts with /), make it a full URL
-          if (avatar.startsWith('/avatar')) {
-            avatar = `${getFrontendOrigin()}${avatar}`;
-          }
-
-          return {
-            ...post,
-            user: {
-              ...post.user,
-              avatar: avatar,
-              userName: post.user?.userName || "Anonymous",
-              title: post.user?.title || "Cinephile",
-            }
-          };
-        });
+        const processedPosts = posts.map((post) => sanitizePost(post));
 
         console.log("Processed posts with avatars:", processedPosts);
         setpostData(processedPosts);
@@ -56,23 +95,33 @@ const Postcard = () => {
   }, []);
 
   const handleVote = async (postId, optionIndex) => {
-    if (typeof optionIndex !== 'number' || optionIndex < 0) {
+    if (!postId) {
+      console.warn('Missing postId for vote');
+      return;
+    }
+
+    if (!Number.isInteger(optionIndex) || optionIndex < 0) {
       console.warn('Invalid poll option index', optionIndex);
       return;
     }
 
     try {
       const res = await api.post(`/api/post/vote/${postId}`, { optionIndex });
-      const updatedPost = res.data?.post;
+      const updatedPost = res.data?.post || res.data?.updatedPost;
 
       if (!updatedPost) {
         console.warn('Vote response missing updated post', res.data);
         return;
       }
 
+      const sanitizedUpdatedPost = sanitizePost(updatedPost);
+
       setpostData(prev =>
         Array.isArray(prev)
-          ? prev.map(p => (p._id === postId ? updatedPost : p))
+          ? prev.map(p => {
+              const id = p._id || p.id;
+              return id === postId ? sanitizedUpdatedPost : p;
+            })
           : prev
       );
     } catch (err) {
@@ -80,25 +129,11 @@ const Postcard = () => {
     }
   };
 
-//     function ActionBtn({ icon, count, active = false }) {
-//   return (
-//     <button
-//       className={`flex items-center gap-1 px-3 py-1.5 rounded-md text-sm transition
-//         ${active 
-//           ? "text-red-500 hover:bg-red-500/10" 
-//           : "text-white/60 hover:text-white hover:bg-white/5"
-//         }`}
-//     >
-//       <span>{icon}</span>
-//       <span className="text-xs">{count}</span>
-//     </button>
-//   );
-// }
   return (
   <>
     <div className="w-full max-sm:px-0 overflow-x-hidden">
       {loading ? (
-        <p className="text-center text-sm sm:text-base text-white/70 py-6 overflow-hidden">
+        <p className="text-center text-xl sm:text-base text-white/70 py-6 overflow-hidden">
           Loading...
         </p>
       ) : (
@@ -176,7 +211,7 @@ const Postcard = () => {
                       className="rounded-xl w-full h-auto object-cover max-h-[520px] max-sm:max-h-[350px]"
                       priority={false}
                       quality={75}
-                      unoptimized={true}
+                      optimized={true}
                       onError={(e) => {
                         console.error(
                           "Image failed to load from URL:",
@@ -235,7 +270,7 @@ const Postcard = () => {
                   return (
                     <div
                       key={i}
-                      onClick={() => handleVote(post._id, i)}
+                      onClick={() => handleVote(post._id || post.id, i)}
                       className="relative p-2.5 sm:p-3 bg-white/5 rounded-xl cursor-pointer overflow-hidden"
                     >
                       <div

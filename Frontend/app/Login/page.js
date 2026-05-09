@@ -1,5 +1,6 @@
 "use client"
 import React from 'react'
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { api } from '@/utils/api.js';
 import { useRouter } from 'next/navigation';
@@ -9,6 +10,7 @@ import { useAuth } from '@/context/AuthContext.js';
 const Login = () => {
   let router = useRouter();
   const { login } = useAuth();
+  const [isLogin, setisLogin] = useState(false);
 
   const onSubmit = async (data) => {
     try {
@@ -28,8 +30,9 @@ const Login = () => {
       };
       localStorage.setItem("accesstoken",res.data.accessToken);
       localStorage.setItem("user", JSON.stringify(safeUser));
+      setisLogin(true);
       login(safeUser);
-      router.push("/");
+      setimeout(() => router.push("/"), 2000);
       reset();
 
     } catch (error) {
@@ -45,6 +48,17 @@ const Login = () => {
   return (
     <>
     <div className='min-h-screen w-full flex flex-col lg:flex-row bg-gradient-to-b from-[#0e0e14] to-black overflow-x-hidden'>
+       {/* Success */}
+        {isLogin && (
+          <div
+            className="lg:block hidden absolute w-100 top-20 left-130 text-center py-2.5 rounded-xl 
+            bg-green-500/12 border border-green-500/20
+            text-green-400 text-[12px] sm:text-sm 
+            font-medium"
+          >
+            ✓ Login successful! Redirecting...
+          </div>
+        )}
 
   {/* LEFT SECTION */}
   <div className="

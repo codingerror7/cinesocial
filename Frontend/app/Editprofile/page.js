@@ -148,7 +148,7 @@ const page = () => {
         onSubmit={handleSubmit(onSubmit)}
         className="max-w-3xl mx-auto text-white w-full"
       >
-        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8 shadow-2xl overflow-hidden">
+        <div className="bg-black/40 border border-white/10 shadow-2xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 backdrop-blur-2xl md:p-8 space-y-6 sm:space-y-8 overflow-hidden">
           
           <input type="hidden" {...register("avatar", { required: true })} />
           <input type="hidden" {...register("genres")} />
@@ -199,7 +199,7 @@ const page = () => {
                 type="text"
                 {...register("title", { required: true })}
                 placeholder="Your name"
-                className="mt-2 w-full px-4 py-3 text-sm sm:text-base rounded-xl bg-white/5 border border-white/10 focus:outline-none focus:border-white/30"
+                className="mt-2 w-full px-4 py-3 text-sm sm:text-base rounded-xl bg-white/1 border border-white/10 focus:outline-none focus:border-white/30"
               />
 
               {errors.title && (
@@ -218,7 +218,7 @@ const page = () => {
               <input
                 type="date"
                 {...register("dob", { required: true })}
-                className="mt-2 w-full px-4 py-3 text-sm sm:text-base rounded-xl bg-white/5 border border-white/10 focus:outline-none focus:border-white/30"
+                className="mt-2 w-full px-4 py-3 text-sm sm:text-base rounded-xl bg-white/1 border border-white/10 focus:outline-none focus:border-white/30"
               />
 
               {errors.dob && (
@@ -238,7 +238,7 @@ const page = () => {
                 type="text"
                 {...register("fantag")}
                 placeholder="like marvel fan, cinephile...(optional)"
-                className="mt-2 w-full px-4 py-3 text-sm sm:text-base rounded-xl bg-white/5 border border-white/10 focus:outline-none focus:border-white/30"
+                className="mt-2 w-full px-4 py-3 text-sm sm:text-base rounded-xl bg-white/1 border border-white/10 focus:outline-none focus:border-white/30"
               />
             </div>
           </div>
@@ -253,7 +253,7 @@ const page = () => {
               rows="4"
               {...register("bio", { required: true })}
               placeholder="Tell something about yourself..."
-              className="mt-2 w-full px-4 py-3 text-sm sm:text-base rounded-xl bg-white/5 border border-white/10 focus:outline-none focus:border-white/30 resize-none"
+              className="mt-2 w-full px-4 py-3 text-sm sm:text-base rounded-xl bg-white/1 border border-white/10 focus:outline-none focus:border-white/30 resize-none"
             />
 
             {errors.bio && (
@@ -278,7 +278,7 @@ const page = () => {
                   className={`px-3 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm border transition whitespace-nowrap ${
                     selectedGenres.includes(genre)
                       ? "bg-white text-black border-white"
-                      : "bg-white/5 border-white/10 hover:bg-white hover:text-black"
+                      : "bg-white/1 border-white/10 hover:bg-white hover:text-black"
                   }`}
                 >
                   {genre}

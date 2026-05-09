@@ -13,11 +13,6 @@ import { IoSettingsOutline } from "react-icons/io5";
 import { MdLocalMovies } from "react-icons/md";
 import { IoIosNotifications } from "react-icons/io";
 
-
-
-
-
-
 const Sidebar = () => {
   const router = useRouter();
   const [popup, setpopup] = useState(false);
@@ -25,13 +20,15 @@ const Sidebar = () => {
   const userId = user?._id || 123;
   const displayName = user?.name || "CineFan";
   const { logout } = useAuth();
+  const [isLoggedOut, setIsLoggedOut] = useState(false);
 
   const handleLogOut = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("accessToken");
     logout();
+    setIsLoggedOut(true);
     console.log("Logged out successfully.");
-    router.push("/");
+    setTimeout(()=>router.push("/Login"), 2000);
   }
 
   return (
@@ -74,8 +71,20 @@ const Sidebar = () => {
         </div>
 
         <NavItem text="Watchlist" icon={<MdLocalMovies />} />
-        <NavItem text="Settings" icon={<IoSettingsOutline />} />
+        <Link href="/Settings"><NavItem text="Settings" icon={<IoSettingsOutline />} /></Link>
       </nav>
+
+      {/* Success */}
+        {isLoggedOut && (
+          <div
+            className="lg:block hidden absolute w-100 top-20 left-130  text-center py-2.5 rounded-xl 
+            bg-red-500/12 border border-red-500/20
+            text-red-400 text-[12px] sm:text-sm 
+            font-medium animate-pulse [animation-duration:3s]"
+          >
+            ✓ Logged out successfully!
+          </div>
+        )}
 
       {/* USER */}
       <div onMouseEnter={()=>setpopup(true)} 
@@ -85,9 +94,8 @@ const Sidebar = () => {
               {/* USER POPUP */}
          {popup && <div className="absolute mb-30 py-2 w-50 border border-white/10 rounded-xl px-2 py-3 bg-black">
             <ul>
-              <Link href="./Signup" className="w-full cursor-pointer text-md text-left px-2 py-1 text-white/60 hover:bg-white/5 hover:text-white">Login</Link>
               <button onClick={handleLogOut}
-                className="w-full cursor-pointer text-md text-left px-2 py-1 text-white/60 hover:bg-white/5 hover:text-white">Logout
+                className="w-full cursor-pointer text-lg text-left px-2 py-1 text-red-400 text-bold hover:bg-white/5 hover:text-red-800">Logout
               </button>
             </ul>
           </div>}

@@ -9,21 +9,12 @@ import Navbar2 from "./Navbar2.js";
 import MobileTopBar from "./MobileTopBar.js";
 import Sidebar from "./Sidebar.js";
 
-// const MOVIE_SUGGESTIONS = [
-//   "Inception (2010)", "Parasite (2019)", "The Godfather (1972)",
-//   "2001: A Space Odyssey (1968)", "Mulholland Drive (2001)",
-//   "Blade Runner 2049 (2017)", "Interstellar (2014)",
-//   "The Dark Knight (2008)", "Spirited Away (2001)", "Roma (2018)",
-// ];
-
 const PLACEHOLDERS = {
   story: "Share your thoughts on a movie, theory, or idea…",
   poll: "Ask a question for your poll…",
   whatif: "Set the scene for your alternate universe…",
   image: "Describe what you're sharing…",
 };
-
-// ─── Sub-components ────────────────────────────────────────────────────────
 
 function PostTypeTabs({ active, onChange }) {
   const tabs = [
@@ -33,7 +24,7 @@ function PostTypeTabs({ active, onChange }) {
     { id: "image",  label: "Image",   icon: "⊞" },
   ];
   return (
-    <div className="flex gap-2 bg-[#0F1016] p-2 rounded-xl border border-white/5 w-full overflow-x-auto scrollbar-hide">
+    <div className="flex gap-2 bg-white/1 p-2 rounded-xl border border-white/5 w-full overflow-x-auto scrollbar-hide">
   
   {tabs.map((tab) => (
     <button
@@ -63,7 +54,7 @@ function PostTypeTabs({ active, onChange }) {
 
 function PollSection({ options, setOptions }) {
   return (
-    <div className="p-3 sm:p-4 rounded-xl bg-[#0F1016] border border-white/5 space-y-2.5 w-full overflow-hidden">
+    <div className="p-3 sm:p-4 rounded-xl bg-white/1 border border-white/5 space-y-2.5 w-full overflow-hidden">
   
   <p className="text-[9px] sm:text-[10px] text-white/28 uppercase tracking-widest font-semibold">
     Poll Options
@@ -98,7 +89,7 @@ function PollSection({ options, setOptions }) {
 
 function WhatIfSection({value, setValue}) {
   return (
-    <div className="p-3 sm:p-4 rounded-xl bg-[#0F1016] border border-white/5 space-y-3 w-full overflow-hidden">
+    <div className="p-3 sm:p-4 rounded-xl bg-white/1 border border-white/5 space-y-3 w-full overflow-hidden">
   
   <div className="flex items-center gap-2">
     
@@ -207,69 +198,6 @@ function ImageSection({ file, setFile }) {
   );
 }
 
-// function MovieTag({ label, onRemove }) {
-//   return (
-//     <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-orange-500/12
-//       border border-orange-500/22 rounded-full text-orange-400 text-xs font-medium">
-//       🎬 {label}
-//       <button
-//         onClick={onRemove}
-//         className="text-orange-400/45 hover:text-orange-300 transition-colors leading-none"
-//       >
-//         ✕
-//       </button>
-//     </span>
-//   );
-// }
-
-// function MovieTagging({ tags, onAdd, onRemove }) {
-//   const [query, setQuery] = useState("");
-//   const [open, setOpen]   = useState(false);
-
-//   const filtered = MOVIE_SUGGESTIONS.filter(
-//     (m) => m.toLowerCase().includes(query.toLowerCase()) && !tags.includes(m)
-//   );
-
-//   return (
-//     <div className="space-y-2">
-//       {tags.length > 0 && (
-//         <div className="flex flex-wrap gap-2">
-//           {tags.map((t) => (
-//             <MovieTag key={t} label={t} onRemove={() => onRemove(t)} />
-//           ))}
-//         </div>
-//       )}
-//       <div className="relative">
-//         <input
-//           type="text"
-//           value={query}
-//           onChange={(e) => { setQuery(e.target.value); setOpen(true); }}
-//           onFocus={() => setOpen(true)}
-//           onBlur={() => setTimeout(() => setOpen(false), 180)}
-//           placeholder="🎬  Tag a movie (e.g., Inception)"
-//           className="w-full bg-[#14151A] border border-white/8 rounded-lg px-4 py-2.5 text-sm
-//             text-white placeholder-white/22 focus:outline-none focus:border-orange-500/55
-//             focus:ring-1 focus:ring-orange-500/25 transition-all"
-//         />
-//         {open && query.length > 0 && filtered.length > 0 && (
-//           <div className="absolute z-20 mt-1 w-full bg-[#1A1C24] border border-white/10
-//             rounded-xl shadow-2xl overflow-hidden">
-//             {filtered.slice(0, 5).map((m) => (
-//               <button
-//                 key={m}
-//                 onMouseDown={() => { onAdd(m); setQuery(""); setOpen(false); }}
-//                 className="w-full text-left px-4 py-2.5 text-sm text-white/65
-//                   hover:bg-orange-500/10 hover:text-orange-300 transition-colors"
-//               >
-//                 {m}
-//               </button>
-//             ))}
-//           </div>
-//         )}
-//       </div>
-//     </div>
-//   );
-// }
 
 function SpoilerToggle({ active, onChange }) {
   return (
@@ -372,7 +300,8 @@ function ActionBar({ onImageClick, onPollClick, onPost }) {
   );
 }
 
-// ─── Main Page ─────────────────────────────────────────────────────────────
+// --- Main Page 
+//--------------------------------------------------------
 
 const CreatePost = () => {
   
@@ -391,6 +320,19 @@ const CreatePost = () => {
   const [title, settitle] = useState("");
   const [profile, setprofile] = useState(null);
 
+  const handlePostTypeChange = (type) => {
+    setPostType(type);
+    if (type !== "poll") {
+      setOptions(["", ""]);
+    }
+    if (type !== "whatif") {
+      setWhatIfText("");
+    }
+    if (type === "whatif") {
+      setText("");
+    }
+  };
+
   const { user } = useAuth();
   // Use user context for avatar, username, and title
   const avatar = user?.avatar || profile?.avatar || "https://ui-avatars.com/api/?name=Anonymous";
@@ -408,10 +350,22 @@ const CreatePost = () => {
         setError("Poll must have at least 2 options");
         return;
       }
+      if (!text.trim()) {
+        setError("Poll question is required");
+        return;
+      }
     }
 
-    // Validation for other types
-    if (postType !== "poll" && !text.trim() && !file) {
+    // Validation for What If type
+    if (postType === "whatif") {
+      if (!whatIfText.trim()) {
+        setError("Please add some content for your What If scenario");
+        return;
+      }
+    }
+
+    // Validation for story/image type
+    if (postType !== "poll" && postType !== "whatif" && !text.trim() && !file) {
       setError("Please add some content");
       return;
     }
@@ -438,12 +392,9 @@ const CreatePost = () => {
     formData.append("postType", postType);
 
     // content logic based on type
-    if (postType === "whatif") {
-      formData.append("content", whatIfText);
-    } else {
-      formData.append("content", text);
-      formData.append("title", title || text.split("\n")[0] || "Untitled");
-    }
+    const contentValue = postType === "whatif" ? whatIfText : text;
+    formData.append("content", contentValue);
+    formData.append("title", title || contentValue.split("\n")[0] || "Untitled");
 
     // poll data - only send non-empty options
     if (postType === "poll") {
@@ -561,8 +512,7 @@ useEffect(()=>{
 
     {/* Post card */}
     <div
-      className="bg-[#14151A]/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl 
-      border border-white/6 shadow-[0_0_40px_rgba(0,0,0,0.45)] overflow-hidden"
+      className="bg-black/40 border border-white/10 shadow-2xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 backdrop-blur-2xl overflow-hidden"
     >
       
       <div className="p-3 sm:p-6 flex flex-col gap-5">
@@ -602,14 +552,14 @@ useEffect(()=>{
               <p
                 className="text-[10px] sm:text-xs text-white/35 mt-0.5 truncate"
               >
-                {titleName} · 412 followers
+                {titleName}
               </p>
             </div>
           </div>
 
           {/* Public tag */}
           <div
-            className="border border-white/15 bg-white/[0.03]
+            className="border border-white/15 bg-white/1
             rounded-full px-3 py-1
             text-[10px] sm:text-xs font-medium text-white/70
             shrink-0"
@@ -622,13 +572,13 @@ useEffect(()=>{
         <div className="overflow-hidden">
           <PostTypeTabs
             active={postType}
-            onChange={setPostType}
+            onChange={handlePostTypeChange}
           />
         </div>
 
         {/* Title */}
         <input
-          className="w-full bg-[#0F1016] border border-white/6 rounded-xl 
+          className="w-full bg-white/1 border border-white/6 rounded-xl 
           px-4 py-3 text-[15px] sm:text-lg font-bold font-[gilroy]
           text-white placeholder-white/20
           focus:outline-none focus:border-orange-500/50 focus:ring-1
@@ -640,18 +590,20 @@ useEffect(()=>{
         />
 
         {/* Main textarea */}
-        <textarea
-          rows={postType === "story" ? 5 : 4}
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder={PLACEHOLDERS[postType]}
-          maxLength={1000}
-          className="w-full bg-[#0F1016] border border-white/6 rounded-xl 
-          px-4 py-3.5 text-[13px] sm:text-sm leading-relaxed resize-none 
-          placeholder-white/20 text-white
-          focus:outline-none focus:border-orange-500/50 focus:ring-1
-          focus:ring-orange-500/20 transition-all duration-200"
-        />
+        {postType !== "whatif" && (
+          <textarea
+            rows={postType === "story" ? 5 : 4}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder={PLACEHOLDERS[postType]}
+            maxLength={1000}
+            className="w-full bg-white/1 border border-white/6 rounded-xl 
+            px-4 py-3.5 text-[13px] sm:text-sm leading-relaxed resize-none 
+            placeholder-white/20 text-white
+            focus:outline-none focus:border-orange-500/50 focus:ring-1
+            focus:ring-orange-500/20 transition-all duration-200"
+          />
+        )}
 
         {/* Dynamic sections */}
         <div className="space-y-4 overflow-hidden">
@@ -680,7 +632,7 @@ useEffect(()=>{
 
         {/* Spoiler */}
         <div
-          className="p-3 sm:p-4 rounded-xl bg-[#0F1016]
+          className="p-3 sm:p-4 rounded-xl bg-white/1
           border border-white/5"
         >
           <SpoilerToggle
@@ -692,8 +644,8 @@ useEffect(()=>{
         {/* Action bar */}
         <div className="overflow-hidden">
           <ActionBar
-            onImageClick={() => setPostType("image")}
-            onPollClick={() => setPostType("poll")}
+            onImageClick={() => handlePostTypeChange("image")}
+            onPollClick={() => handlePostTypeChange("poll")}
             onPost={handlePost}
           />
         </div>

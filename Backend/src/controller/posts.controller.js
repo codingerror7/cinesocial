@@ -41,19 +41,37 @@ export const createPost = async (req,res) => {
             mediaUrls.push(imageUrl);
         }
 
-        let pollData = null;
+         let pollData = null;
 
-       if (postType === "poll") {
-  const options = JSON.parse(req.body.pollOptions);
+        if (postType === "whatif" && (!content || !content.trim())) {
+          return res.status(400).json({ message: "What If content is required" });
+        }
 
-  pollData = {
-    question: content,
-    options: options.map(opt => ({
-      text: opt,
-      votes: 0
-    }))
-  };
-}
+        if (postType === "poll") {
+          if (!content || !content.trim()) {
+            return res.status(400).json({ message: "Poll question is required" });
+          }
+
+          let options;
+          try {
+            options = JSON.parse(req.body.pollOptions);
+          } catch (parseError) {
+            console.error("Invalid poll options payload:", req.body.pollOptions, parseError);
+            return res.status(400).json({ message: "Invalid poll options format" });
+          }
+
+          if (!Array.isArray(options) || options.filter(opt => typeof opt === "string" && opt.trim() !== "").length < 2) {
+            return res.status(400).json({ message: "Poll must have at least 2 options" });
+          }
+
+          pollData = {
+            question: content,
+            options: options.map((opt) => ({
+              text: String(opt).trim(),
+              votes: 0,
+            }))
+          };
+        }
 
         const post = await Post.create({
             user: {
@@ -87,7 +105,7 @@ export const createPost = async (req,res) => {
 
 export const getPost = async (req,res) => {
     try {
-        const post = await Post.find().sort({ createdAt: -1 }).limit(10);
+        const post = await Post.find().sort({ createdAt: -1 }).limit(25);
         if(!post || post.length === 0){
             console.log("No posts found in database");
             return res.status(200).json({
@@ -139,7 +157,7 @@ export const voteOnPoll = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      post
+      post: post.toObject({ getters: true, versionKey: false })
     });
 
   } catch (error) {

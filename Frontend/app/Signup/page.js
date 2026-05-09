@@ -11,6 +11,7 @@ const Signup = () => {
 
   const router = useRouter();
   const { login } = useAuth();
+  const [isSignUp, setisSignUp] = useState(false);
 
   const onSubmit = async (data) => {
     try {
@@ -30,8 +31,9 @@ const Signup = () => {
       };
       localStorage.setItem("accesstoken",res.data.accessToken);
       localStorage.setItem("user", JSON.stringify(safeUser));
+      setisSignUp(true);
       login(safeUser);
-      router.push("/");
+      setTimeout(() => router.push("/"), 2000);
       reset();
 
     } catch (error) {
@@ -49,6 +51,16 @@ const Signup = () => {
   return (
     <>
     <div className='min-h-screen w-full flex flex-col lg:flex-row bg-gradient-to-b from-[#0e0e14] to-black overflow-x-hidden'>
+      {isSignUp && (
+          <div
+            className="lg:block hidden absolute w-100 top-20 left-130 text-center py-2.5 rounded-xl 
+            bg-green-500/12 border border-green-500/20
+            text-green-400 text-[12px] sm:text-sm 
+            font-medium"
+          >
+            ✓ Account created successfully! Redirecting...
+          </div>
+        )}
 
   {/* LEFT SECTION */}
   <div
