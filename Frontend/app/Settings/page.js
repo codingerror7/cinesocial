@@ -2,6 +2,8 @@
 import React from 'react'
 import { useState } from 'react';
 import Link from 'next/link';
+import {useAuth} from '@/context/AuthContext.js';
+import {useRouter} from 'next/navigation';
 import { FaWhatsapp } from "react-icons/fa";
 import Navbar2 from '@/Components/Navbar2'
 import MobileTopBar from '@/Components/MobileTopBar'
@@ -31,6 +33,7 @@ const page = () => {
   },
 ];
 
+const {logout} = useAuth();
   const [openIndex, setOpenIndex] = useState(null);
 
   const toggle = (index) => {
@@ -39,6 +42,8 @@ const page = () => {
 
   const [isLoggedOut, setIsLoggedOut] = useState(false);
 
+
+  const router = useRouter();
 
   const handleLogOut = () => {
     localStorage.removeItem("user");
@@ -55,10 +60,11 @@ const page = () => {
         <Navbar2 />
         <MobileTopBar />
         <Sidebar />
+
          {/* Success */}
         {isLoggedOut && (
           <div
-            className="lg:block hidden absolute w-100 top-20 left-130  text-center py-2.5 rounded-xl 
+            className="lg:block hidden absolute w-100 top-30 left-130  text-center py-2.5 rounded-xl 
             bg-red-500/12 border border-red-500/20
             text-red-400 text-[12px] sm:text-sm 
             font-medium animate-pulse [animation-duration:3s]"
@@ -66,6 +72,7 @@ const page = () => {
             ✓ Logged out successfully!
           </div>
         )}
+
          <section className="relative w-full overflow-hidden bg-[#07070A] py-16 sm:py-24 px-4 sm:px-6 lg:px-12 text-white">
 
       {/* Heading */}
@@ -223,11 +230,113 @@ const page = () => {
     </div>
   </div>
 </section>
-<div className = "relative w-full overflow-hidden bg-[#07070A] sm:py-24 px-4 sm:px-6 lg:px-12 text-white">
-    <button className = "bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-2xl text-center cursor-pointer ml-60" onClick={handleLogOut}>
-  LOG OUT
-</button>
-</div>
+<section className="relative w-full overflow-hidden bg-[#07070A] py-10 sm:py-24 px-4 sm:px-6 lg:px-12 text-white">
+
+
+  {/* Main Card */}
+  <div
+    className="relative z-10 max-w-4xl mx-auto
+    rounded-3xl border border-white/10
+    bg-black/30 backdrop-blur-2xl
+    shadow-[0_0_40px_rgba(0,0,0,0.45)]
+    overflow-hidden"
+  >
+
+    {/* Gradient Overlay */}
+    <div className="absolute inset-0 bg-gradient-to-br from-red-500/[0.03] via-transparent to-orange-500/[0.03]" />
+
+    <div className="relative z-10 px-6 sm:px-10 py-10 sm:py-14">
+
+      {/* Top Content */}
+      <div className="flex flex-col lg:flex-row items-center justify-between gap-10">
+
+        {/* Left Side */}
+        <div className="max-w-2xl text-center lg:text-left">
+
+          <div
+            className="inline-flex items-center gap-2 px-4 py-1.5
+            rounded-full border border-red-500/20
+            bg-red-500/10 text-red-400
+            text-xs sm:text-sm font-medium tracking-wide"
+          >
+           Account Session
+          </div>
+
+          <h2
+            className="mt-5 text-3xl sm:text-4xl font-bold
+            leading-tight tracking-tight"
+          >
+            Ready to Leave{" "}
+            <span
+              className="bg-gradient-to-r from-red-400 via-orange-300 to-red-600
+              bg-clip-text text-transparent"
+            >
+              CineSocial?
+            </span>
+          </h2>
+
+          <p
+            className="mt-4 text-sm sm:text-base
+            text-white/55 leading-relaxed"
+          >
+            You can securely log out of your account anytime.
+            Your profile, posts, and cinematic journey will always
+            be waiting for your return.
+          </p>
+
+          {/* Small Stats / Info */}
+          <div className="mt-6 flex flex-wrap items-center justify-center lg:justify-start gap-3">
+
+            <div
+              className="px-4 py-2 rounded-xl bg-black/30 backdrop-blur-xl
+              border border-white/10 text-xs sm:text-sm text-white/70"
+            >
+              Secure Logout
+            </div>
+
+            <div
+              className="px-4 py-2 rounded-xl bg-black/30 backdrop-blur-xl
+              border border-white/10 text-xs sm:text-sm text-white/70"
+            >
+             Your data stays safe
+            </div>
+
+          </div>
+        </div>
+
+        {/* Right Side */}
+        <div className="flex flex-col items-center gap-4 w-full sm:w-auto">
+
+          {/* Logout Button */}
+          <button
+            onClick={handleLogOut}
+            className="group relative overflow-hidden
+            w-full sm:w-auto
+            inline-flex items-center justify-center gap-3
+            rounded-2xl px-8 py-2
+            bg-gradient-to-r from-red-500 to-red-800
+            text-white text-sm sm:text-base font-bold tracking-wide
+            shadow-[0_12px_40px_rgba(239,68,68,0.35)]
+            transition-all duration-300 ease-out
+            hover:scale-[1.04]
+            hover:shadow-[0_16px_50px_rgba(239,68,68,0.5)]
+            active:scale-[0.98] cursor-pointer"
+          >
+
+            <span>
+              LOG OUT
+            </span>
+          </button>
+
+          {/* Extra Note */}
+          <p className="text-[11px] sm:text-xs text-white/30 text-center max-w-[220px]">
+            Logging out will end your current active session on this device.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
     </div>
     </>
   )
