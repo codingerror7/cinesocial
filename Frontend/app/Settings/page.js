@@ -12,25 +12,25 @@ import Sidebar from '@/Components/Sidebar'
 const page = () => {
     const faqs = [
   {
-    q: "Why should I choose your event service?",
-    a: "We bring creativity, precision, and seamless execution to every event. From planning to final delivery, we ensure your event feels effortless and memorable.",
+    q: "What is CineSocial?",
+    a: "CineSocial is a social platform built for cinephiles to share reviews, theories, opinions, polls, and connect through cinema."
   },
   {
-    q: "What makes your wedding planning unique?",
-    a: "Our approach is highly personalized. We design experiences tailored to your story, combining aesthetics, innovation, and flawless coordination.",
+    q: "How is CineSocial different from other social media apps?",
+    a: "Unlike traditional social apps, CineSocial is completely focused on movies, storytelling, fandoms, and cinematic discussions."
   },
   {
-    q: "Do you handle corporate events?",
-    a: "Yes, we manage conferences, launches, and corporate gatherings with professional execution and attention to detail.",
+    q: "What can I post on CineSocial?",
+    a: "You can share movie reviews, fan theories, alternate storylines, polls, images, recommendations, and spoiler discussions."
   },
   {
-    q: "Do you offer customized decoration themes?",
-    a: "Absolutely. Every setup is tailored based on your preferences, ensuring a unique and visually stunning experience.",
+    q: "Does CineSocial support communities and discussions?",
+    a: "Yes, users can join communities, interact with fellow cinephiles, and participate in topic-based movie conversations."
   },
   {
-    q: "Which locations do you serve?",
-    a: "We primarily operate in major cities and are open to destination events depending on requirements.",
-  },
+    q: "What makes CineSocial unique?",
+    a: "CineSocial combines social networking with cinema culture through interactive features like polls, what-if scenarios, spoiler controls, and movie-focused communities."
+  }
 ];
 
 const {logout} = useAuth();

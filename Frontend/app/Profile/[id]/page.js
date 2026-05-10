@@ -85,8 +85,8 @@ const page = () => {
             <div className="absolute inset-0 rounded-full bg-gradient-to-br from-red-500/20 to-orange-500/20 blur-xl scale-110" />
 
             <img
-              src={profile?.avatar || 'https://i.pravatar.cc/150'}
-              alt="avatar"
+              src={profile?.avatar}
+              alt="choose avatar"
               className="relative w-24 h-24 sm:w-30 sm:h-30 rounded-full object-cover border border-white/10 shadow-[0_0_25px_rgba(255,255,255,0.08)]"
             />
           </div>
