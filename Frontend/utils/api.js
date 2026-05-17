@@ -14,9 +14,16 @@ const getApiBaseUrl = () => {
   return "http://localhost:8000";
 };
 
+const normalizeToken = (token) => {
+  if (typeof token !== "string") return null;
+  const trimmed = token.trim();
+  return trimmed && trimmed.split('.').length === 3 ? trimmed : null;
+};
+
 const getAuthToken = () => {
   if (typeof window === "undefined") return null;
-  return localStorage.getItem("accesstoken") || localStorage.getItem("accessToken");
+  const rawToken = localStorage.getItem("accesstoken") || localStorage.getItem("accessToken");
+  return normalizeToken(rawToken);
 };
 
 const api = axios.create({
@@ -37,4 +44,4 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-export { api, getApiBaseUrl };
+export { api, getApiBaseUrl, getAuthToken };

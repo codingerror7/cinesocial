@@ -15,8 +15,8 @@ export const signUp = async (req,res) => {
         let hashPassword = await bcrypt.hash(password,10);
         const user = await User.create({name,email,password : hashPassword});
         //refresh token mechanism
-        const accessToken = generateAccessToken(user._id);
-        const refreshToken = generateRefreshToken(user._id);
+        const accessToken = await generateAccessToken(user._id);
+        const refreshToken = await generateRefreshToken(user._id);
         res.cookie("refreshToken",refreshToken,{
             httpOnly : true,
             secure : process.env.NODE_ENVIRONMENT === "production",
@@ -47,8 +47,8 @@ export const logIn = async (req,res) => {
         return res.status(400).json({message : "password invalid."});
     }
     //refresh token mechanism
-    const accessToken = generateAccessToken(existUser._id);
-    const refreshToken = generateRefreshToken(existUser._id);
+    const accessToken = await generateAccessToken(existUser._id);
+    const refreshToken = await generateRefreshToken(existUser._id);
     res.cookie("refreshToken",refreshToken,{
         httpOnly : true,
         secure : process.env.NODE_ENVIRONMENT === "production",

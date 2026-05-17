@@ -2,7 +2,7 @@
 import React from 'react'
 import { useState, useEffect } from 'react';
 import Image from 'next/image';     //image optimization in nextjs, lazy loading, responsive images, making images light-weight and more efficient image handling.
-import { api } from '@/utils/api.js';
+import { api, getAuthToken } from '@/utils/api.js';
 import { AiOutlineLike } from "react-icons/ai";
 import { AiFillLike } from "react-icons/ai";
 import { FaRegComment } from "react-icons/fa";
@@ -119,10 +119,7 @@ const Postcard = () => {
     const currentlyLiked = post?.isLiked || false;
     const currentCount = Number(post?.likesCount ?? 0);
 
-    const token =
-      typeof window !== "undefined"
-        ? localStorage.getItem("accesstoken") || localStorage.getItem("accessToken")
-        : null;
+    const token = getAuthToken();
 
     if (!token) {
       console.warn("Like action blocked because user is not authenticated.");
@@ -132,16 +129,7 @@ const Postcard = () => {
     setProcessingLikes((prev) => ({ ...prev, [postId]: true }));
 
     try {
-
-      const res = await api.post(
-        `/api/like/${postId}`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const res = await api.post(`/api/like/${postId}`);
 
       const liked = typeof res.data?.liked === "boolean" ? res.data.liked : !currentlyLiked;
       const likesCount = typeof res.data?.likesCount === "number" ? res.data.likesCount : currentlyLiked ? Math.max(0, currentCount - 1) : currentCount + 1;
