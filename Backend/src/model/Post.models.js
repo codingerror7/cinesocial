@@ -52,19 +52,11 @@ const postSchema = new mongoose.Schema({
             }
         ]
     },
-
-    comment : [
-        {
-            type : mongoose.Schema.Types.ObjectId,
-            ref : "Comment"
-        }
-    ],
-    likes : [
-        {
-            type : String,
-            required : true
-        }
-    ],
+    commentsCount : {
+        type : Number,
+        required : true,
+        default : 0
+    },
     likesCount : {
         type : Number,
         required : true,
