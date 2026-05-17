@@ -3,6 +3,10 @@ import React from 'react'
 import { useState, useEffect } from 'react';
 import Image from 'next/image';     //image optimization in nextjs, lazy loading, responsive images, making images light-weight and more efficient image handling.
 import { api } from '@/utils/api.js';
+import { AiOutlineLike } from "react-icons/ai";
+import { AiFillLike } from "react-icons/ai";
+import { FaRegComment } from "react-icons/fa";
+
 
 const getFrontendOrigin = () =>
   typeof window !== 'undefined'
@@ -65,12 +69,114 @@ const sanitizePost = (post) => {
       title: post.user?.title || 'Cinephile',
     },
     media: sanitizedMedia,
+    likesCount: typeof post.likesCount === 'number' ? post.likesCount : 0,
+    commentsCount: typeof post.commentsCount === 'number' ? post.commentsCount : 0,
+    isLiked: typeof post.isLiked === 'boolean' ? post.isLiked : false,
   };
 };
 
+const Avatar = ({ src, alt = 'avatar', size = 44, small = false }) => {
+  const [errored, setErrored] = useState(false);
+  const finalSize = small ? size - 12 : size;
+
+  if (!src || errored) {
+    return (
+      <span
+        style={{ width: finalSize, height: finalSize, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+        className={small ? 'text-sm' : 'text-lg'}
+        aria-hidden
+      >
+        👤
+      </span>
+    );
+  }
+
+  return (
+    <Image
+      src={src}
+      alt={alt}
+      width={finalSize}
+      height={finalSize}
+      className="rounded-full object-cover w-full h-full"
+      onError={() => setErrored(true)}
+      unoptimized={typeof src === 'string' && src.startsWith(getFrontendOrigin())}
+    />
+  );
+};
+
 const Postcard = () => {
-  const [postData, setpostData] = useState([]);   //jab multiple data backend se aa rha hai tab empty array use krte hain and jab single document aa rha hai tab null use krte hain.
+  const [postData, setpostData] = useState([]);   // jab multiple data backend se aa rha hai tab empty array use krte hain and jab single document aa rha hai tab null use krte hain.
   const [loading, setLoading] = useState(true);
+  const [processingLikes, setProcessingLikes] = useState({});
+
+  const handleLike = async (postId) => {
+    if (!postId) {
+      console.warn("Missing postId for like toggle");
+      return;
+    }
+
+    const post = postData.find((item) => item._id === postId || item.id === postId);
+    const currentlyLiked = post?.isLiked || false;
+    const currentCount = Number(post?.likesCount ?? 0);
+
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("accesstoken") || localStorage.getItem("accessToken")
+        : null;
+
+    if (!token) {
+      console.warn("Like action blocked because user is not authenticated.");
+      return;
+    }
+
+    setProcessingLikes((prev) => ({ ...prev, [postId]: true }));
+
+    try {
+
+      const res = await api.post(
+        `/api/like/${postId}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const liked = typeof res.data?.liked === "boolean" ? res.data.liked : !currentlyLiked;
+      const likesCount = typeof res.data?.likesCount === "number" ? res.data.likesCount : currentlyLiked ? Math.max(0, currentCount - 1) : currentCount + 1;
+
+      setpostData((prev) =>
+        Array.isArray(prev)
+          ? prev.map((item) => {
+              const id = item._id || item.id;
+              if (id !== postId) return item;
+              return {
+                ...item,
+                isLiked: liked,
+                likesCount,
+              };
+            })
+          : prev
+      );
+    } catch (err) {
+      const resp = err?.response;
+      console.error("Error toggling like on post:", resp?.data || err.message || err);
+      if (resp?.status === 401) {
+        console.warn('Like failed: unauthorized. Clearing token and please login.');
+        try {
+          localStorage.removeItem('accesstoken');
+          localStorage.removeItem('accessToken');
+        } catch (e) {}
+      }
+    } finally {
+      setProcessingLikes((prev) => {
+        const next = { ...prev };
+        delete next[postId];
+        return next;
+      });
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -149,24 +255,7 @@ const Postcard = () => {
               {/* LEFT */}
               <div className="flex items-center gap-2 min-w-0 flex-1">
                 <div className="border border-white/10 rounded-full w-10 h-10 sm:w-11 sm:h-11 overflow-hidden bg-white/5 flex items-center justify-center shrink-0">
-                  {post.user?.avatar ? (
-                    <Image
-                      className="rounded-full object-cover w-full h-full"
-                      src={post.user.avatar}
-                      alt="avatar"
-                      width={44}
-                      height={44}
-                      onError={(e) => {
-                        console.log("Avatar failed to load, using fallback");
-                        e.currentTarget.style.display = "none";
-                        e.currentTarget.parentElement.innerHTML =
-                          '<span class="text-lg">👤</span>';
-                      }}
-                      unoptimized={post.user.avatar.startsWith(getFrontendOrigin())}
-                    />
-                  ) : (
-                    <span className="text-lg">👤</span>
-                  )}
+                  <Avatar src={post.user?.avatar} alt={post.user?.userName || 'avatar'} size={44} />
                 </div>
 
                 <div className="flex flex-col min-w-0 overflow-hidden">
@@ -224,30 +313,11 @@ const Postcard = () => {
 
                   {/* MEDIA USER OVERLAY */}
                   <div className="absolute top-2 left-2 flex items-center gap-2 bg-black/50 backdrop-blur-md px-2 py-1 rounded-full max-w-[80%]">
-                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden border border-white/20 bg-white/10 flex items-center justify-center shrink-0">
-                      {post.user?.avatar ? (
-                        <Image
-                          src={post.user.avatar}
-                          alt="avatar"
-                          width={32}
-                          height={32}
-                          className="rounded-full object-cover w-full h-full"
-                          onError={(e) => {
-                            console.log(
-                              "Overlay avatar failed to load, using fallback"
-                            );
-                            e.currentTarget.style.display = "none";
-                            e.currentTarget.parentElement.innerHTML =
-                              '<span class="text-sm">👤</span>';
-                          }}
-                          unoptimized={post.user.avatar.startsWith(getFrontendOrigin())}
-                        />
-                      ) : (
-                        <span className="text-sm">👤</span>
-                      )}
+                      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden border border-white/20 bg-white/10 flex items-center justify-center shrink-0">
+                      <Avatar src={post.user?.avatar} alt={post.user?.userName || 'avatar'} size={32} small />
                     </div>
 
-                    <span className="text-[10px] sm:text-xs text-white/90 font-semibold truncate">
+                    <span className="text-[10px] sm:text-xs text-white/90 font-medium truncate">
                       {post.user?.userName || "Anonymous"}
                     </span>
                   </div>
@@ -292,6 +362,26 @@ const Postcard = () => {
                 })}
               </div>
             )}
+
+            <div className="flex items-center justify-between mb-1 mt-2 px-4 gap-4 w-25">
+              <button
+                onClick={() => handleLike(post._id || post.id)}
+                disabled={processingLikes[post._id || post.id]}
+                className="text-white/80 hover:text-white text-xl cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                aria-label={post.isLiked ? "Unlike post" : "Like post"}
+              >
+                {post.isLiked ? <AiFillLike /> : <AiOutlineLike />}
+              </button>
+              <p className="text-white/80 text-lg font-medium">
+                {post.likesCount}
+              </p>
+              <button className="text-white/80 hover:text-white text-xl cursor-pointer">
+                <FaRegComment />
+              </button>
+              <p className="text-white/80 text-lg font-medium">
+                {post.commentsCount}
+              </p>
+            </div>
 
             {/* DATE */}
             <p className="text-[10px] sm:text-sm text-white/60 py-2 border-t border-white/10 mt-4">

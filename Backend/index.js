@@ -6,7 +6,7 @@ import connectDB from "./src/config/db.config.js";
 import authRouter from "./src/routes/auth.route.js";
 import postRouter from "./src/routes/post.routes.js";
 import profileRouter from "./src/routes/profile.routes.js";
-import likeAndCommentsRouter from "./src/routes/likeAndCommentsRoute.js";
+import likeAndCommentsRouter from "./src/routes/likeAndCommentsRoute.route.js";
 
 dotenv.config({
     path : "./.env"     //exact .env path, we have to call dotenv.config() only in server.js

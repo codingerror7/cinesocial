@@ -1,27 +1,42 @@
 import Like from "../model/Like.models.js";
 import Post from "../model/Post.models.js";
 
-const LikePost = async (req,res)=> {
-    try {
-        const {postId} = req.params;
-        const userId = req.user.userId;
+const LikePost = async (req, res) => {
+  try {
+    const { postId } = req.params;
+    const userId = req.user.userId;
 
-        //check if like exists:
-        const existingLikes = await Like.findOne({post : postId, user : userId});
-        if(existingLikes){
-            //if like exists, then remove it (unlike)
-            await Like.findOneAndDelete({post : postId, user : userId});
-            await Post.findByIdAndUpdate(postId,{$inc : {likesCount : -1}});
-            return res.status(201).json("Post unliked successfully.");
-        }
-        //like
-        await Like.create({post : postId, user : userId});
-        await Post.findByIdAndUpdate(postId,{$inc : {likeCount : 1}});
-        return res.status(201).json("Post liked successfully.");
+    const existingLikes = await Like.findOne({ post: postId, user: userId });
+    if (existingLikes) {
+      await Like.findOneAndDelete({ post: postId, user: userId });
+      const updatedPost = await Post.findByIdAndUpdate(
+        postId,
+        { $inc: { likesCount: -1 } },
+        { new: true }
+      );
 
-    } catch (error) {
-        return res.status(500).json({error : error.message}, {message : "like not working"});
+      return res.status(200).json({
+        message: "Post unliked successfully.",
+        liked: false,
+        likesCount: updatedPost?.likesCount ?? 0,
+      });
     }
-}
+
+    await Like.create({ post: postId, user: userId });
+    const updatedPost = await Post.findByIdAndUpdate(
+      postId,
+      { $inc: { likesCount: 1 } },
+      { new: true }
+    );
+
+    return res.status(200).json({
+      message: "Post liked successfully.",
+      liked: true,
+      likesCount: updatedPost?.likesCount ?? 0,
+    });
+  } catch (error) {
+    return res.status(500).json({ error: error.message, message: "Like action failed." });
+  }
+};
 
 export default LikePost;

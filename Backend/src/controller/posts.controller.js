@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
+import jwt from "jsonwebtoken";
 import uploadOnCloudinary from "../utils/cloudinary.js";
 import Post from "../model/Post.models.js";
+import Like from "../model/Like.models.js";
 
 
 export const createPost = async (req,res) => {
@@ -105,7 +107,7 @@ export const createPost = async (req,res) => {
 
 export const getPost = async (req,res) => {
     try {
-        const post = await Post.find().sort({ createdAt: -1 }).limit(25);
+    const post = await Post.find().sort({ createdAt: -1 }).limit(25);
         if(!post || post.length === 0){
             console.log("No posts found in database");
             return res.status(200).json({
@@ -120,10 +122,36 @@ export const getPost = async (req,res) => {
             console.log(`Post ${idx}: media count = ${p.media?.length || 0}, media = ${JSON.stringify(p.media)}`);
         });
         
+        // Attempt to detect authenticated user from Authorization header so
+        // we can mark which posts the user already liked.
+        let likedSet = new Set();
+        try {
+          const header = req.headers?.authorization;
+          if (header && header.startsWith("Bearer ")) {
+            const token = header.split(" ")[1];
+            const decoded = jwt.verify(token, process.env.ACCESS_SECRET);
+            const userId = decoded?.userId;
+            if (userId) {
+              const likedDocs = await Like.find({ user: userId, post: { $in: post.map(p => p._id) } }).select('post').lean();
+              likedDocs.forEach(d => likedSet.add(String(d.post)));
+            }
+          }
+        } catch (e) {
+          // don't block feed on token errors; feed remains public
+          console.warn('Feed: token parse/verify failed:', e?.message || e);
+        }
+
+        // Attach isLiked to posts using the set we built
+        const postsWithLikeFlag = post.map(p => {
+          const po = p.toObject ? p.toObject() : { ...p };
+          po.isLiked = likedSet.has(String(p._id));
+          return po;
+        });
+
         return res.status(200).json({
-            success : true,
-            message : "post fetched successfully.",
-            post
+          success : true,
+          message : "post fetched successfully.",
+          post: postsWithLikeFlag
         });
     } catch (error) {
         console.error("Error fetching posts:", error);
