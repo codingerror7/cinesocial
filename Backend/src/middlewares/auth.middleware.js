@@ -18,13 +18,10 @@ const authMiddleware = (req,res,next) => {
     //it extracts token from header of request and seperates it with single spacing. here, [1] means token.
     try {
         const decode = jwt.verify(token,process.env.ACCESS_SECRET);
-        //compares secret string present in token and dotenv, if valid then moves forward.
         req.user = decode;
-        //now, attach extract user data from token like phone,userID and give it to decode. the authcontroller can directly use the user info and hence there is no need for it to again verify token.
         next();
-        //moves forward.
     } catch (error) {
-        return res.status(401).json({message:error});
+        return res.status(401).json({ message: error?.message || 'Invalid token.' });
     }
    
 }

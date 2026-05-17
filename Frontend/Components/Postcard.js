@@ -3,6 +3,7 @@ import React from 'react'
 import { useState, useEffect } from 'react';
 import Image from 'next/image';     //image optimization in nextjs, lazy loading, responsive images, making images light-weight and more efficient image handling.
 import { api, getAuthToken } from '@/utils/api.js';
+import { useAuth } from '@/context/AuthContext.js';
 import { AiOutlineLike } from "react-icons/ai";
 import { AiFillLike } from "react-icons/ai";
 import { FaRegComment } from "react-icons/fa";
@@ -75,6 +76,16 @@ const sanitizePost = (post) => {
   };
 };
 
+const getStoredUser = () => {
+  if (typeof window === 'undefined') return null;
+  try {
+    return JSON.parse(localStorage.getItem('user') || 'null');
+  } catch (error) {
+    console.warn('Unable to read stored user from localStorage:', error);
+    return null;
+  }
+};
+
 const Avatar = ({ src, alt = 'avatar', size = 44, small = false }) => {
   const [errored, setErrored] = useState(false);
   const finalSize = small ? size - 12 : size;
@@ -105,9 +116,16 @@ const Avatar = ({ src, alt = 'avatar', size = 44, small = false }) => {
 };
 
 const Postcard = () => {
-  const [postData, setpostData] = useState([]);   // jab multiple data backend se aa rha hai tab empty array use krte hain and jab single document aa rha hai tab null use krte hain.
+  const [postData, setpostData] = useState([]);   // jab multiple data backend se aa rha hai tab empty array use krte hain and jab single document aa rha tab null use krte hain.
   const [loading, setLoading] = useState(true);
   const [processingLikes, setProcessingLikes] = useState({});
+  const [commentModalPostId, setCommentModalPostId] = useState(null);
+  const [commentsByPost, setCommentsByPost] = useState({});
+  const [commentInput, setCommentInput] = useState("");
+  const [commentLoading, setCommentLoading] = useState(false);
+  const [commentPosting, setCommentPosting] = useState(false);
+  const [commentError, setCommentError] = useState("");
+  const { user } = useAuth();
 
   const handleLike = async (postId) => {
     if (!postId) {
@@ -152,10 +170,10 @@ const Postcard = () => {
       console.error("Error toggling like on post:", resp?.data || err.message || err);
       if (resp?.status === 401) {
         console.warn('Like failed: unauthorized. Clearing token and please login.');
-        try {
+        if (typeof window !== 'undefined') {
           localStorage.removeItem('accesstoken');
           localStorage.removeItem('accessToken');
-        } catch (e) {}
+        }
       }
     } finally {
       setProcessingLikes((prev) => {
@@ -187,6 +205,183 @@ const Postcard = () => {
     };
     fetchData();
   }, []);
+
+  const handleOpenComments = async (postId) => {
+    setCommentError("");
+    setCommentInput("");
+    setCommentModalPostId(postId);
+
+    if (commentsByPost[postId]) {
+      return;
+    }
+
+    setCommentLoading(true);
+    try {
+      const response = await api.get(`/api/comments/${postId}`);
+      setCommentsByPost((prev) => ({
+        ...prev,
+        [postId]: Array.isArray(response.data) ? response.data : [],
+      }));
+    } catch (error) {
+      const resp = error?.response;
+      console.error('Error fetching comments:', resp?.data || error.message || error);
+      setCommentError(resp?.data?.message || 'Failed to load comments.');
+      setCommentsByPost((prev) => ({ ...prev, [postId]: [] }));
+    } finally {
+      setCommentLoading(false);
+    }
+  };
+
+  const handleCommentSubmit = async (postId) => {
+    const trimmed = commentInput.trim();
+    if (!trimmed) {
+      setCommentError('Comment cannot be empty.');
+      return;
+    }
+
+    const currentUser = user || getStoredUser();
+    if (!currentUser?._id) {
+      setCommentError('Please log in to post comments.');
+      return;
+    }
+
+    setCommentError("");
+    setCommentPosting(true);
+
+    try {
+      const response = await api.post(`/api/comment/${postId}`, {
+        userId: currentUser._id,
+        userName: currentUser.name || currentUser.userName || 'Anonymous',
+        avatar: currentUser.avatar || '',
+        content: trimmed,
+      });
+
+      const createdComment = response.data?.comment;
+      setCommentsByPost((prev) => ({
+        ...prev,
+        [postId]: [createdComment, ...(prev[postId] || [])],
+      }));
+      setCommentInput("");
+      setpostData((prev) =>
+        Array.isArray(prev)
+          ? prev.map((item) => {
+              if ((item._id || item.id) !== postId) return item;
+              return {
+                ...item,
+                commentsCount: Number(item.commentsCount || 0) + 1,
+              };
+            })
+          : prev
+      );
+    } catch (err) {
+      const resp = err?.response;
+      console.error('Error posting comment:', resp?.data || err.message || err);
+      const serverMessage = resp?.data?.message || resp?.data || err?.message || 'Unable to send comment.';
+      setCommentError(typeof serverMessage === 'string' ? serverMessage : 'Unable to send comment.');
+    } finally {
+      setCommentPosting(false);
+    }
+  };
+
+  const handleCloseComments = () => {
+    setCommentModalPostId(null);
+    setCommentError("");
+  };
+
+  const renderComments = (postId) => {
+    const comments = commentsByPost[postId] || [];
+    return (
+      <div className="max-h-[50vh] overflow-y-auto pr-2 space-y-3">
+        {commentLoading ? (
+          <p className="text-white/70">Loading comments...</p>
+        ) : comments.length === 0 ? (
+          <p className="text-white/70">No comments yet. Be the first to comment.</p>
+        ) : (
+          comments.map((comment) => (
+            <div key={comment._id || comment.id} className="rounded-2xl border border-white/10 bg-white/5 p-3">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-8 h-8 rounded-full overflow-hidden bg-white/10 flex items-center justify-center text-sm">
+                  {comment.user?.avatar ? (
+                    <Image
+                      src={comment.user.avatar}
+                      alt={comment.user.userName || 'avatar'}
+                      width={32}
+                      height={32}
+                      className="object-cover w-full h-full"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                      unoptimized={typeof comment.user.avatar === 'string' && comment.user.avatar.startsWith(getFrontendOrigin())}
+                    />
+                  ) : (
+                    <span>👤</span>
+                  )}
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-white">{comment.user?.userName || 'Anonymous'}</p>
+                  <p className="text-[11px] text-white/60">{new Date(comment.commentedAt || comment.createdAt || Date.now()).toLocaleString()}</p>
+                </div>
+              </div>
+              <p className="text-sm text-white/80 whitespace-pre-wrap">{comment.content}</p>
+            </div>
+          ))
+        )}
+      </div>
+    );
+  };
+
+  const getCurrentComments = (postId) => commentsByPost[postId] || [];
+
+  const isCommentModalOpen = (postId) => commentModalPostId === postId;
+
+  const commentPostUser = user || getStoredUser();
+
+  const renderCommentModal = (postId) => {
+    if (!isCommentModalOpen(postId)) return null;
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
+        <div className="w-full max-w-2xl max-h-[90vh] overflow-hidden rounded-3xl border border-white/10 bg-slate-950 p-4">
+          <div className="flex items-center justify-between gap-3 border-b border-white/10 pb-3 mb-3">
+            <div>
+              <h3 className="text-lg font-semibold text-white">Comments</h3>
+              <p className="text-sm text-white/60">Post a new comment or read the conversation.</p>
+            </div>
+            <button
+              onClick={handleCloseComments}
+              className="rounded-full border border-white/10 px-3 py-1 text-sm text-white/80 hover:bg-white/5"
+            >
+              Close
+            </button>
+          </div>
+          {renderComments(postId)}
+          <div className="mt-4 rounded-3xl border border-white/10 bg-black/50 p-3">
+            {commentError ? <p className="mb-2 text-sm text-red-400">{commentError}</p> : null}
+            <textarea
+              value={commentInput}
+              onChange={(e) => setCommentInput(e.target.value)}
+              placeholder={commentPostUser?._id ? 'Write a comment...' : 'Log in to post comments.'}
+              className="min-h-[110px] w-full rounded-2xl border border-white/10 bg-black/70 p-3 text-white outline-none placeholder:text-white/40"
+              disabled={!commentPostUser?._id}
+            />
+            <div className="mt-3 flex items-center justify-between gap-3">
+              <span className="text-xs text-white/50">
+                {commentPostUser?._id ? `Commenting as ${commentPostUser.name || commentPostUser.userName}` : 'You must be logged in to comment.'}
+              </span>
+              <button
+                onClick={() => handleCommentSubmit(postId)}
+                disabled={commentPosting || !commentInput.trim() || !commentPostUser?._id}
+                className="rounded-2xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {commentPosting ? 'Posting...' : 'Post Comment'}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const currentComments = commentModalPostId ? getCurrentComments(commentModalPostId) : [];
 
   const handleVote = async (postId, optionIndex) => {
     if (!postId) {
@@ -363,13 +558,19 @@ const Postcard = () => {
               <p className="text-white/80 text-lg font-medium">
                 {post.likesCount}
               </p>
-              <button className="text-white/80 hover:text-white text-xl cursor-pointer">
+              <button
+                onClick={() => handleOpenComments(post._id || post.id)}
+                className="text-white/80 hover:text-white text-xl cursor-pointer"
+                aria-label="View comments"
+              >
                 <FaRegComment />
               </button>
               <p className="text-white/80 text-lg font-medium">
                 {post.commentsCount}
               </p>
             </div>
+
+            {renderCommentModal(post._id || post.id)}
 
             {/* DATE */}
             <p className="text-[10px] sm:text-sm text-white/60 py-2 border-t border-white/10 mt-4">
