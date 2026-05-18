@@ -550,22 +550,22 @@ const Postcard = () => {
               <button
                 onClick={() => handleLike(post._id || post.id)}
                 disabled={processingLikes[post._id || post.id]}
-                className="text-white/80 hover:text-white text-xl cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                className="text-white/80 hover:text-white text-md lg:text-xl cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 aria-label={post.isLiked ? "Unlike post" : "Like post"}
               >
                 {post.isLiked ? <AiFillLike /> : <AiOutlineLike />}
               </button>
-              <p className="text-white/80 text-lg font-medium">
+              <p className="text-white/80 text-md lg:text-lg font-medium">
                 {post.likesCount}
               </p>
               <button
                 onClick={() => handleOpenComments(post._id || post.id)}
-                className="text-white/80 hover:text-white text-xl cursor-pointer"
+                className="text-white/80 hover:text-white text-md lg:text-xl cursor-pointer"
                 aria-label="View comments"
               >
                 <FaRegComment />
               </button>
-              <p className="text-white/80 text-lg font-medium">
+              <p className="text-white/80 text-md lg:text-lg font-medium">
                 {post.commentsCount}
               </p>
             </div>

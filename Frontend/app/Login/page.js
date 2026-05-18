@@ -32,11 +32,12 @@ const Login = () => {
       localStorage.setItem("user", JSON.stringify(safeUser));
       setisLogin(true);
       login(safeUser);
-      setimeout(() => router.push("/"), 2000);
+      setTimeout(() => router.push("/"), 2000);
       reset();
 
     } catch (error) {
-      console.log(error.response.data);
+      const server = error?.response?.data || error?.message || error;
+      console.error('Login failed:', server);
     }
   }
   const {
@@ -264,7 +265,7 @@ const Login = () => {
       <p className="text-[11px] sm:text-sm text-white/50 text-center pt-1">
         Dont have an account?{" "}
 
-        <Link href="./Signup">
+        <Link href="/Signup">
           <span className="text-red-400 font-medium hover:text-orange-400 transition cursor-pointer">
             Create account
           </span>
