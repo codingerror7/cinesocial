@@ -18,7 +18,7 @@ const Sidebar = () => {
   const [popup, setpopup] = useState(false);
   const { user } = useAuth();
   const userId = user?._id || 123;
-  const displayName = user?.name || "CineFan";
+  const displayName = user?.name || "Cinephile";
   const { logout } = useAuth();
   const [isLoggedOut, setIsLoggedOut] = useState(false);
 
@@ -53,7 +53,7 @@ const Sidebar = () => {
         </div>
 
         <Link href="/"><NavItem text="Home" icon={<FaHome />} /></Link>
-        <Link href="./Post"><NavItem text="Communities" icon={<MdGroups2 />} /></Link>
+        <Link href="./Communities"><NavItem text="Communities" icon={<MdGroups2 />} /></Link>
         <Link href="./Post"><NavItem text="Create Post" icon={<IoIosCreate />} /></Link>
 
         {/* LIBRARY */}
