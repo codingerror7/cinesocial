@@ -34,6 +34,23 @@ const api = axios.create({
   baseURL: getApiBaseUrl(),
 });
 
+// Track if we're currently refreshing the token to prevent multiple refresh calls
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  
+  isRefreshing = false;
+  failedQueue = [];
+};
+
 api.interceptors.request.use(
   (config) => {
     const token = getAuthToken();
@@ -46,6 +63,81 @@ api.interceptors.request.use(
     return config;
   },
   (error) => Promise.reject(error)
+);
+
+// Response interceptor to handle token expiration and refresh
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+
+    // If error is 401 (unauthorized) and we haven't already tried to refresh
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        // If token refresh is already in progress, queue this request
+        return new Promise(function (resolve, reject) {
+          failedQueue.push({ resolve, reject });
+        })
+          .then(token => {
+            originalRequest.headers['Authorization'] = `Bearer ${token}`;
+            return api(originalRequest);
+          })
+          .catch(err => {
+            return Promise.reject(err);
+          });
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      try {
+        // Call refresh endpoint to get new access token
+        // NOTE: backend mounts auth routes under /api/auth
+        // Include refresh token from localStorage as a fallback for development environments
+        const storedRefresh = typeof window !== 'undefined' ? localStorage.getItem('refreshToken') : null;
+        const response = await axios.post(
+          `${getApiBaseUrl()}/api/auth/refresh`,
+          { refreshToken: storedRefresh || null },
+          { withCredentials: true } // Include cookies (refresh token)
+        );
+
+        const { accessToken } = response.data;
+
+        // Debug
+        console.debug('Token refresh succeeded, new access token received');
+
+        // Store the new access token (store under both common keys for compatibility)
+        localStorage.setItem("accessToken", accessToken);
+        localStorage.setItem("accesstoken", accessToken);
+
+        // Update the authorization header with new token
+        originalRequest.headers['Authorization'] = `Bearer ${accessToken}`;
+
+        // Process the queue of failed requests
+        processQueue(null, accessToken);
+
+        // Retry the original request
+        return api(originalRequest);
+      } catch (refreshError) {
+        // Refresh failed, process queue with error
+        processQueue(refreshError, null);
+
+        // Clear storage and redirect to login
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("accesstoken");
+        localStorage.removeItem("user");
+
+        // Redirect to login page
+        if (typeof window !== "undefined") {
+          window.location.href = "/Login";
+        }
+
+        return Promise.reject(refreshError);
+      }
+    }
+
+    return Promise.reject(error);
+  }
 );
 
 export { api, getApiBaseUrl, getAuthToken };

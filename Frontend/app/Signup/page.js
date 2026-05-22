@@ -30,6 +30,9 @@ const Signup = () => {
         dob: res.data.user.dob || ""
       };
       localStorage.setItem("accesstoken",res.data.accessToken);
+      if (res.data.refreshToken) {
+        localStorage.setItem("refreshToken", res.data.refreshToken);
+      }
       localStorage.setItem("user", JSON.stringify(safeUser));
       setisSignUp(true);
       login(safeUser);

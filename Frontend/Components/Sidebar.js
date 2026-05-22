@@ -25,6 +25,7 @@ const Sidebar = () => {
   const handleLogOut = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
     logout();
     setIsLoggedOut(true);
     console.log("Logged out successfully.");
@@ -53,8 +54,8 @@ const Sidebar = () => {
         </div>
 
         <Link href="/"><NavItem text="Home" icon={<FaHome />} /></Link>
-        <Link href="./Communities"><NavItem text="Communities" icon={<MdGroups2 />} /></Link>
-        <Link href="./Post"><NavItem text="Create Post" icon={<IoIosCreate />} /></Link>
+        <Link href="/Communities"><NavItem text="Communities" icon={<MdGroups2 />} /></Link>
+        <Link href="/Post"><NavItem text="Create Post" icon={<IoIosCreate />} /></Link>
 
         {/* LIBRARY */}
         <div className="text-[10px] font-semibold tracking-[1.5px] uppercase text-white/40 px-3 mt-5 mb-2">

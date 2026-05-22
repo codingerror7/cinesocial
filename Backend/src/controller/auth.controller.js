@@ -20,10 +20,17 @@ export const signUp = async (req,res) => {
         res.cookie("refreshToken",refreshToken,{
             httpOnly : true,
             secure : process.env.NODE_ENVIRONMENT === "production",
-            sameSite : "none",
+            sameSite : process.env.NODE_ENVIRONMENT === "production" ? "none" : "lax",
             maxAge : 7*24*60*60*1000
         })
-        return res.status(201).json({user,accessToken});
+
+        // In development, include refresh token in body as a fallback (so dev env without HTTPS can test)
+        const responseBody = { user, accessToken };
+        if (process.env.NODE_ENVIRONMENT !== "production") {
+            responseBody.refreshToken = refreshToken;
+        }
+
+        return res.status(201).json(responseBody);
 
     } catch (error) {
         //to get the actual and exact validation error
@@ -66,14 +73,15 @@ export const logIn = async (req,res) => {
 }
 
 //refresh token
-export const refresh = (req,res) => {
-    const token = req.cookies.refreshToken;
+export const refresh = async (req,res) => {
+    // Accept refresh token from cookie OR request body to support dev environments
+    const token = req.cookies.refreshToken || req.body?.refreshToken;
     if(!token){
         return res.status(401).json({message : "no refresh token"});
     }
     try {
         const decoded = jwt.verify(token,process.env.REFRESH_SECRET);
-        const newAccessToken = generateAccessToken(decoded.userId);
+        const newAccessToken = await generateAccessToken(decoded.userId);
         res.json({accessToken : newAccessToken});
     } catch (error) {
         return res.status(401).json({message : "invalid refresh token"});

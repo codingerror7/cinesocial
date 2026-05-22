@@ -572,13 +572,9 @@ const Postcard = () => {
 
             {renderCommentModal(post._id || post.id)}
 
-            {/* DATE */}
-            <p className="text-[10px] sm:text-sm text-white/60 py-2 border-t border-white/10 mt-4">
-              {new Date(post.postedAt)
-                .toDateString()
-                .split(" ")
-                .slice(1, 4)
-                .join("-")}
+            {/* DATE AND TIME */}
+            <p className="text-[8px] sm:text-sm text-white/60 py-2 border-t border-white/10 mt-4">
+              {new Date(post.postedAt || post.createdAt || Date.now()).toLocaleString()}
             </p>
           </div>
         ))
