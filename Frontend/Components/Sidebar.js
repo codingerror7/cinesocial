@@ -51,7 +51,7 @@ const Sidebar = () => {
         {/* MAIN */}
         <div className="text-[10px] font-semibold tracking-[1.5px] uppercase text-white/40 px-3 mt-5 mb-2">
           Main
-        </div>
+        </div>  
 
         <Link href="/"><NavItem text="Home" icon={<FaHome />} /></Link>
         <Link href="/Communities"><NavItem text="Communities" icon={<MdGroups2 />} /></Link>
@@ -62,7 +62,7 @@ const Sidebar = () => {
           Library
         </div>
 
-        <NavItem text="Chatbot" icon={<GiArtificialIntelligence />} />
+        <Link href="/Chatbot"><NavItem text="Chatbot" icon={<GiArtificialIntelligence />} /></Link>
         <NavItem text="Notifications" icon={<IoIosNotifications />}/>
         <Link href={`/Profile/${userId}`}><NavItem text="Profile" icon={<CgProfile />} /></Link>
 
