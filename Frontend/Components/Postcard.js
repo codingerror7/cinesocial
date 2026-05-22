@@ -425,154 +425,326 @@ const Postcard = () => {
         Array.isArray(postData) &&
         postData.map((post) => (
           <div
-            key={post._id}
-            className="p-3 sm:p-4 border border-white/10 rounded-2xl mb-4 bg-black/30 font-[gilroy] w-full overflow-hidden max-sm:rounded-xl"
-          >
-            {/* TOP */}
-            <div className="w-full flex items-start justify-between gap-3">
-              
-              {/* LEFT */}
-              <div className="flex items-center gap-2 min-w-0 flex-1">
-                <div className="border border-white/10 rounded-full w-10 h-10 sm:w-11 sm:h-11 overflow-hidden bg-white/5 flex items-center justify-center shrink-0">
-                  <Avatar src={post.user?.avatar} alt={post.user?.userName || 'avatar'} size={44} />
-                </div>
+  key={post._id}
+  className="
+    group relative overflow-hidden
+    rounded-3xl border border-white/[0.08]
+    bg-black/30
+    backdrop-blur-xl
+    shadow-[0_10px_40px_rgba(0,0,0,0.45)]
+    hover:border-white/[0.14]
+    hover:shadow-[0_15px_60px_rgba(0,0,0,0.55)]
+    transition-all duration-500
+    p-4 sm:p-5 mb-5
+  "
+>
 
-                <div className="flex flex-col min-w-0 overflow-hidden">
-                  <h2 className="text-sm sm:text-base md:text-lg font-bold text-white/80 truncate">
-                    {post.user?.userName || "Anonymous"}
-                  </h2>
+  {/* subtle glow */}
+  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition duration-700 pointer-events-none">
+    <div className="absolute -top-20 left-0 w-52 h-52 bg-orange-500/10 blur-3xl rounded-full" />
+  </div>
 
-                  <span className="text-[10px] sm:text-xs text-white/40 font-normal truncate">
-                    {post.user?.title || "Cinephile"}
-                  </span>
-                </div>
-              </div>
+  {/* TOP */}
+  <div className="relative z-10 flex items-start justify-between gap-3">
 
-              {/* RIGHT */}
-              <p className="text-[10px] sm:text-sm text-white/70 whitespace-nowrap shrink-0">
-                {post.postType === "poll" ? "📊 Poll" : "📝 Post"}
-              </p>
-            </div>
+    {/* LEFT */}
+    <div className="flex items-center gap-3 min-w-0 flex-1">
 
-            {/* TITLE */}
-            <h1 className="text-[17px] sm:text-xl font-bold text-white mt-4 px-1 sm:px-3 leading-snug break-words">
-              {post.title || "Untitled"}
-            </h1>
+      {/* Avatar */}
+      <div className="
+        relative shrink-0
+        rounded-full p-[2px]
+        bg-gradient-to-br from-orange-400/40 to-purple-500/40
+      ">
+        <div className="
+          w-11 h-11 sm:w-12 sm:h-12
+          rounded-full overflow-hidden
+          bg-black/40 border border-white/10
+        ">
+          <Avatar
+            src={post.user?.avatar}
+            alt={post.user?.userName || "avatar"}
+            size={48}
+          />
+        </div>
+      </div>
 
-            {/* CONTENT */}
-            <p className="text-[13px] sm:text-base text-white/85 mt-2 px-1 sm:px-3 py-1 leading-relaxed break-words whitespace-pre-wrap">
-              {post.content}
-            </p>
+      {/* USER INFO */}
+      <div className="flex flex-col min-w-0">
 
-            {/* MEDIA */}
-            {post.media?.length > 0 &&
-              post.media[0] &&
-              typeof post.media[0] === "string" &&
-              post.media[0].trim() !== "" && (
-                <div className="relative mt-3 mb-2">
-                  <div className="relative w-full bg-black/30 rounded-xl overflow-hidden">
-                    <Image
-                      src={post.media[0]}
-                      alt="post media"
-                      width={800}
-                      height={600}
-                      className="rounded-xl w-full h-auto object-cover max-h-[520px] max-sm:max-h-[350px]"
-                      priority={false}
-                      quality={75}
-                      optimized={true}
-                      onError={(e) => {
-                        console.error(
-                          "Image failed to load from URL:",
-                          post.media[0]
-                        );
-                        e.currentTarget.style.display = "none";
-                      }}
-                    />
-                  </div>
+        <h2 className="
+          text-[15px] sm:text-[17px]
+          font-semibold tracking-wide
+          text-white truncate
+        ">
+          {post.user?.userName || "Anonymous"}
+        </h2>
 
-                  {/* MEDIA USER OVERLAY */}
-                  <div className="absolute top-2 left-2 flex items-center gap-2 bg-black/50 backdrop-blur-md px-2 py-1 rounded-full max-w-[80%]">
-                      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden border border-white/20 bg-white/10 flex items-center justify-center shrink-0">
-                      <Avatar src={post.user?.avatar} alt={post.user?.userName || 'avatar'} size={32} small />
-                    </div>
+        <div className="flex items-center gap-2 mt-0.5">
 
-                    <span className="text-[10px] sm:text-xs text-white/90 font-medium truncate">
-                      {post.user?.userName || "Anonymous"}
-                    </span>
-                  </div>
-                </div>
-              )}
+          <span className="
+            text-[11px] sm:text-xs
+            text-orange-300/90
+            bg-orange-500/10
+            border border-orange-400/10
+            px-2 py-[2px]
+            rounded-full
+            truncate
+          ">
+            {post.user?.title || "Cinephile"}
+          </span>
 
-            {/* POLL */}
-            {post.postType === "poll" && post.poll?.options && (
-              <div className="mt-3 space-y-2">
-                {post.poll.options.map((opt, i) => {
-                  const totalVotes = post.poll.options.reduce(
-                    (sum, o) => sum + o.votes,
-                    0
-                  );
+          <span className="text-[10px] text-white/30">
+            •
+          </span>
 
-                  const percentage = totalVotes
-                    ? Math.round((opt.votes / totalVotes) * 100)
-                    : 0;
+          <span className="text-[10px] sm:text-xs text-white/40">
+            Film Enthusiast
+          </span>
+        </div>
 
-                  return (
-                    <div
-                      key={i}
-                      onClick={() => handleVote(post._id || post.id, i)}
-                      className="relative p-2.5 sm:p-3 bg-white/5 rounded-xl cursor-pointer overflow-hidden"
-                    >
-                      <div
-                        className="absolute top-0 left-0 h-full bg-orange-500/30"
-                        style={{ width: `${percentage}%` }}
-                      />
+      </div>
+    </div>
 
-                      <div className="relative flex items-center justify-between gap-3">
-                        <span className="text-[13px] sm:text-base text-white break-words flex-1">
-                          {opt.text}
-                        </span>
+    {/* POST TYPE */}
+    <div className="
+      text-[10px] sm:text-xs
+      px-3 py-1.5
+      rounded-full
+      border border-white/10
+      bg-white/[0.03]
+      text-white/70
+      backdrop-blur-md
+      whitespace-nowrap
+      shrink-0
+    ">
+      {post.postType === "poll" ? " Poll" : " Post"}
+    </div>
+  </div>
 
-                        <span className="text-[11px] sm:text-sm text-white/80 shrink-0">
-                          {percentage}%
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
+  {/* TITLE */}
+  <h1 className="
+    relative z-10
+    mt-5
+    text-[20px] sm:text-2xl
+    font-bold
+    leading-tight
+    tracking-tight
+    text-white
+    px-1
+  ">
+    {post.title || "Untitled"}
+  </h1>
 
-            <div className="flex items-center justify-between mb-1 mt-2 px-4 gap-4 w-25">
-              <button
-                onClick={() => handleLike(post._id || post.id)}
-                disabled={processingLikes[post._id || post.id]}
-                className="text-white/80 hover:text-white text-md lg:text-xl cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                aria-label={post.isLiked ? "Unlike post" : "Like post"}
-              >
-                {post.isLiked ? <AiFillLike /> : <AiOutlineLike />}
-              </button>
-              <p className="text-white/80 text-md lg:text-lg font-medium">
-                {post.likesCount}
-              </p>
-              <button
-                onClick={() => handleOpenComments(post._id || post.id)}
-                className="text-white/80 hover:text-white text-md lg:text-xl cursor-pointer"
-                aria-label="View comments"
-              >
-                <FaRegComment />
-              </button>
-              <p className="text-white/80 text-md lg:text-lg font-medium">
-                {post.commentsCount}
-              </p>
-            </div>
+  {/* CONTENT */}
+  <p className="
+    relative z-10
+    mt-3
+    text-[14px] sm:text-[15px]
+    leading-7
+    text-white/75
+    whitespace-pre-wrap
+    break-words
+    px-1
+  ">
+    {post.content}
+  </p>
 
-            {renderCommentModal(post._id || post.id)}
+  {/* MEDIA */}
+  {post.media?.length > 0 &&
+    post.media[0] &&
+    typeof post.media[0] === "string" &&
+    post.media[0].trim() !== "" && (
 
-            {/* DATE AND TIME */}
-            <p className="text-[8px] sm:text-sm text-white/60 py-2 border-t border-white/10 mt-4">
-              {new Date(post.postedAt || post.createdAt || Date.now()).toLocaleString()}
-            </p>
+      <div className="relative mt-5">
+
+        <div className="
+          overflow-hidden rounded-2xl
+          border border-white/10
+          bg-black/30
+        ">
+
+          <Image
+            src={post.media[0]}
+            alt="post media"
+            width={800}
+            height={600}
+            className="
+              w-full h-auto object-cover
+              max-h-[550px]
+              transition duration-700
+              group-hover:scale-[1.02]
+            "
+            priority={false}
+            quality={75}
+            optimized={true}
+            onError={(e) => {
+              console.error(
+                "Image failed to load from URL:",
+                post.media[0]
+              );
+              e.currentTarget.style.display = "none";
+            }}
+          />
+
+        </div>
+
+        {/* IMAGE OVERLAY */}
+        <div className="
+          absolute top-3 left-3
+          flex items-center gap-2
+          bg-black/45 backdrop-blur-xl
+          border border-white/10
+          px-2 py-1.5 rounded-full
+        ">
+
+          <div className="
+            w-7 h-7 rounded-full overflow-hidden
+            border border-white/10
+          ">
+            <Avatar
+              src={post.user?.avatar}
+              alt={post.user?.userName || "avatar"}
+              size={32}
+              small
+            />
           </div>
+
+          <span className="text-xs text-white/90 truncate">
+            {post.user?.userName || "Anonymous"}
+          </span>
+        </div>
+
+      </div>
+    )}
+
+  {/* POLL */}
+  {post.postType === "poll" && post.poll?.options && (
+    <div className="mt-5 space-y-3">
+
+      {post.poll.options.map((opt, i) => {
+
+        const totalVotes = post.poll.options.reduce(
+          (sum, o) => sum + o.votes,
+          0
+        );
+
+        const percentage = totalVotes
+          ? Math.round((opt.votes / totalVotes) * 100)
+          : 0;
+
+        return (
+          <div
+            key={i}
+            onClick={() => handleVote(post._id || post.id, i)}
+            className="
+              relative overflow-hidden
+              rounded-2xl
+              border border-white/10
+              bg-white/[0.03]
+              p-3 cursor-pointer
+              hover:bg-white/[0.05]
+              transition-all duration-300
+            "
+          >
+
+            <div
+              className="
+                absolute top-0 left-0 h-full
+                bg-gradient-to-r from-orange-500/30 to-orange-400/10
+              "
+              style={{ width: `${percentage}%` }}
+            />
+
+            <div className="
+              relative z-10
+              flex items-center justify-between gap-4
+            ">
+              <span className="
+                text-sm sm:text-[15px]
+                text-white/90
+              ">
+                {opt.text}
+              </span>
+
+              <span className="
+                text-xs sm:text-sm
+                font-medium
+                text-orange-300
+              ">
+                {percentage}%
+              </span>
+            </div>
+
+          </div>
+        );
+      })}
+    </div>
+  )}
+
+  {/* ACTIONS */}
+  <div className="
+    relative z-10
+    flex items-center gap-6
+    mt-5 pt-4
+    border-t border-white/10
+  ">
+
+    {/* LIKE */}
+    <button
+      onClick={() => handleLike(post._id || post.id)}
+      disabled={processingLikes[post._id || post.id]}
+      className="
+        flex items-center gap-2
+        text-white/60 hover:text-orange-300
+        transition duration-300
+        disabled:opacity-50
+      "
+    >
+      <span className="text-lg sm:text-xl">
+        {post.isLiked ? <AiFillLike /> : <AiOutlineLike />}
+      </span>
+
+      <span className="text-sm font-medium">
+        {post.likesCount}
+      </span>
+    </button>
+
+    {/* COMMENT */}
+    <button
+      onClick={() => handleOpenComments(post._id || post.id)}
+      className="
+        flex items-center gap-2
+        text-white/60 hover:text-purple-300
+        transition duration-300
+      "
+    >
+      <span className="text-lg sm:text-xl">
+        <FaRegComment />
+      </span>
+
+      <span className="text-sm font-medium">
+        {post.commentsCount}
+      </span>
+    </button>
+  </div>
+
+  {renderCommentModal(post._id || post.id)}
+
+  {/* DATE */}
+  <p className="
+    relative z-10
+    mt-4
+    text-[11px]
+    text-white/35
+  ">
+    {new Date(
+      post.postedAt ||
+      post.createdAt ||
+      Date.now()
+    ).toLocaleString()}
+  </p>
+</div>
         ))
       )}
     </div>
