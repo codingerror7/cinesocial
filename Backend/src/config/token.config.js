@@ -7,7 +7,7 @@ export const generateAccessToken = async (userId) => {
         if(!process.env.ACCESS_SECRET){
             throw new Error("ACCESS SECRET VARIABLE missing in dotenv file.");
         }
-        const token = await jwt.sign({userId},process.env.ACCESS_SECRET,{expiresIn : "30m"});
+        const token = await jwt.sign({userId},process.env.ACCESS_SECRET,{expiresIn : "1m"});
         return token;
     } catch (error) {
         console.log(`token not generated ${error}`);

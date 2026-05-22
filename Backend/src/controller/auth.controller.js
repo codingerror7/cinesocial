@@ -59,10 +59,15 @@ export const logIn = async (req,res) => {
     res.cookie("refreshToken",refreshToken,{
         httpOnly : true,
         secure : process.env.NODE_ENVIRONMENT === "production",
-        sameSite : "none",
+        sameSite : process.env.NODE_ENVIRONMENT === "production" ? "none" : "lax",
         maxAge : 7*24*60*60*1000
     })
-    return res.status(200).json({user: existUser,accessToken});
+    // In development, include refresh token in body as a fallback
+    const responseBody = { user: existUser, accessToken };
+    if (process.env.NODE_ENVIRONMENT !== "production") {
+        responseBody.refreshToken = refreshToken;
+    }
+    return res.status(200).json(responseBody);
     } catch (error) {
     if (error.name === 'ValidationError') {
        const messages = Object.values(error.errors).map(val => val.message);

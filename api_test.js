@@ -22,18 +22,19 @@
     const refreshTokenFromBody = signupJson?.refreshToken || null;
     const accessTokenFromBody = signupJson?.accessToken || null;
 
-    // 2) Call refresh using body refresh token
-    if (!refreshTokenFromBody) {
-      console.log('No refreshToken returned in signup body; skipping body-based refresh test.');
-    } else {
-      const r = await fetch(base + '/api/auth/refresh', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refreshToken: refreshTokenFromBody }),
-      });
-      const rb = await r.json().catch(() => null);
-      console.log('REFRESH (body) status', r.status, 'body:', rb);
-    }
+    // 2) Try login with same credentials to test login response includes refreshToken in dev
+    const loginResp = await fetch(base + '/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: `autotest_${unique}@example.com`, password: 'Testpass123' }),
+    });
+    const loginBodyText = await loginResp.text();
+    let loginJson = null;
+    try { loginJson = JSON.parse(loginBodyText); } catch (e) { }
+    console.log('LOGIN status', loginResp.status, 'body:', loginJson || loginBodyText);
+
+    const refreshTokenFromLogin = loginJson?.refreshToken || null;
+    const accessTokenFromLogin = loginJson?.accessToken || null;
 
     // 3) Create a post (no auth required)
     const createRes = await fetch(base + '/api/post/create-post', {
@@ -61,15 +62,16 @@
     const badLikeBody = await badLike.text();
     console.log('LIKE invalid body:', badLikeBody);
 
-    // 5) Refresh using body token we received earlier and then like with new token
-    if (!refreshTokenFromBody) {
+    // 5) Refresh using the login's refresh token (preferred) or signup's refresh token as fallback
+    const useRefresh = refreshTokenFromLogin || refreshTokenFromBody;
+    if (!useRefresh) {
       console.log('No refresh token available to test refresh+like flow.');
       return;
     }
     const refreshResp = await fetch(base + '/api/auth/refresh', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refreshToken: refreshTokenFromBody }),
+      body: JSON.stringify({ refreshToken: useRefresh }),
     });
     const refreshJson = await refreshResp.json().catch(() => null);
     console.log('REFRESH status', refreshResp.status, 'body', refreshJson);

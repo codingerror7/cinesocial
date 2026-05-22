@@ -119,13 +119,35 @@ api.interceptors.response.use(
         // Retry the original request
         return api(originalRequest);
       } catch (refreshError) {
-        // Refresh failed, process queue with error
+        // Refresh failed, attempt a cookie-only retry (in case server set httpOnly cookie but body fallback missing)
+        console.warn('First refresh attempt failed:', refreshError?.response?.data || refreshError.message || refreshError);
+        try {
+          const cookieOnly = await axios.post(
+            `${getApiBaseUrl()}/api/auth/refresh`,
+            {},
+            { withCredentials: true }
+          );
+          const cookieAccess = cookieOnly.data?.accessToken;
+          if (cookieAccess) {
+            console.debug('Cookie-only refresh succeeded');
+            localStorage.setItem('accessToken', cookieAccess);
+            localStorage.setItem('accesstoken', cookieAccess);
+            originalRequest.headers['Authorization'] = `Bearer ${cookieAccess}`;
+            processQueue(null, cookieAccess);
+            return api(originalRequest);
+          }
+        } catch (cookieErr) {
+          console.warn('Cookie-only refresh also failed:', cookieErr?.response?.data || cookieErr.message || cookieErr);
+        }
+
+        // Both refresh attempts failed — process queue with error
         processQueue(refreshError, null);
 
         // Clear storage and redirect to login
         localStorage.removeItem("accessToken");
         localStorage.removeItem("accesstoken");
         localStorage.removeItem("user");
+        localStorage.removeItem("refreshToken");
 
         // Redirect to login page
         if (typeof window !== "undefined") {

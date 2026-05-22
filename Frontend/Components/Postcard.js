@@ -137,12 +137,8 @@ const Postcard = () => {
     const currentlyLiked = post?.isLiked || false;
     const currentCount = Number(post?.likesCount ?? 0);
 
-    const token = getAuthToken();
-
-    if (!token) {
-      console.warn("Like action blocked because user is not authenticated.");
-      return;
-    }
+    // Do not block here if access token is missing — allow the API call to trigger
+    // the interceptor refresh logic which will obtain a new access token if possible.
 
     setProcessingLikes((prev) => ({ ...prev, [postId]: true }));
 
