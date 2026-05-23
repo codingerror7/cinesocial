@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 import Navbar2 from '@/Components/Navbar2'
 import Sidebar from '@/Components/Sidebar'
 import MobileTopBar from '@/Components/MobileTopBar'
+import Loader from '@/Components/Loader'
 import { api } from '@/utils/api.js'
 import { useAuth } from '@/context/AuthContext.js'
 
@@ -133,21 +134,7 @@ const page = () => {
 
       {/* LOADING */}
       {loading ? (
-
-        <div className="flex items-center justify-center min-h-[420px]">
-          <div className="text-center">
-            <div
-              className="mx-auto mb-4 h-14 w-14 rounded-full
-              border-2 border-orange-500/20 border-t-orange-400
-              animate-spin"
-            />
-
-            <p className="text-sm text-white/50">
-              Loading communities...
-            </p>
-          </div>
-        </div>
-
+        <Loader message="Loading communities..." />
       ) : communities.length === 0 ? (
 
         <div

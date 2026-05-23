@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 import Sidebar from '@/Components/Sidebar'
 import Navbar2 from '@/Components/Navbar2'
 import MobileTopBar from '@/Components/MobileTopBar'
+import Loader from '@/Components/Loader'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { api } from '@/utils/api.js';
@@ -53,7 +54,9 @@ const page = () => {
         <Sidebar />
         <Navbar2 />
         <div className="text-white flex justify-center px-4 py-30">
-          <div className="w-full max-w-2xl text-center text-white/70">Loading profile...</div>
+          <div className="w-full max-w-2xl text-center">
+            <Loader message="Loading profile..." />
+          </div>
         </div>
       </div>
     );

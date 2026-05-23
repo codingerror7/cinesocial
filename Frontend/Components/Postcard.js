@@ -2,6 +2,7 @@
 import React from 'react'
 import { useState, useEffect } from 'react';
 import Image from 'next/image';     //image optimization in nextjs, lazy loading, responsive images, making images light-weight and more efficient image handling.
+import Loader from '@/Components/Loader'
 import { api, getAuthToken } from '@/utils/api.js';
 import { useAuth } from '@/context/AuthContext.js';
 import { AiOutlineLike } from "react-icons/ai";
@@ -292,7 +293,7 @@ const Postcard = () => {
     return (
       <div className="max-h-[50vh] overflow-y-auto pr-2 space-y-3">
         {commentLoading ? (
-          <p className="text-white/70">Loading comments...</p>
+          <Loader message="Loading comments..." minHeightClass="min-h-[140px]" />
         ) : comments.length === 0 ? (
           <p className="text-white/70">No comments yet. Be the first to comment.</p>
         ) : (
@@ -421,9 +422,7 @@ const Postcard = () => {
   <>
     <div className="w-full max-sm:px-0 overflow-x-hidden">
       {loading ? (
-        <p className="text-center text-xl sm:text-base text-white/70 py-6 overflow-hidden">
-          Loading...
-        </p>
+        <Loader message="Loading posts..." minHeightClass="min-h-[260px]" />
       ) : (
         Array.isArray(postData) &&
         postData.map((post) => (
