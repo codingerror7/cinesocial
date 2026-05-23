@@ -195,9 +195,6 @@ const page = () => {
               rounded-[30px] 
               border border-white/10
               bg-black/30 backdrop-blur-2xl
-              transition-all duration-500
-              hover:-translate-y-1.5
-              hover:border-orange-500/25
               "
             >
 
@@ -262,9 +259,8 @@ const page = () => {
                     <h2
                       className="
                       truncate
-                      text-[22px] font-semibold tracking-tight
-                      text-white transition duration-300
-                      group-hover:text-orange-300 uppercase
+                      text-[20px] font-semibold tracking-tight
+                      text-white uppercase
                       "
                     >
                       {community.title}
@@ -322,14 +318,14 @@ const page = () => {
                       className="
                       rounded-full
                       border border-orange-500/15
-                      bg-orange-500/10
+                      bg-transparent
                       px-3 py-1
                       text-[11px] font-medium
                       text-orange-300
                       backdrop-blur-md
                       "
                     >
-                      #{tag}
+                      {tag}
                     </span>
                   ))}
                 </div>
