@@ -119,6 +119,7 @@ const Postcard = () => {
   const [postData, setpostData] = useState([]);   // jab multiple data backend se aa rha hai tab empty array use krte hain and jab single document aa rha tab null use krte hain.
   const [loading, setLoading] = useState(true);
   const [processingLikes, setProcessingLikes] = useState({});
+  const [likeAnimation, setLikeAnimation] = useState({});
   const [commentModalPostId, setCommentModalPostId] = useState(null);
   const [commentsByPost, setCommentsByPost] = useState({});
   const [commentInput, setCommentInput] = useState("");
@@ -141,6 +142,8 @@ const Postcard = () => {
     // the interceptor refresh logic which will obtain a new access token if possible.
 
     setProcessingLikes((prev) => ({ ...prev, [postId]: true }));
+    setLikeAnimation((prev) => ({ ...prev, [postId]: true }));
+    setTimeout(() => setLikeAnimation((prev) => ({ ...prev, [postId]: false })), 600);
 
     try {
       const res = await api.post(`/api/like/${postId}`);
@@ -454,17 +457,16 @@ const Postcard = () => {
       <div className="
         relative shrink-0
         rounded-full p-[2px]
-        bg-gradient-to-br from-orange-400/40 to-purple-500/40
       ">
         <div className="
-          w-11 h-11 sm:w-12 sm:h-12
+          w-14 h-14 sm:w-12 sm:h-12
           rounded-full overflow-hidden
           bg-black/40 border border-white/10
         ">
           <Avatar
             src={post.user?.avatar}
             alt={post.user?.userName || "avatar"}
-            size={48}
+            size={60}
           />
         </div>
       </div>
@@ -701,7 +703,13 @@ const Postcard = () => {
         disabled:opacity-50
       "
     >
-      <span className="text-lg sm:text-xl">
+      <span 
+        style={{
+          display: 'inline-block',
+          animation: likeAnimation[post._id || post.id] ? 'likePopBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)' : 'none'
+        }}
+        className="text-lg sm:text-xl"
+      >
         {post.isLiked ? <AiFillLike /> : <AiOutlineLike />}
       </span>
 
@@ -753,3 +761,32 @@ const Postcard = () => {
 }
 
 export default Postcard;
+
+const styles = `
+  @keyframes likePopBounce {
+    0% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    25% {
+      transform: scale(1.35) rotate(10deg);
+    }
+    50% {
+      transform: scale(1.2) rotate(-5deg);
+    }
+    75% {
+      transform: scale(1.15);
+      filter: drop-shadow(0 0 10px rgba(249, 115, 22, 0.8));
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+`;
+
+if (typeof document !== 'undefined') {
+  const styleSheet = document.createElement('style');
+  styleSheet.textContent = styles;
+  document.head.appendChild(styleSheet);
+}
