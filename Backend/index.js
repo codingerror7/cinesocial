@@ -7,6 +7,7 @@ import authRouter from "./src/routes/auth.route.js";
 import postRouter from "./src/routes/post.routes.js";
 import profileRouter from "./src/routes/profile.routes.js";
 import likeAndCommentsRouter from "./src/routes/likeAndCommentsRoute.route.js";
+import communityRoutes from "./src/routes/community.routes.js";
 
 dotenv.config({
     path : "./.env"     //exact .env path, we have to call dotenv.config() only in server.js
@@ -44,6 +45,7 @@ app.use("/api/auth",authRouter);
 app.use("/api",postRouter);
 app.use("/api",profileRouter);
 app.use("/api",likeAndCommentsRouter);
+app.use("/api",communityRoutes);
 
 //test route
 app.get("/home",(req,res)=>{

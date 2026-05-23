@@ -63,7 +63,7 @@ const Sidebar = () => {
         </div>
 
         <Link href="/Chatbot"><NavItem text="Chatbot" icon={<GiArtificialIntelligence />} /></Link>
-        <NavItem text="Notifications" icon={<IoIosNotifications />}/>
+        <Link href="/CreateCommunity"><NavItem text="Create Community" icon={<IoIosNotifications />}/></Link>
         <Link href={`/Profile/${userId}`}><NavItem text="Profile" icon={<CgProfile />} /></Link>
 
         {/* MORE */}

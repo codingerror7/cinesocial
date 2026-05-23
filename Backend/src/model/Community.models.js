@@ -8,20 +8,28 @@ const communitySchema = new mongoose.Schema({
         minlength : 2,
         maxlength : 40
     },
-    avatar : {
-        type : String,   //cloudinary url
+    communityBanner : {
+        type : String,   
         default : "",
     },
     admin : {
-        type : mongoose.Schema.Types.ObjectId,
-        ref : "User",
-        required : true
+        userId : {
+            type : mongoose.Schema.Types.ObjectId,
+            ref : "User"
+        },
+        username : {
+            type : String
+        }
     },
     description : {
         type : String,
         minlength : 5,
-        maxlength : 100
+        maxlength : 500
     },
+    tags : [{
+        type : String,
+        enum : ["action","thriller","sci-fi","drama","mystery","emotional","horror","anime"]
+    }],
     createdAt : {
         type : Date,
         default : Date.now
@@ -34,14 +42,12 @@ const communitySchema = new mongoose.Schema({
 ],
     membersCount : {
         type : Number,
-        default : 0
-    },
-
-    private : {
-    type : Boolean,
-    default : false
-}
+        default : 1
+    }
 },{timestamps : true});
+
+communitySchema.index({ title: "text" });
+communitySchema.index({ createdAt : -1 });
 
 const Community = mongoose.model("Community",communitySchema);
 
