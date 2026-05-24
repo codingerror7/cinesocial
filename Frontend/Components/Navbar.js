@@ -78,11 +78,11 @@ const Navbar = () => {
         className="
         group relative overflow-hidden
         px-4 py-1.5 rounded-xl
-        border border-white/10 text-sm text-white/75
+        border border-white/20 text-sm text-white/75
         backdrop-blur-xl
         transition-all duration-300
         hover:bg-white/[0.06]
-        hover:text-white
+        hover:text-white cursor-pointer
         "
       >
 
@@ -98,11 +98,11 @@ const Navbar = () => {
         className="
         group relative overflow-hidden
         px-4 py-1.5 rounded-xl
-        border border-white/10 text-sm text-white/75
+        border border-white/20 text-sm text-white/75
         backdrop-blur-xl
         transition-all duration-300
         hover:bg-white/[0.06]
-        hover:text-white
+        hover:text-white cursor-pointer
         "
       >
 

@@ -590,32 +590,6 @@ const Postcard = () => {
 
         </div>
 
-        {/* IMAGE OVERLAY */}
-        <div className="
-          absolute top-3 left-3
-          flex items-center gap-2
-          bg-black/45 backdrop-blur-xl
-          border border-white/10
-          px-2 py-1.5 rounded-full
-        ">
-
-          <div className="
-            w-7 h-7 rounded-full overflow-hidden
-            border border-white/10
-          ">
-            <Avatar
-              src={post.user?.avatar}
-              alt={post.user?.userName || "avatar"}
-              size={32}
-              small
-            />
-          </div>
-
-          <span className="text-xs text-white/90 truncate">
-            {post.user?.userName || "Anonymous"}
-          </span>
-        </div>
-
       </div>
     )}
 
@@ -736,8 +710,6 @@ const Postcard = () => {
     </button>
   </div>
 
-  {renderCommentModal(post._id || post.id)}
-
   {/* DATE */}
   <p className="
     relative z-10
@@ -755,6 +727,9 @@ const Postcard = () => {
         ))
       )}
     </div>
+
+    {/* Comment Modal - Rendered outside post loop, positioned relative to viewport */}
+    {commentModalPostId && renderCommentModal(commentModalPostId)}
   </>
 );
 }

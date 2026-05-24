@@ -22,10 +22,13 @@ const avatars = [
   { id: "communityBanner11", url: "/communityBanner11.jpg" },
   { id: "communityBanner12", url: "/communityBanner12.jpg" },
   { id: "communityBanner13", url: "/communityBanner13.jpg" },
-  { id: "communityBanner14", url: "/communityBanner14.jpg" }
+  { id: "communityBanner14", url: "/communityBanner14.jpg" },
+  { id: "communityBanner15", url: "/communityBanner15.jpg" },
+  { id: "communityBanner16", url: "/communityBanner16.jpg" },
+  { id: "communityBanner17", url: "/communityBanner17.jpg" },
 ];
 
-const genresList = ["action","thriller","sci-fi","drama","mystery","emotional","horror","anime"];
+const genresList = ["PsychologicalThriller","CosmicHorror","darkComedy","coldHorror","animeFilms","IndieCinema","slowCinema","mindbending","dystopian","postApocalyptic","supernaturalThriller","neoNoir","existentialDrama","surrealistCinema","cultClassics","arthouse","experimentalFilms"];
 
 const page = () => {
   const router = useRouter();

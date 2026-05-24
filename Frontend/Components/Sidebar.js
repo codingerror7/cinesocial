@@ -13,6 +13,8 @@ import { IoSettingsOutline } from "react-icons/io5";
 import { MdLocalMovies } from "react-icons/md";
 import { BsChatRightTextFill } from "react-icons/bs";
 import { MdMovieFilter } from "react-icons/md";
+import { IoLogOut } from "react-icons/io5";
+
 
 
 
@@ -108,31 +110,11 @@ const Sidebar = () => {
         )}
 
       {/* USER */}
-      <div onMouseEnter={()=>setpopup(true)} 
-           onMouseLeave={()=>setpopup(false)}   
-           className="mt-auto px-5 border-t border-white/10">
+      <div className="mt-auto px-5 border-t border-white/10">
         <div className="flex items-center gap-2.5 p-2 rounded-md hover:bg-white/5 cursor-pointer transition">
-              {/* USER POPUP */}
-         {popup && <div className="absolute mb-30 py-2 w-50 border border-white/10 rounded-xl px-2 py-3 bg-black">
-            <ul>
-              <button onClick={handleLogOut}
-                className="w-full cursor-pointer text-lg text-left px-2 py-1 text-red-400 text-bold hover:bg-white/5 hover:text-red-800">Logout
+<button onClick={handleLogOut}
+                className="w-full cursor-pointer text-lg text-left px-2 py-1 text-red-400 text-bold hover:bg-white/5 hover:text-red-800 flex items-center"><IoLogOut className="mr-2" size = {26} />LOGOUT
               </button>
-            </ul>
-          </div>}
-          
-          <div className="w-[34px] h-[34px] rounded-full flex items-center justify-center text-sm font-bold bg-gradient-to-br from-purple-500 to-red-500 border-2 border-purple-400/40">
-            {displayName?.charAt(0) || "A"}
-          </div>
-
-          <div className="overflow-hidden">
-            <div className="text-[15px] text-white font-semibold truncate">
-              {displayName}
-            </div>
-            <div className="text-[11px] text-white/40 truncate">
-              @{displayName?.toLowerCase().replace(/\s+/g, "_") || "cinematic_user"}
-            </div>
-          </div>
 
         </div>
       </div>

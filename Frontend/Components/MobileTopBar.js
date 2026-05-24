@@ -1,5 +1,6 @@
 "use client"
 import React from 'react'
+import { MdMovieFilter } from "react-icons/md";
 
 const MobileTopBar = () => {
   return (
@@ -8,7 +9,7 @@ const MobileTopBar = () => {
      {/* LOGO */}
       <div className="py-1 flex items-center gap-2.5">
         <div className="w-8 h-8 rounded-lg flex items-center justify-center text-md bg-gradient-to-br from-red-500 to-orange-400 shadow-[0_0_20px_rgba(239,68,68,0.6)]">
-          🎬
+          <MdMovieFilter className="text-white" size={28} />
         </div>
         <div className="text-[20px] tracking-[2px] font-bold bg-gradient-to-r from-white to-white/60 text-transparent bg-clip-text">
           CineSocial
