@@ -125,7 +125,7 @@ const page = () => {
                 <div
                   key={avatar.id}
                   onClick={() => handleAvatarSelect(avatar)}
-                  className={`w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden cursor-pointer border-2 transition-all duration-300 shrink-0 ${
+                  className={`w-28 h-18 sm:w-20 sm:h-20 rounded-2xl overflow-hidden cursor-pointer border-2 transition-all duration-300 shrink-0 ${
                     selectedAvatar === avatar.id
                       ? "border-white scale-105 sm:scale-110 shadow-lg"
                       : "border-transparent opacity-70 hover:opacity-100"

@@ -14,6 +14,8 @@ import { MdLocalMovies } from "react-icons/md";
 import { BsChatRightTextFill } from "react-icons/bs";
 import { MdMovieFilter } from "react-icons/md";
 import { IoLogOut } from "react-icons/io5";
+import { MdExplore } from "react-icons/md";
+
 
 
 
@@ -90,7 +92,7 @@ const Sidebar = () => {
         </div>
 
         <Link href="/Watchlist">
-          <NavItem text="Watchlist" icon={<MdLocalMovies />} active={pathname === "/Watchlist"} />
+          <NavItem text="Explore" icon={<MdExplore />} active={pathname === "/Watchlist"} />
         </Link>
         <Link href="/Settings">
           <NavItem text="Settings" icon={<IoSettingsOutline />} active={pathname === "/Settings"} />
