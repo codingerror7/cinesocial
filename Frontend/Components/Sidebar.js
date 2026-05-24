@@ -2,7 +2,7 @@
 import React from "react";
 import Link from "next/link";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "../context/AuthContext.js";
 import { FaHome } from "react-icons/fa";
 import { MdGroups2 } from "react-icons/md";
@@ -11,10 +11,14 @@ import { GiArtificialIntelligence } from "react-icons/gi";
 import { CgProfile } from "react-icons/cg";
 import { IoSettingsOutline } from "react-icons/io5";
 import { MdLocalMovies } from "react-icons/md";
-import { IoIosNotifications } from "react-icons/io";
+import { BsChatRightTextFill } from "react-icons/bs";
+import { MdMovieFilter } from "react-icons/md";
+
+
 
 const Sidebar = () => {
   const router = useRouter();
+  const pathname = usePathname();
   const [popup, setpopup] = useState(false);
   const { user } = useAuth();
   const userId = user?._id || 123;
@@ -38,7 +42,7 @@ const Sidebar = () => {
       {/* LOGO */}
       <div className="px-6 pb-6 py-6 flex items-center gap-2.5">
         <div className="w-9 h-9 rounded-lg flex items-center justify-center text-lg bg-gradient-to-br from-red-500 to-orange-400 shadow-[0_0_20px_rgba(239,68,68,0.6)]">
-          🎬
+          <MdMovieFilter className="text-white" size={30} />
         </div>
         <div className="text-[22px] tracking-[2px] font-bold bg-gradient-to-r from-white to-white/60 text-transparent bg-clip-text">
           CineSocial
@@ -53,26 +57,42 @@ const Sidebar = () => {
           Main
         </div>  
 
-        <Link href="/"><NavItem text="Home" icon={<FaHome />} /></Link>
-        <Link href="/Communities"><NavItem text="Communities" icon={<MdGroups2 />} /></Link>
-        <Link href="/Post"><NavItem text="Create Post" icon={<IoIosCreate />} /></Link>
+        <Link href="/">
+          <NavItem text="Home" icon={<FaHome />} active={pathname === "/"} />
+        </Link>
+        <Link href="/Communities">
+          <NavItem text="Communities" icon={<MdGroups2 />} active={pathname === "/Communities"} />
+        </Link>
+        <Link href="/Post">
+          <NavItem text="Create Post" icon={<IoIosCreate />} active={pathname === "/Post"} />
+        </Link>
 
         {/* LIBRARY */}
         <div className="text-[10px] font-semibold tracking-[1.5px] uppercase text-white/40 px-3 mt-5 mb-2">
           Library
         </div>
 
-        <Link href="/Chatbot"><NavItem text="Chatbot" icon={<GiArtificialIntelligence />} /></Link>
-        <Link href="/CreateCommunity"><NavItem text="Create Community" icon={<IoIosNotifications />}/></Link>
-        <Link href={`/Profile/${userId}`}><NavItem text="Profile" icon={<CgProfile />} /></Link>
+        <Link href="/Chatbot">
+          <NavItem text="Chatbot" icon={<GiArtificialIntelligence />} active={pathname === "/Chatbot"} />
+        </Link>
+        <Link href="/CreateCommunity">
+          <NavItem text="Create Community" icon={<BsChatRightTextFill />} active={pathname === "/CreateCommunity"} />
+        </Link>
+        <Link href={`/Profile/${userId}`}>
+          <NavItem text="Profile" icon={<CgProfile />} active={pathname === `/Profile/${userId}`} />
+        </Link>
 
         {/* MORE */}
         <div className="text-[10px] font-semibold tracking-[1.5px] uppercase text-white/40 px-3 mt-5 mb-2">
           More
         </div>
 
-        <NavItem text="Watchlist" icon={<MdLocalMovies />} />
-        <Link href="/Settings"><NavItem text="Settings" icon={<IoSettingsOutline />} /></Link>
+        <Link href="/Watchlist">
+          <NavItem text="Watchlist" icon={<MdLocalMovies />} active={pathname === "/Watchlist"} />
+        </Link>
+        <Link href="/Settings">
+          <NavItem text="Settings" icon={<IoSettingsOutline />} active={pathname === "/Settings"} />
+        </Link>
       </nav>
 
       {/* Success */}

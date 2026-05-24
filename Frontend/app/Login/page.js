@@ -6,6 +6,8 @@ import { api } from '@/utils/api.js';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext.js';
+import { MdMovieFilter } from "react-icons/md";
+
 
 const Login = () => {
   let router = useRouter();
@@ -91,7 +93,7 @@ const Login = () => {
         shadow-[0_0_20px_rgba(239,68,68,0.5)]
       "
       >
-        🎬
+        <MdMovieFilter className="text-white" size={30} />
       </div>
 
       <div
