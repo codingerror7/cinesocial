@@ -192,3 +192,75 @@ export const voteOnPoll = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+
+export const getPostById = async (req,res) => {
+  try{
+       const {id} = req.params;
+       if(!id){
+        return res.status(400).json({message : "id missing, cannot fetch post by id"},{status : false});
+       }
+       const post = await Post.findById(id);
+       if(!post){
+        return res.status(404).json({message : "no posts for this user."});
+       }
+       return res.status(200).json(post);
+
+  }
+  catch(error){
+    console.error("Error fetching post by id:", error);
+    return res.status(500).json({message : error.message});
+  }
+}
+
+
+
+export const getUserPosts = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    
+    if (!userId) {
+      return res.status(400).json({ message: "userId is required" });
+    }
+
+    const userPosts = await Post.find({ "user.userId": userId }).sort({ postedAt: -1 });
+
+    if (!userPosts || userPosts.length === 0) {
+      return res.status(200).json({
+        success: true,
+        message: "No posts found for this user",
+        posts: []
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "User posts fetched successfully",
+      posts: userPosts
+    });
+  } catch (error) {
+    console.error("Error fetching user posts:", error);
+    return res.status(500).json({ message: error.message });
+  }
+}
+
+export const getPostsByUsername = async (req, res) => {
+  try {
+    const { username } = req.params;
+    if (!username) {
+      return res.status(400).json({ message: "username is required" });
+    }
+
+    // case-insensitive match for username
+    const userPosts = await Post.find({ "user.userName": new RegExp(`^${username}$`, 'i') }).sort({ postedAt: -1 });
+
+    if (!userPosts || userPosts.length === 0) {
+      return res.status(200).json({ success: true, message: "No posts found for this username", posts: [] });
+    }
+
+    return res.status(200).json({ success: true, message: "User posts fetched successfully", posts: userPosts });
+  } catch (error) {
+    console.error("Error fetching posts by username:", error);
+    return res.status(500).json({ message: error.message });
+  }
+};

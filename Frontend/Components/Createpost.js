@@ -372,8 +372,8 @@ const CreatePost = () => {
 
     const formData = new FormData();
 
-    // Generate a consistent userId if none exists
-    let userId = user?.id || user?.uid;
+    // Generate a consistent userId if none exists. Prefer the Mongo `_id` saved in localStorage.
+    let userId = user?._id || user?.id || user?.uid;
     if (!userId || userId === "anonymous") {
       // Generate a temporary userId for anonymous users
       userId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
