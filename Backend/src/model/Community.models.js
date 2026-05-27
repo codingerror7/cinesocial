@@ -8,6 +8,13 @@ const communitySchema = new mongoose.Schema({
         minlength : 2,
         maxlength : 40
     },
+    slug: {
+        type: String,
+        required: true,
+        unique: true,
+        lowercase: true,
+        trim: true,
+    },
     communityBanner : {
         type : String,   
         default : "",
@@ -28,7 +35,7 @@ const communitySchema = new mongoose.Schema({
     },
     tags : [{
         type : String,
-        enum : ["action","thriller","sci-fi","drama","mystery","emotional","horror","anime"]
+        enum : ["PsychologicalThriller","CosmicHorror","darkComedy","coldHorror","animeFilms","IndieCinema","slowCinema","mindbending","dystopian","postApocalyptic","supernaturalThriller","neoNoir","existentialDrama","surrealistCinema","cultClassics","arthouse","experimentalFilms"]
     }],
     createdAt : {
         type : Date,
@@ -45,6 +52,17 @@ const communitySchema = new mongoose.Schema({
         default : 1
     }
 },{timestamps : true});
+
+// online members tracked for quick UX; in production consider Redis set
+communitySchema.add({
+    onlineMembers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    lastMessage: { type: mongoose.Schema.Types.ObjectId, ref: 'Message' },
+    lastActivity: { type: Date, default: Date.now }
+});
+
+// optimized indexes
+communitySchema.index({ slug: 1 });
+communitySchema.index({ lastActivity: -1 });
 
 communitySchema.index({ title: "text" });
 communitySchema.index({ createdAt : -1 });

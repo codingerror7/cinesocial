@@ -1,4 +1,5 @@
 import express from "express";
+import http from "http";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import cors from "cors";
@@ -8,20 +9,30 @@ import postRouter from "./src/routes/post.routes.js";
 import profileRouter from "./src/routes/profile.routes.js";
 import likeAndCommentsRouter from "./src/routes/likeAndCommentsRoute.route.js";
 import communityRoutes from "./src/routes/community.routes.js";
+import { initSocket } from "./src/socket/socket.js";
 
 dotenv.config({
-    path : "./.env"     //exact .env path, we have to call dotenv.config() only in server.js
+    path : "./.env"
 });
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+//cors for http:
+const CLIENT_ORIGIN = process.env.CORS_ORIGIN || "http://localhost:3000";
+
 app.use(cors({
-    origin : process.env.CORS_ORIGIN,
+    origin : CLIENT_ORIGIN,
     credentials : true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+//create server
+const server = http.createServer(app);
+
+// socket module handles Socket.IO connection and room events
+const io = initSocket(server, CLIENT_ORIGIN);
 
 // Allow images from Cloudinary
 app.use((req, res, next) => {
@@ -55,7 +66,7 @@ app.get("/what",(req,res)=>{
     res.send("app for cinephile!");
 })
 
-app.listen(PORT, "0.0.0.0",()=>{
+server.listen(PORT, "0.0.0.0",()=>{
     console.log(`running at ${PORT}`);
     connectDB();
 });

@@ -8,7 +8,7 @@ const getApiBaseUrl = () => {
   if (typeof window !== "undefined") {
     const host = window.location.hostname;
     const protocol = window.location.protocol;
-    // default frontend dev expects backend on port 8000 (backend .env), allow overrides via env
+    // default frontend dev expects backend on port 8000
     return `${protocol}//${host}:8000`;
   }
 

@@ -1,5 +1,6 @@
 "use client"
 import React, { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Navbar2 from '@/Components/Navbar2'
 import Sidebar from '@/Components/Sidebar'
 import MobileTopBar from '@/Components/MobileTopBar'
@@ -8,6 +9,7 @@ import { api } from '@/utils/api.js'
 import { useAuth } from '@/context/AuthContext.js'
 
 const page = () => {
+  const router = useRouter();
   const { user } = useAuth();
   const [communities, setCommunities] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -50,18 +52,25 @@ const page = () => {
       });
 
       if (res.data?.success) {
+        const updatedCommunity = res.data.community;
         setCommunities(prev =>
           prev.map(c =>
             c._id === communityId
-              ? { ...c, membersCount: (c.membersCount || 0) + 1 }
+              ? { ...c, membersCount: (c.membersCount || 0) + 1, slug: updatedCommunity?.slug || c.slug }
               : c
           )
         );
         setError(null);
+        const destination = updatedCommunity?.slug ? `/Community/${updatedCommunity.slug}` : `/Community/${updatedCommunity._id}`;
+        router.push(destination);
       }
     } catch (err) {
       const errMsg = err?.response?.data?.message || 'Failed to join community';
-      if (!errMsg.includes('already')) {
+      if (errMsg.includes('already')) {
+        const currentCommunity = communities.find((c) => c._id === communityId);
+        const destination = currentCommunity?.slug ? `/Community/${currentCommunity.slug}` : `/Community/${communityId}`;
+        router.push(destination);
+      } else {
         setError(errMsg);
       }
       console.error('Error joining community:', err);

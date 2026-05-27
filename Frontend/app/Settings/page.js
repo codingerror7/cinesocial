@@ -50,7 +50,7 @@ const page = () => {
     logout();
     setIsLoggedOut(true);
 
-    setTimeout(() => router.push("/Login"), 2000);
+    setTimeout(() => router.push("/Login"), 1000);
   };
 
   return (
