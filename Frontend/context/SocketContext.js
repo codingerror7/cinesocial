@@ -21,7 +21,7 @@ export const SocketProvider = ({ children }) => {
     // lazy init on client
     if (typeof window === 'undefined') return;
     const token = localStorage.getItem('accessToken') || localStorage.getItem('accesstoken');
-    const url = process.env.NEXT_PUBLIC_SOCKET_URL || process.env.NEXT_PUBLIC_API_BASE_URL || `${window.location.protocol}//${window.location.hostname}:8000`;
+    const url = process.env.NEXT_PUBLIC_SOCKET_URL || process.env.NEXT_PUBLIC_API_BASE_URL || `${window.location.protocol}//${window.location.hostname}:5000`;
     setConnecting(true);
     const s = io(url, {
       auth: { token },

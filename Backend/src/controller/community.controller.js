@@ -212,20 +212,34 @@ export const joinCommunity = async (req, res) => {
             return res.status(400).json({ message: "communityId and userId are required" });
         }
 
-        const community = await Community.findById(communityId);
+        const community = await Community.findById(communityId).lean();
         if (!community) {
             return res.status(404).json({ message: "community not found" });
         }
 
-        if (community.members.some((memberId) => memberId?.toString() === userId)) {
+        const alreadyMember = community.members?.some((memberId) => memberId?.toString() === userId);
+        if (alreadyMember) {
             return res.status(200).json({ success: true, message: "user already a member", community });
         }
 
-        community.members.push(userId);
-        community.membersCount = community.members.length;
-        await community.save();
+        await Community.updateOne(
+            { _id: communityId },
+            { $addToSet: { members: userId } }
+        );
 
-        return res.status(200).json({ success: true, message: "joined community successfully", community });
+        const updatedCommunity = await Community.findById(communityId)
+            .populate('admin.userId', 'avatar username')
+            .lean();
+
+        if (updatedCommunity) {
+            const count = Array.isArray(updatedCommunity.members) ? updatedCommunity.members.length : (updatedCommunity.membersCount || 0);
+            if (updatedCommunity.membersCount !== count) {
+                await Community.updateOne({ _id: communityId }, { $set: { membersCount: count } });
+                updatedCommunity.membersCount = count;
+            }
+        }
+
+        return res.status(200).json({ success: true, message: "joined community successfully", community: updatedCommunity || community });
     } catch (err) {
         return res.status(500).json({ message: "error joining community", error: err.message });
     }

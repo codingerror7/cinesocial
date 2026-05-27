@@ -188,13 +188,24 @@ const Postcard = () => {
     const fetchData = async () => {
       try {
         const response = await api.get('/api/post/feed');
-        const posts = response.data.post;
-        console.log("Raw posts from backend:", posts);
+        const posts = Array.isArray(response.data?.post)
+          ? response.data.post
+          : Array.isArray(response.data?.posts)
+          ? response.data.posts
+          : Array.isArray(response.data)
+          ? response.data
+          : [];
+
+        if (!Array.isArray(posts)) {
+          console.warn('Unexpected feed response shape:', response.data);
+        }
+
+        console.log('Raw posts from backend:', posts);
 
         // Process posts and ensure avatars are available
         const processedPosts = posts.map((post) => sanitizePost(post));
 
-        console.log("Processed posts with avatars:", processedPosts);
+        console.log('Processed posts with avatars:', processedPosts);
         setpostData(processedPosts);
       } catch (error) {
         console.error('Error fetching post data:', error);

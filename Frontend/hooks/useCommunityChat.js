@@ -53,27 +53,22 @@ export const useCommunityChat = ({ communityId, user }) => {
     if (!socket || !communityId) return;
 
     const handleNewMessage = (msg) => {
-      // prevent duplicates by _id
       setMessages((prev) => {
         if (prev.some(m => m._id && msg._id && m._id.toString() === msg._id.toString())) return prev;
         return [...prev, msg];
       });
-      // cleanup optimistic
       if (msg._clientTempId) pendingRefs.current.delete(msg._clientTempId);
-      // auto-scroll
       setTimeout(() => scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' }), 50);
     };
 
     const handleTyping = ({ user }) => {
-      setTypingUsers((prev) => Array.from(new Set([...prev.filter(u=>u._id!==user._id), user])));
+      setTypingUsers((prev) => Array.from(new Set([...prev.filter(u => u._id !== user._id), user])));
     };
     const handleStopTyping = ({ user }) => {
       setTypingUsers((prev) => prev.filter(u => u._id !== user._id));
     };
     const handleOnline = ({ communityId: cid }) => {
-      // request server for online count via API or event, simplified here
-      // server emits ONLINE_MEMBERS; client can call endpoint to fetch count
-      // for now, leave to event payload
+      // server event can be used for online presence updates if payload expands later
     };
 
     socket.on(EVENTS.SERVER.NEW_MESSAGE, handleNewMessage);
@@ -90,34 +85,72 @@ export const useCommunityChat = ({ communityId, user }) => {
   }, [socket, communityId]);
 
   const join = async () => {
-    if (!socket) throw new Error('Socket not connected');
+    if (!socket) {
+      return { ok: false, error: 'Socket not connected' };
+    }
+
+    if (!connected) {
+      return new Promise((resolve) => {
+        const onConnect = () => {
+          socket.off('connect', onConnect);
+          resolve(emit(EVENTS.CLIENT.JOIN, { communityId }));
+        };
+
+        socket.on('connect', onConnect);
+        setTimeout(() => {
+          socket.off('connect', onConnect);
+          resolve({ ok: false, error: 'Socket connect timeout' });
+        }, 5000);
+      });
+    }
+
     return emit(EVENTS.CLIENT.JOIN, { communityId });
   };
 
   const leave = async () => {
-    if (!socket) return;
+    if (!socket) return { ok: false, error: 'Socket not connected' };
     return emit(EVENTS.CLIENT.LEAVE, { communityId });
   };
 
   const sendMessage = async (text) => {
-    if (!socket) throw new Error('Socket not ready');
-    const tempId = `tmp_${Date.now()}_${Math.random().toString(36).slice(2,8)}`;
-    const optimistic = { _id: tempId, message: text, sender: user?._id, username: user?.name || user?.userName || 'You', avatar: user?.avatar || '', createdAt: new Date().toISOString(), pending: true };
-    setMessages(prev => [...prev, optimistic]);
-    pendingRefs.current.set(tempId, optimistic);
-    setSending(true);
-    const res = await emit(EVENTS.CLIENT.SEND_MESSAGE, { communityId, message: text });
-    setSending(false);
-    if (!res || !res.ok) {
-      setError(res?.error || 'send_failed');
-      // mark optimistic as failed
-      setMessages(prev => prev.map(m => m._id === tempId ? { ...m, failed: true } : m));
+    if (!socket) {
+      setError('Socket not connected');
       return null;
     }
-    // replace optimistic with server message
-    setMessages(prev => prev.map(m => (m._id === tempId ? res.message : m)));
-    pendingRefs.current.delete(tempId);
-    return res.message;
+
+    const tempId = `tmp_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    const optimistic = {
+      _id: tempId,
+      message: text,
+      sender: user?._id,
+      username: user?.name || user?.userName || 'You',
+      avatar: user?.avatar || '',
+      createdAt: new Date().toISOString(),
+      pending: true,
+    };
+
+    setMessages((prev) => [...prev, optimistic]);
+    pendingRefs.current.set(tempId, optimistic);
+    setSending(true);
+
+    try {
+      const res = await emit(EVENTS.CLIENT.SEND_MESSAGE, { communityId, message: text });
+      if (!res || !res.ok) {
+        setError(res?.error || 'send_failed');
+        setMessages((prev) => prev.map((m) => (m._id === tempId ? { ...m, failed: true } : m)));
+        return null;
+      }
+
+      setMessages((prev) => prev.map((m) => (m._id === tempId ? res.message : m)));
+      pendingRefs.current.delete(tempId);
+      return res.message;
+    } catch (err) {
+      setError(err?.message || 'send_failed');
+      setMessages((prev) => prev.map((m) => (m._id === tempId ? { ...m, failed: true } : m)));
+      return null;
+    } finally {
+      setSending(false);
+    }
   };
 
   const startTyping = () => { socket?.emit(EVENTS.CLIENT.TYPING_START, { communityId }); };
@@ -130,6 +163,7 @@ export const useCommunityChat = ({ communityId, user }) => {
     error,
     typingUsers,
     onlineCount,
+    connected,
     hasMore,
     join,
     leave,
