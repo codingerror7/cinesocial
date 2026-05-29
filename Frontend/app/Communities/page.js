@@ -47,8 +47,7 @@ const page = () => {
       setJoiningCommunities(prev => ({ ...prev, [communityId]: true }));
 
       const res = await api.post('/api/join-community', {
-        communityId,
-        userId: storedUser._id
+        communityId
       });
 
       if (res.data?.success) {
@@ -61,14 +60,14 @@ const page = () => {
           )
         );
         setError(null);
-        const destination = updatedCommunity?.slug ? `/Community/${updatedCommunity.slug}` : `/Community/${updatedCommunity._id}`;
+        const destination = updatedCommunity?.slug ? `/Community/${updatedCommunity.slug}/chat` : `/Community/${updatedCommunity._id}/chat`;
         router.push(destination);
       }
     } catch (err) {
       const errMsg = err?.response?.data?.message || 'Failed to join community';
       if (errMsg.includes('already')) {
         const currentCommunity = communities.find((c) => c._id === communityId);
-        const destination = currentCommunity?.slug ? `/Community/${currentCommunity.slug}` : `/Community/${communityId}`;
+        const destination = currentCommunity?.slug ? `/Community/${currentCommunity.slug}/chat` : `/Community/${communityId}/chat`;
         router.push(destination);
       } else {
         setError(errMsg);

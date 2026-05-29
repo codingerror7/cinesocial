@@ -52,13 +52,6 @@ const communitySchema = new mongoose.Schema({
     }
 },{timestamps : true});
 
-// online members tracked for quick UX; in production consider Redis set
-communitySchema.add({
-    onlineMembers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-    lastMessage: { type: mongoose.Schema.Types.ObjectId, ref: 'Message' },
-    lastActivity: { type: Date, default: Date.now }
-});
-
 // optimized indexes
 
 communitySchema.index({ createdAt : -1,title: "text" });

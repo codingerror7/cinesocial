@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import Community from "../model/Community.models.js";
-import Message from "../model/Message.model.js";
+import { getMessagesByCommunity } from "../services/message.service.js";
 
 const normalizeSlug = (title) => {
     return title
@@ -13,11 +13,11 @@ const normalizeSlug = (title) => {
 const generateUniqueSlug = async (title) => {
     const baseSlug = normalizeSlug(title);
     let slug = baseSlug;
-    let counter = 0;
+    let suffix = 0;
 
     while (await Community.findOne({ slug })) {
-        counter += 1;
-        slug = `${baseSlug}-${counter}`;
+        suffix += 1;
+        slug = `${baseSlug}-${suffix}`;
     }
 
     return slug;
@@ -31,9 +31,9 @@ export const createCommunities = async (req,res) => {
         }
 
         const normalizedTags = Array.isArray(tags)
-            ? tags.map((tag) => String(tag).trim().toLowerCase()).filter(Boolean)
+            ? tags.map((tag) => String(tag).trim()).filter(Boolean)
             : typeof tags === 'string'
-                ? tags.split(",").map((tag) => tag.trim().toLowerCase()).filter(Boolean)
+                ? tags.split(",").map((tag) => tag.trim()).filter(Boolean)
                 : [];
 
         const slug = await generateUniqueSlug(title);
@@ -133,3 +133,93 @@ export const getJoinedCommunities = async (req,res) => {
         return res.status(500).json({message : "error 500 while fetching joined communities", error: err.message});
     }
 }
+
+
+export const getCommunityBySlug = async (req,res) => {
+    try{
+        const {slug} = req.params;
+        if(!slug){
+            return res.status(400).json({message : "community slug missing"});
+        }
+        const normalizedSlug = normalizeSlug(slug);
+        const community = await Community.findOne({slug:normalizedSlug}).populate('admin.userId', 'avatar username');
+        if(!community){
+            return res.status(404).json({message : "community not found"});
+        }
+        return res.status(200).json({success : true, community});
+    }
+    catch(error){
+        return res.status(500).json({message : "error 500 while fetching community by slug", error: error.message});
+    }
+}
+
+export const joinCommunity = async (req, res) => {
+    try {
+        const userId = req.user?.userId;
+        const { communityId } = req.body;
+
+        if (!userId) {
+            return res.status(401).json({ message: "User not authorized" });
+        }
+
+        if (!communityId) {
+            return res.status(400).json({ message: "communityId is required" });
+        }
+
+        const community = await Community.findById(communityId);
+        if (!community) {
+            return res.status(404).json({ message: "Community not found" });
+        }
+
+        const alreadyMember = community.members.some((member) => String(member) === String(userId))
+            || String(community.admin?.userId) === String(userId);
+
+        if (alreadyMember) {
+            return res.status(200).json({ success: true, message: "Already a member", community });
+        }
+
+        community.members.push(userId);
+        community.membersCount = Math.max(community.membersCount + 1, community.members.length);
+        await community.save();
+
+        const updatedCommunity = await Community.findById(communityId).populate('admin.userId', 'avatar username');
+
+        return res.status(200).json({ success: true, message: "Joined community successfully", community: updatedCommunity });
+    } catch (error) {
+        console.error("Join community error:", error);
+        return res.status(500).json({ message: "Unable to join community", error: error.message });
+    }
+};
+
+export const getCommunityMessages = async (req, res) => {
+    try {
+        const userId = req.user?.userId;
+        const { communityId } = req.params;
+
+        if (!userId) {
+            return res.status(401).json({ message: "User not authorized" });
+        }
+
+        if (!communityId) {
+            return res.status(400).json({ message: "communityId is required" });
+        }
+
+        const community = await Community.findOne({
+            _id: communityId,
+            $or: [
+                { members: userId },
+                { "admin.userId": userId }
+            ]
+        });
+
+        if (!community) {
+            return res.status(403).json({ message: "You must join this community to view messages" });
+        }
+
+        const messages = await getMessagesByCommunity(communityId, 100);
+        return res.status(200).json({ success: true, messages });
+    } catch (error) {
+        console.error("Get community messages error:", error);
+        return res.status(500).json({ message: "Unable to load messages", error: error.message });
+    }
+};

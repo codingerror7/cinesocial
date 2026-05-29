@@ -13,13 +13,20 @@ const messageSchema = new mongoose.Schema({
         required : true,
         index: true
     },
-    username: { type: String, required: true, trim: true },
-    avatar: { type: String, default: "", trim: true },
-    message : { type : String, required : true },
-    readBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-    deliveredTo: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-    edited: { type: Boolean, default: false },
-    deleted: { type: Boolean, default: false }
+    username: { 
+        type: String,
+        required: true,
+         trim: true 
+        },
+    avatar: { 
+        type: String,
+         default: "",
+         trim: true 
+        },
+    message : {
+         type : String,
+         required : true 
+        },
 },{timestamps : true});
 
 // indexes for faster queries
