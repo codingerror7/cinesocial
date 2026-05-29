@@ -70,7 +70,7 @@ export const getCommunities = async (req,res) => {
     try{
         const allCommunities = await Community.find()
             .sort({createdAt : -1})
-            .limit(10)
+            .limit(25)
             .select('slug title description communityBanner tags admin membersCount createdAt _id')
             .populate('admin.userId', 'avatar username');
         
