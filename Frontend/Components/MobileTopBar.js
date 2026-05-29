@@ -1,23 +1,177 @@
-"use client"
-import React from 'react'
+"use client";
+
+import React, { useState, useEffect, useRef } from "react";
+import Link from "next/link";
+
 import { MdMovieFilter } from "react-icons/md";
+import { HiOutlineMenuAlt3 } from "react-icons/hi";
+import { FiInfo, FiMessageSquare } from "react-icons/fi";
 
 const MobileTopBar = () => {
+  const [open, setOpen] = useState(false);
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(e.target)
+      ) {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () =>
+      document.removeEventListener(
+        "mousedown",
+        handleClickOutside
+      );
+  }, []);
+
   return (
     <>
-    <div className='w-full lg:hidden bg-gradient-to-b from-[#0e0e14] to-black flex items-center justify-between overflow-hidden px-3 py-3 fixed z-90 border-b border-white/10 font-[gilroy] top-0 mb-10'>
-     {/* LOGO */}
-      <div className="py-1 flex items-center gap-2.5">
-        <div className="w-8 h-8 rounded-lg flex items-center justify-center text-md bg-gradient-to-br from-red-500 to-orange-400 shadow-[0_0_20px_rgba(239,68,68,0.6)]">
-          <MdMovieFilter className="text-white" size={28} />
-        </div>
-        <div className="text-[20px] tracking-[2px] font-bold bg-gradient-to-r from-white to-white/60 text-transparent bg-clip-text">
-          CineSocial
-        </div>
-      </div>
-    </div>
-    </>
-  )
-}
+      <header
+        className="
+        fixed top-0 left-0 right-0
+        z-[100]
+        lg:hidden
 
-export default MobileTopBar
+        border-b border-white/10
+        bg-[#0B0B0C]/95
+        backdrop-blur-xl
+        "
+      >
+        <div
+          className="
+          flex items-center justify-between
+          px-4 py-3
+          "
+        >
+          {/* LOGO */}
+          <Link
+            href="/"
+            className="flex items-center gap-3"
+          >
+            <div
+              className="
+              flex h-9 w-9
+              items-center justify-center
+              rounded-xl
+
+              bg-gradient-to-br
+              from-red-500
+              to-orange-400
+              "
+            >
+              <MdMovieFilter
+                className="text-white"
+                size={22}
+              />
+            </div>
+
+            <div>
+              <h1
+                className="
+                text-lg
+                font-bold
+                tracking-wide
+                text-white
+                "
+              >
+                CineSocial
+              </h1>
+            </div>
+          </Link>
+
+          {/* MENU */}
+          <div
+            ref={menuRef}
+            className="relative"
+          >
+            <button
+              onClick={() => setOpen(!open)}
+              className="
+              flex h-10 w-10
+              items-center justify-center
+
+              rounded-xl
+              border border-white/10
+
+              bg-white/[0.03]
+              text-white
+
+              transition-all duration-200
+              active:scale-95
+              "
+            >
+              <HiOutlineMenuAlt3 size={22} />
+            </button>
+
+            {/* DROPDOWN */}
+            {open && (
+              <div
+                className="
+                absolute right-0 top-12
+
+                w-48
+                overflow-hidden
+
+                rounded-2xl
+                border border-white/10
+
+                bg-[#111111]
+                shadow-2xl
+                "
+              >
+                <Link
+                  href="/About"
+                  onClick={() => setOpen(false)}
+                  className="
+                  flex items-center gap-3
+
+                  px-4 py-3
+
+                  text-sm text-white/80
+
+                  transition-colors
+                  hover:bg-white/[0.05]
+                  "
+                >
+                  <FiInfo size={18} />
+                  About
+                </Link>
+
+                <div className="h-px bg-white/10" />
+
+                <Link
+                  href="/Feedback"
+                  onClick={() => setOpen(false)}
+                  className="
+                  flex items-center gap-3
+
+                  px-4 py-3
+
+                  text-sm text-white/80
+
+                  transition-colors
+                  hover:bg-white/[0.05]
+                  "
+                >
+                  <FiMessageSquare size={18} />
+                  Feedback
+                </Link>
+              </div>
+            )}
+          </div>
+        </div>
+      </header>
+
+      {/* Spacer */}
+      <div className="h-[64px] lg:hidden" />
+    </>
+  );
+};
+
+export default MobileTopBar;

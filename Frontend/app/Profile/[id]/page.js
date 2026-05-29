@@ -4,6 +4,7 @@ import Sidebar from '@/Components/Sidebar'
 import Navbar2 from '@/Components/Navbar2'
 import MobileTopBar from '@/Components/MobileTopBar'
 import Loader from '@/Components/Loader'
+import MobileNav from '@/Components/MobileNav.js'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { api } from '@/utils/api.js';
@@ -102,7 +103,7 @@ const page = () => {
   <Sidebar />
   <Navbar2 />
   <MobileTopBar />
-
+  <MobileNav />
   {/* MAIN */}
   <div className="text-white flex justify-center px-3 sm:px-4 pt-24 sm:pt-28 md:pt-30 pb-24">
     
@@ -153,6 +154,14 @@ const page = () => {
               className="w-full sm:w-auto flex items-center justify-center px-4 py-3 sm:py-2 text-sm rounded-xl bg-white/5 hover:bg-white transition shadow-[0_0_12px_rgba(255,255,255,0.08)] hover:text-black border border-white/15"
             >
               Edit Profile
+            </Link>
+          </div>
+          <div className="lg:hidden w-full sm:w-auto">
+            <Link
+              href="/CreateCommunity"
+              className="w-full sm:w-auto flex items-center justify-center px-4 py-3 sm:py-2 text-sm rounded-xl bg-white text-black border border-white/15"
+            >
+             Create Community
             </Link>
           </div>
         </div>

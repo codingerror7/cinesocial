@@ -5,6 +5,7 @@ import Sidebar from "@/Components/Sidebar";
 import CreatePost from "@/Components/Createpost.js";
 import MobileTopBar from "@/Components/MobileTopBar";
 import Navbar2 from "@/Components/Navbar2";
+import MobileNav from "@/Components/MobileNav.js";
 
 const Page = () => {
   return (
@@ -12,6 +13,7 @@ const Page = () => {
   
   <Navbar2 /> 
   <MobileTopBar />
+  <MobileNav />
 
   {/* Desktop Sidebar */}
   <div className="hidden lg:block fixed left-0 top-0 h-screen w-[16rem] border-r border-white/10 z-40">

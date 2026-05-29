@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Navbar2 from '@/Components/Navbar2'
+import MobileNav from '@/Components/MobileNav.js'
 import Sidebar from '@/Components/Sidebar'
 import MobileTopBar from '@/Components/MobileTopBar'
 import Loader from '@/Components/Loader'
@@ -93,6 +94,7 @@ const page = () => {
   <Navbar2 />
   <MobileTopBar />
   <Sidebar />
+  <MobileNav />
 
   {/* MAIN WRAPPER */}
   <main
