@@ -1,6 +1,6 @@
 "use client"
 import React from 'react'
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';     //image optimization in nextjs, lazy loading, responsive images, making images light-weight and more efficient image handling.
 import Loader from '@/Components/Loader'
 import { api, getAuthToken } from '@/utils/api.js';
@@ -105,6 +105,7 @@ const Avatar = ({ src, alt = 'avatar', size = 44, small = false }) => {
 
   return (
     <Image
+    loading='lazy'
       src={src}
       alt={alt}
       width={finalSize}
@@ -119,7 +120,12 @@ const Avatar = ({ src, alt = 'avatar', size = 44, small = false }) => {
 const Postcard = () => {
   const [postData, setpostData] = useState([]);   // jab multiple data backend se aa rha hai tab empty array use krte hain and jab single document aa rha tab null use krte hain.
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [nextCursor, setNextCursor] = useState(null);
+  const [hasMore, setHasMore] = useState(false);
+  const [feedError, setFeedError] = useState("");
   const [processingLikes, setProcessingLikes] = useState({});
+  const loadMoreRef = useRef(null);
   const [likeAnimation, setLikeAnimation] = useState({});
   const [commentModalPostId, setCommentModalPostId] = useState(null);
   const [commentsByPost, setCommentsByPost] = useState({});
@@ -184,38 +190,116 @@ const Postcard = () => {
     }
   };
 
+  const parseFeedResponse = (responseData) => {
+    const rawPosts = Array.isArray(responseData?.post)
+      ? responseData.post
+      : Array.isArray(responseData?.posts)
+      ? responseData.posts
+      : Array.isArray(responseData)
+      ? responseData
+      : [];
+
+    if (!Array.isArray(rawPosts)) {
+      console.warn('Unexpected feed response shape:', responseData);
+    }
+
+    return {
+      posts: Array.isArray(rawPosts) ? rawPosts : [],
+      nextCursor: responseData?.nextCursor ?? null,
+      hasMore: responseData?.hasMore === true,
+    };
+  };
+
   useEffect(() => {
     const fetchData = async () => {
+      setFeedError("");
       try {
         const response = await api.get('/api/post/feed');
-        const posts = Array.isArray(response.data?.post)
-          ? response.data.post
-          : Array.isArray(response.data?.posts)
-          ? response.data.posts
-          : Array.isArray(response.data)
-          ? response.data
-          : [];
+        console.log('📥 Initial feed response:', response.data);
+        const { posts, nextCursor: cursor, hasMore: more } = parseFeedResponse(response.data);
+        console.log('✅ Parsed initial feed:', { postsCount: posts.length, cursor, hasMore: more });
 
-        if (!Array.isArray(posts)) {
-          console.warn('Unexpected feed response shape:', response.data);
-        }
-
-        console.log('Raw posts from backend:', posts);
-
-        // Process posts and ensure avatars are available
         const processedPosts = posts.map((post) => sanitizePost(post));
 
-        console.log('Processed posts with avatars:', processedPosts);
         setpostData(processedPosts);
+        setNextCursor(cursor);
+        setHasMore(more && posts.length > 0);
       } catch (error) {
         console.error('Error fetching post data:', error);
         setpostData([]);
+        setFeedError('Failed to load posts. Please try again.');
       } finally {
         setLoading(false);
       }
     };
     fetchData();
   }, []);
+
+  const fetchMorePosts = useCallback(async () => {
+    if (!hasMore || !nextCursor || loadingMore) {
+      console.warn('⚠️ Cannot fetch more:', { hasMore, nextCursor, loadingMore });
+      return;
+    }
+
+    console.log('🔄 Fetching more posts with cursor:', nextCursor);
+    setLoadingMore(true);
+    setFeedError("");
+
+    try {
+      const url = `/api/post/feed?cursor=${encodeURIComponent(nextCursor)}`;
+      console.log('📤 Request URL:', url);
+      const response = await api.get(url);
+      console.log('📥 Pagination response:', response.data);
+      const { posts, nextCursor: cursor, hasMore: more } = parseFeedResponse(response.data);
+      console.log('✅ Parsed pagination:', { postsCount: posts.length, nextCursor: cursor, hasMore: more });
+      
+      const processedPosts = posts.map((post) => sanitizePost(post));
+
+      setpostData((prev) => {
+        const updated = Array.isArray(prev) ? [...prev, ...processedPosts] : processedPosts;
+        console.log('📊 Updated postData length:', updated.length);
+        return updated;
+      });
+      setNextCursor(cursor);
+      setHasMore(more && posts.length > 0);
+      console.log('✨ State updated:', { newHasMore: more && posts.length > 0, newCursor: cursor });
+    } catch (error) {
+      console.error('❌ Error loading more posts:', error);
+      setFeedError('Unable to load more posts. Please try again.');
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [nextCursor]);
+
+  useEffect(() => {
+    if (!loadMoreRef.current) {
+      console.warn('⚠️ loadMoreRef not available');
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        console.log('👁️ Observer fired:', { isIntersecting: entry.isIntersecting, hasMore, loadingMore, nextCursor });
+        if (entry.isIntersecting && hasMore && !loadingMore && nextCursor) {
+          console.log('🎯 Triggering fetchMorePosts');
+          fetchMorePosts();
+        }
+      },
+      {
+        rootMargin: '300px',
+        threshold: 0.1,
+      }
+    );
+
+    observer.observe(loadMoreRef.current);
+    console.log('👁️ Observer attached to sentinel element');
+
+    return () => {
+      observer.disconnect();
+      console.log('👁️ Observer disconnected');
+    };
+  }, [hasMore, loadingMore, nextCursor, fetchMorePosts]);
 
   const handleOpenComments = async (postId) => {
     setCommentError("");
@@ -434,9 +518,18 @@ const Postcard = () => {
     <div className="w-full max-sm:px-0 overflow-x-hidden">
       {loading ? (
         <Loader message="Loading posts..." minHeightClass="min-h-[260px]" />
+      ) : feedError ? (
+        <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-center text-white/80">
+          <p>{feedError}</p>
+        </div>
+      ) : Array.isArray(postData) && postData.length === 0 ? (
+        <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-center text-white/80">
+          <p>No posts available yet.</p>
+        </div>
       ) : (
-        Array.isArray(postData) &&
-        postData.map((post) => (
+        <>
+          {Array.isArray(postData) &&
+            postData.map((post) => (
           <div
   key={post._id}
   className="
@@ -474,6 +567,7 @@ const Postcard = () => {
           bg-black/40 border border-white/10
         ">
           <Avatar
+          loading='lazy'
             src={post.user?.avatar}
             alt={post.user?.userName || "avatar"}
             size={60}
@@ -577,6 +671,7 @@ const Postcard = () => {
         ">
 
           <Image
+          loading='lazy'
             src={post.media[0]}
             alt="post media"
             width={800}
@@ -735,7 +830,21 @@ const Postcard = () => {
     ).toLocaleString()}
   </p>
 </div>
-        ))
+        ))}
+
+          {postData.length > 0 && (
+            <div
+              ref={loadMoreRef}
+              className="flex justify-center mt-6 text-sm text-white/60"
+            >
+              {loadingMore
+                ? 'Loading more posts…'
+                : hasMore
+                ? 'Scroll to load more posts…'
+                : 'No more posts to load.'}
+            </div>
+          )}
+        </>
       )}
     </div>
 

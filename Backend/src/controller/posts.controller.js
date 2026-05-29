@@ -106,7 +106,19 @@ export const createPost = async (req,res) => {
 
 export const getPost = async (req,res) => {
     try {
-    const post = await Post.find().sort({ createdAt: -1 }).limit(25).select("user.userId user.userName user.avatar postedAt postType title content media poll commentsCount likesCount").lean();
+      const limit = 25; // number of posts to return per request
+      const cursor = req.query.cursor; // expecting a timestamp or post ID for pagination
+
+      let query = {};
+
+      //if cursor is provided, we fetch posts created before the cursor timestamp for pagination
+      if(cursor){
+        query.createdAt = {
+          $lt : new Date(cursor)
+        }
+      }
+
+    const post = await Post.find(query).sort({ createdAt: -1 }).limit(limit).select("user.userId user.userName user.avatar postedAt postType title content media poll commentsCount likesCount createdAt").lean();
         if(!post || post.length === 0){
             console.log("No posts found in database");
             return res.status(200).json({
@@ -115,6 +127,8 @@ export const getPost = async (req,res) => {
                 post: []
             });
         }
+
+        const nextCursor = post.length > 0 ? post[post.length - 1].createdAt : null;
         
         console.log(`Retrieved ${post.length} posts from database`);
         post.forEach((p, idx) => {
@@ -150,7 +164,9 @@ export const getPost = async (req,res) => {
         return res.status(200).json({
           success : true,
           message : "post fetched successfully.",
-          post: postsWithLikeFlag
+          post: postsWithLikeFlag,
+          nextCursor,
+          hasMore : postsWithLikeFlag.length === limit
         });
     } catch (error) {
         console.error("Error fetching posts:", error);
