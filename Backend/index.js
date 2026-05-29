@@ -3,6 +3,7 @@ import http from "http";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import globalRateLimiter from "./src/middlewares/rateLimiter.middlewares.js";
 import connectDB from "./src/config/db.config.js";
 import authRouter from "./src/routes/auth.route.js";
 import postRouter from "./src/routes/post.routes.js";
@@ -51,6 +52,8 @@ app.use(express.urlencoded({   //its main task is to handle url encoded form dat
     limit : "16kb", 
     parameterLimit : 5000        //to prevent DoS attacks
 }));
+
+app.use(globalRateLimiter);   //to prevent DDoS attacks and to limit the number of requests a user can make in a certain time frame, protecting the server from being overwhelmed by too many requests.
 
 app.use("/api/auth",authRouter);
 app.use("/api",postRouter);
