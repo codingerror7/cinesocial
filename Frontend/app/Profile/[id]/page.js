@@ -37,7 +37,7 @@ const page = () => {
           // fallback: if no posts found by userId, try fetching by username
           if ((!posts || posts.length === 0) && profileRes?.data?.name) {
             try {
-              const fallback = await api.get(`/api/post/user-by-username/${encodeURIComponent(profileRes.data.name)}`);
+              const fallback = await api.get(`/api/post/user-by-username/${encodeURIComponent(profileRes.data.name.toLowerCase())}`);
               posts = fallback.data?.posts || [];
             } catch (fallbackErr) {
               console.warn("Fallback fetch by username failed:", fallbackErr);

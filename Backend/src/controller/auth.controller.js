@@ -45,7 +45,8 @@ export const signUp = async (req,res) => {
 export const logIn = async (req,res) => {
     try {
         const {email,password} = req.body;
-    let existUser = await User.findOne({email});
+        const normalizedEmail = String(req.body.email).trim().toLowerCase();
+    let existUser = await User.findOne({email : normalizedEmail});
     if(!existUser){
         return res.status(404).json({message:"user not found, please signup."});
     }
@@ -100,5 +101,21 @@ export const logOut = async (req,res) => {
         return res.status(204).json({message : "user logout successfully"})
     } catch (error) {
         return res.status(400).json({message:error});
+    }
+}
+
+
+//deleteAccount
+export const deleteAccount = async (req,res)=>{
+    try{
+        const {userId} = req.body;
+        const deleteUser = await User.findByIdAndDelete(userId);
+        if(!deleteUser){
+            return res.status(400).json({message : "cant delere user"});
+        }
+        return res.status(204).json({message : "user deleted successfully"});
+    }
+    catch(error){
+        return res.status(500).json({message : "error deleting user", error : error.message});
     }
 }

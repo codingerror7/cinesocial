@@ -1,14 +1,14 @@
 import express from "express";
 import upload from "../middlewares/multer.middleware.js"
-import { createPost, getPost, voteOnPoll, getPostById, getUserPosts, getPostsByUsername } from "../controller/posts.controller.js";
+import { createPost, getPost, voteOnPoll, getUserPosts, getUserPostsByUsername } from "../controller/posts.controller.js";
+import authMiddleware from "../middlewares/auth.middleware.js";
 
 const postRouter = express.Router();
 
 postRouter.post("/post/create-post", upload.single("media"), createPost);
 postRouter.get("/post/feed",getPost);
-postRouter.post("/post/vote/:postId", voteOnPoll);
+postRouter.post("/post/vote/:postId",authMiddleware, voteOnPoll);
 postRouter.get("/post/user/:userId", getUserPosts);
-postRouter.get("/post/user-by-username/:username", getPostsByUsername);
-postRouter.get("/post/:id", getPostById);
+postRouter.get("/post/user-by-username/:username", getUserPostsByUsername);
 
 export default postRouter;

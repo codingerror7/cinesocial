@@ -65,8 +65,8 @@ const postSchema = new mongoose.Schema({
 },{timestamps : true});
 
 //indexing for optimized query search
-postSchema.index({userName : 1});
-postSchema.index({postedAt : -1});
+postSchema.index({createdAt : -1, userName : 1});
+
 
 const Post = mongoose.model("Post",postSchema);
 

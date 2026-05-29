@@ -104,10 +104,9 @@ export const createPost = async (req,res) => {
   }
 }
 
-
 export const getPost = async (req,res) => {
     try {
-    const post = await Post.find().sort({ createdAt: -1 }).limit(25);
+    const post = await Post.find().sort({ createdAt: -1 }).limit(25).select("user.userId user.userName user.avatar postedAt postType title content media poll commentsCount likesCount").lean();
         if(!post || post.length === 0){
             console.log("No posts found in database");
             return res.status(200).json({
@@ -194,27 +193,8 @@ export const voteOnPoll = async (req, res) => {
 };
 
 
-export const getPostById = async (req,res) => {
-  try{
-       const {id} = req.params;
-       if(!id){
-        return res.status(400).json({message : "id missing, cannot fetch post by id"},{status : false});
-       }
-       const post = await Post.findById(id);
-       if(!post){
-        return res.status(404).json({message : "no posts for this user."});
-       }
-       return res.status(200).json(post);
 
-  }
-  catch(error){
-    console.error("Error fetching post by id:", error);
-    return res.status(500).json({message : error.message});
-  }
-}
-
-
-
+//fetch posts posted by user on his profile page
 export const getUserPosts = async (req, res) => {
   try {
     const { userId } = req.params;
@@ -223,7 +203,7 @@ export const getUserPosts = async (req, res) => {
       return res.status(400).json({ message: "userId is required" });
     }
 
-    const userPosts = await Post.find({ "user.userId": userId }).sort({ postedAt: -1 });
+    const userPosts = await Post.find({ "user.userId": userId }).sort({ createdAt: -1 });
 
     if (!userPosts || userPosts.length === 0) {
       return res.status(200).json({
@@ -244,23 +224,31 @@ export const getUserPosts = async (req, res) => {
   }
 }
 
-export const getPostsByUsername = async (req, res) => {
+export const getUserPostsByUsername = async (req, res) => {
   try {
     const { username } = req.params;
     if (!username) {
       return res.status(400).json({ message: "username is required" });
     }
 
-    // case-insensitive match for username
-    const userPosts = await Post.find({ "user.userName": new RegExp(`^${username}$`, 'i') }).sort({ postedAt: -1 });
+    const normalizedUsername = username.toLowerCase();
+    const userPosts = await Post.find({ "user.userName": normalizedUsername }).sort({ createdAt: -1 }).select("user.userId postedAt postType title content media poll commentsCount likesCount").lean();
 
     if (!userPosts || userPosts.length === 0) {
-      return res.status(200).json({ success: true, message: "No posts found for this username", posts: [] });
+      return res.status(404).json({
+        success: true,
+        message: "No posts found for this username",
+        posts: []
+      });
     }
 
-    return res.status(200).json({ success: true, message: "User posts fetched successfully", posts: userPosts });
+    return res.status(200).json({
+      success: true,
+      message: "User posts fetched successfully",
+      posts: userPosts
+    });
   } catch (error) {
-    console.error("Error fetching posts by username:", error);
+    console.error("Error fetching user posts by username:", error);
     return res.status(500).json({ message: error.message });
   }
-};
+}

@@ -60,11 +60,8 @@ communitySchema.add({
 });
 
 // optimized indexes
-communitySchema.index({ slug: 1 });
-communitySchema.index({ lastActivity: -1 });
 
-communitySchema.index({ title: "text" });
-communitySchema.index({ createdAt : -1 });
+communitySchema.index({ createdAt : -1,title: "text" });
 
 const Community = mongoose.model("Community",communitySchema);
 

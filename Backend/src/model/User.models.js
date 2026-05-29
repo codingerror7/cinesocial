@@ -15,6 +15,7 @@ const userSchema = new mongoose.Schema({
         unique : [true,"email must be unique"],   //basic indexing.
         trim : true,
         lowercase : true,
+        unique : [true,"email must be unique"],
         match : [/^\S+@\S+\.\S+$/,"please enter a valid email address"]
     },
     password : {
@@ -61,8 +62,7 @@ const userSchema = new mongoose.Schema({
 });
 
 //indexing for optimized query search
-userSchema.index({name : 1}); 
-userSchema.index({createdAt : -1});
+userSchema.index({createdAt : -1,name : 1, email : 1});  //compount index, very fast
 
 const User = mongoose.model("User",userSchema);
 export default User;

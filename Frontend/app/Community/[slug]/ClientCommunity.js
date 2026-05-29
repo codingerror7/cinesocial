@@ -14,10 +14,10 @@ const ChatInner = ({ communityId, user, canChat, onJoin, joinLoading, joinError 
   const { messages, loading: chatLoading, sending, sendMessage, typingUsers, scrollRef, join: joinSocket, connected, startTyping, stopTyping } = useCommunityChat({ communityId, user });
 
   useEffect(() => {
-    if (canChat && connected) {
-      joinSocket?.();
+    if (canChat && joinSocket) {
+      joinSocket();
     }
-  }, [canChat, connected, joinSocket]);
+  }, [canChat]);
 
   if (!canChat) {
     return (
