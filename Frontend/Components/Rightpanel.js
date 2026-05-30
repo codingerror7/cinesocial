@@ -1,4 +1,4 @@
-"use client"
+
 import React from 'react'
 import Trending from './Trending'
 import Suggest from './Suggest'

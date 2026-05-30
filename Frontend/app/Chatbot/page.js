@@ -1,4 +1,4 @@
-"use client";
+
 import Navbar2 from '@/Components/Navbar2';
 import Sidebar from '@/Components/Sidebar';
 import MobileTopBar from '@/Components/MobileTopBar';

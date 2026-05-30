@@ -8,6 +8,7 @@ import MobileNav from '@/Components/MobileNav.js'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { api } from '@/utils/api.js';
+import Image from 'next/image';
 
 const page = () => {
   const params = useParams();
@@ -122,9 +123,11 @@ const page = () => {
           <div className="relative mx-auto sm:mx-0 shrink-0">
             <div className="absolute inset-0 rounded-full bg-gradient-to-br from-red-500/20 to-orange-500/20 blur-xl scale-110" />
 
-            <img
+            <Image
               src={profile?.avatar}
               alt="choose avatar"
+              width={100}
+              height={100}
               className="relative w-24 h-24 sm:w-30 sm:h-30 rounded-full object-cover border border-white/10 shadow-[0_0_25px_rgba(255,255,255,0.08)]"
             />
           </div>

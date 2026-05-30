@@ -7,6 +7,7 @@ import { useForm } from 'react-hook-form'
 import { useRouter } from 'next/navigation'
 import { api } from '@/utils/api.js';
 import { useAuth } from '@/context/AuthContext.js'
+import Image from 'next/image'
 
 const avatars = [
   { id: "avatar1", url: "/avatar1.jpg" },
@@ -178,9 +179,11 @@ const page = () => {
                       : "border-transparent opacity-70 hover:opacity-100"
                   }`}
                 >
-                  <img
+                  <Image
                     src={avatar.url}
                     alt="avatar"
+                    width={100}
+                    height={100}
                     className="w-full h-full object-cover"
                   />
                 </div>

@@ -1,4 +1,4 @@
-"use client"
+
 import React from 'react'
 import Herocard from './Herocard'
 import Postcard from './Postcard'

@@ -8,6 +8,7 @@ import MobileTopBar from '@/Components/MobileTopBar'
 import Loader from '@/Components/Loader'
 import { api } from '@/utils/api.js'
 import { useAuth } from '@/context/AuthContext.js'
+import Image from 'next/image'
 
 const page = () => {
   const router = useRouter();
@@ -159,6 +160,7 @@ const page = () => {
               bg-white/[0.03] border border-white/10
               text-4xl"
             >
+              <Image src="/avatar1.jpg" alt="Default Banner" width={40} height={40} />
             </div>
 
             <p className="text-2xl font-semibold text-white/70">
@@ -198,7 +200,7 @@ const page = () => {
               {/* Banner */}
               <div className="relative h-52 sm:h-56 overflow-hidden">
 
-                <img
+                <Image width={1000} height={500}
                   src={community.communityBanner || "/avatar1.jpg"}
                   alt={community.title}
                   className="

@@ -1,4 +1,4 @@
-"use client"
+
 import React from 'react'
 
 function SuggestedUser({ name, info, variant = "v1", following = false }) {

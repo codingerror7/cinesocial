@@ -1,4 +1,4 @@
-"use client"
+
 
 const Loader = ({ message = "Loading...", minHeightClass = "min-h-[420px]" }) => {
   return (

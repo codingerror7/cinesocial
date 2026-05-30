@@ -1,4 +1,4 @@
-"use client"
+
 import React from 'react'
 
 function TrendingItem({ rank, name, posts, heat, top = false }) {
