@@ -3,7 +3,7 @@ import React from 'react'
 import Sidebar from './Sidebar'
 import Navbar from './Navbar'
 import Feed from './Feed'
-import Rightpanel from './Rightpanel'
+import Trending from './AllCommunities'
 import MobileNav from './MobileNav'
 import MobileTopBar from './MobileTopBar'
 
@@ -11,30 +11,24 @@ const Home = () => {
   return (
     <>
       <div className="min-h-screen w-full bg-black text-white">
-      
-      <MobileTopBar />
-      <Navbar />
-      <Sidebar />
 
-      {/* MAIN AREA */}
-      <div className="ml-0 lg:ml-64 flex">
+  <MobileTopBar />
+  <Navbar />
+  <Sidebar />
 
-        {/* CENTER FEED */}
-        <div className="flex-1 max-w-3xl mx-auto px-2">
-          <Feed />
-        </div>
+  <main className="lg:ml-60 xl:pr-[360px]">
 
-        {/* RIGHT PANEL */}
-        <div className="w-[420px] hidden xl:block px-6">
-          <Rightpanel />
-        </div>
-
-      </div>
-
-      {/* MOBILE NAV */}
-      <MobileNav />
-
+    <div className="max-w-4xl mx-auto px-4">
+      <Feed />
     </div>
+
+  </main>
+
+  <Trending />
+
+  <MobileNav />
+
+</div>
     </>
   )
 }

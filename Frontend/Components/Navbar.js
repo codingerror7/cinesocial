@@ -1,6 +1,6 @@
 "use client"
 import React from 'react'
-import Searchbar from './Searchbar'
+// import Searchbar from './Searchbar'
 import Link from 'next/link';
 import { MdMovieFilter } from "react-icons/md";
 import { useAuth } from '../context/AuthContext.js';
@@ -65,7 +65,7 @@ const Navbar = () => {
 
     {/* Search */}
     <div className="flex-1 max-w-xl ml-3">
-      <Searchbar />
+      {/* <Searchbar /> */}
     </div>
   </div>
 
