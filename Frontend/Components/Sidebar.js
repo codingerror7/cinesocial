@@ -112,14 +112,32 @@ const Sidebar = () => {
         )}
 
       {/* USER */}
-      <div className="mt-auto px-5 border-t border-white/10">
-        <div className="flex items-center gap-2.5 p-2 rounded-md hover:bg-white/5 cursor-pointer transition">
-<button onClick={handleLogOut}
-                className="w-full cursor-pointer text-lg text-left px-2 py-1 text-red-400 text-bold hover:bg-white/5 hover:text-red-800 flex items-center"><IoLogOut className="mr-2" size = {26} />LOGOUT
-              </button>
+      <div className="mt-auto border-t border-white/10">
+  <button
+    onClick={handleLogOut}
+    className="
+      flex
+      w-full
+      items-center
+      gap-3
+      rounded-xl
+      px-3
+      py-3
+      text-sm
+      font-medium
+      text-zinc-400
+      transition-all
+      duration-200
+      hover:bg-red-500/10
+      hover:text-red-400
+      cursor-pointer
+    "
+  >
+    <IoLogOut size={20} />
 
-        </div>
-      </div>
+    <span>Logout</span>
+  </button>
+</div>
 
 
     </aside>
