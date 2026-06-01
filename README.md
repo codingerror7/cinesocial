@@ -47,7 +47,7 @@ Users can create and join niche communities based on their interests.
 
 ---
 
-### 3. 🤖 AI Movie Recommendation Chatbot
+### 3. 🤖 AI Movie Recommendation System
 
 An intelligent chatbot that suggests movies based on:
 
@@ -63,7 +63,7 @@ An intelligent chatbot that suggests movies based on:
 
 ---
 
-### 4. 📊 User Dashboard
+### 4. 📊 User Profile
 
 Each user gets a personalized dashboard to track activity and preferences.
 
