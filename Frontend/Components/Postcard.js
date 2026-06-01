@@ -779,7 +779,7 @@ const Postcard = () => {
         flex items-center gap-2
         text-white/60 hover:text-orange-300
         transition duration-300
-        disabled:opacity-50
+        disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed
       "
     >
       <span 
@@ -803,7 +803,7 @@ const Postcard = () => {
       className="
         flex items-center gap-2
         text-white/60 hover:text-purple-300
-        transition duration-300
+        transition duration-300 cursor-pointer
       "
     >
       <span className="text-lg sm:text-xl">
