@@ -3,9 +3,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 
-import { MdMovieFilter } from "react-icons/md";
+import { MdMovieFilter , MdOutlineExplore } from "react-icons/md";
 import { HiOutlineMenuAlt3 } from "react-icons/hi";
 import { FiInfo, FiMessageSquare } from "react-icons/fi";
+import { IoSettingsOutline } from "react-icons/io5";
 
 const MobileTopBar = () => {
   const [open, setOpen] = useState(false);
@@ -162,6 +163,43 @@ const MobileTopBar = () => {
                   <FiMessageSquare size={18} />
                   Feedback
                 </Link>
+
+                <Link
+                  href="/Watchlist"
+                  onClick={() => setOpen(false)}
+                  className="
+                  flex items-center gap-3
+
+                  px-4 py-3
+
+                  text-sm text-white/80
+
+                  transition-colors
+                  hover:bg-white/[0.05]
+                  "
+                >
+                  <MdOutlineExplore size={18} />
+                  Explore
+                </Link>
+                
+                <Link
+                  href="/Settings"
+                  onClick={() => setOpen(false)}
+                  className="
+                  flex items-center gap-3
+
+                  px-4 py-3
+
+                  text-sm text-white/80
+
+                  transition-colors
+                  hover:bg-white/[0.05]
+                  "
+                >
+                  <IoSettingsOutline size={18} />
+                  Settings
+                </Link>
+
               </div>
             )}
           </div>
