@@ -69,15 +69,14 @@ export const createCommunities = async (req,res) => {
 
 export const getCommunities = async (req,res) => {
     try{
-        
-        // const cachedKey = "all-communities";
+        // const cachedKey = "all_communities";
         // const cachedCommunities = await redisClient.get(cachedKey);
         // if(cachedCommunities){
         //     console.log("cache hit for communities data");
         //     return res.status(200).json(JSON.parse(cachedCommunities));
         // }
         // console.log("cache miss for communities data, fetching from database");
-
+        
         const allCommunities = await Community.find()
             .sort({createdAt : -1})
             .limit(25)

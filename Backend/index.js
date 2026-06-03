@@ -3,6 +3,7 @@ import http from "http";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import compression from "compression";
 import globalRateLimiter from "./src/middlewares/rateLimiter.middlewares.js";
 import connectDB from "./src/config/db.config.js";
 import authRouter from "./src/routes/auth.route.js";
@@ -19,6 +20,8 @@ dotenv.config({
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+app.use(compression());   //to compress the response data sent to clients, improving performance and reducing bandwidth usage, especially for large responses like images or JSON data.
 
 //cors for http:
 const CLIENT_ORIGIN = process.env.CORS_ORIGIN || "http://localhost:3000";

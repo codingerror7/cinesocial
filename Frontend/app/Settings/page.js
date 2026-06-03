@@ -13,11 +13,11 @@ const page = () => {
   const faqs = [
     {
       q: "What is CineSocial?",
-      a: "CineSocial is a social platform built for cinephiles to share reviews, theories, opinions, polls, and connect through cinema.",
+      a: "CineSocial is a social platform built for cinephiles to share Stories, reviews, theories, opinions, polls, and connect through cinema with other cinephiles. It is the platform which allows you to connect with cinema lovers, share your thoughts and experiences on a movie/series and to remain in your own cinematic world.",
     },
     {
       q: "How is CineSocial different from other social media apps?",
-      a: "Unlike traditional social apps, CineSocial is completely focused on movies, storytelling, fandoms, and cinematic discussions.",
+      a: "Unlike traditional social apps, CineSocial is completely focused on movies, storytelling, fandoms, and cinematic discussions. it is a place where cinephiles can share their love for cinema, engage in meaningful conversations, and connect with like-minded individuals who share their passion for films.",
     },
     {
       q: "What can I post on CineSocial?",

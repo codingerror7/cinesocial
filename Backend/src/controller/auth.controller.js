@@ -111,7 +111,7 @@ export const deleteAccount = async (req,res)=>{
         const {userId} = req.body;
         const deleteUser = await User.findByIdAndDelete(userId);
         if(!deleteUser){
-            return res.status(400).json({message : "cant delere user"});
+            return res.status(400).json({message : "cant delete user"});
         }
         return res.status(204).json({message : "user deleted successfully"});
     }
