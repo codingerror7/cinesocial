@@ -77,7 +77,7 @@ const Sidebar = () => {
         </div>
 
         <Link href="/Chatbot">
-          <NavItem text="Chatbot" icon={<GiArtificialIntelligence />} active={pathname === "/Chatbot"} />
+          <NavItem text="Recommendations" icon={<GiArtificialIntelligence />} active={pathname === "/Chatbot"} />
         </Link>
         <Link href="/CreateCommunity">
           <NavItem text="Create Community" icon={<BsChatRightTextFill />} active={pathname === "/CreateCommunity"} />
