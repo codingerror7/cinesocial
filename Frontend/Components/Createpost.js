@@ -214,7 +214,7 @@ function SpoilerToggle({ active, onChange }) {
       </p>
 
       <p className="text-[11px] sm:text-xs text-white/28 mt-0.5 leading-relaxed">
-        Blurs content for users who haven't seen it
+        Coming soon!
       </p>
     </div>
 
@@ -334,10 +334,19 @@ const CreatePost = () => {
   };
 
   const { user } = useAuth();
-  // Use user context for avatar, username, and title
-  const avatar = user?.avatar || profile?.avatar || "https://ui-avatars.com/api/?name=Anonymous";
-  const username = user?.name || user?.displayName || profile?.name || "Anonymous";
-  const titleName = user?.title || profile?.title || "Cinephile";
+  
+  // Get user avatar from context or localStorage, with proper fallback
+  const storedUser = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || 'null') : null;
+  const currentUser = user || storedUser;
+  
+  // Use avatar from context/storage, or generate one
+  const computedAvatar = (currentUser?.avatar && String(currentUser.avatar).trim()) 
+    ? String(currentUser.avatar).trim()
+    : `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser?.name || currentUser?.displayName || 'Anonymous')}&background=6366f1&color=fff&size=128`;
+  
+  const avatar = computedAvatar || profile?.avatar;
+  const username = currentUser?.name || currentUser?.displayName || profile?.name || "Anonymous";
+  const titleName = currentUser?.title || profile?.title || "Cinephile";
 
   const handlePost = async () => {
   try {

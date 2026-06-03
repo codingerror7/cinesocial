@@ -76,12 +76,17 @@ export const createPost = async (req,res) => {
           };
         }
 
+        // Ensure avatar is a usable URL; fall back to generated UI avatar if missing
+        const computedAvatar = (avatar && String(avatar).trim())
+          ? String(avatar).trim()
+          : `https://ui-avatars.com/api/?name=${encodeURIComponent(username || 'Anonymous')}&background=6366f1&color=fff&size=128`;
+
         const post = await Post.create({
-            user: {
-                userId: validUserId,
-                userName: username,
-                avatar: avatar || " "
-            },
+          user: {
+            userId: validUserId,
+            userName: username,
+            avatar: computedAvatar
+          },
             postedAt,
             postType,
             title: title || " ",

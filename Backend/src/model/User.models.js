@@ -29,7 +29,7 @@ const userSchema = new mongoose.Schema({
         type : String,
         trim : true,
         minlength : 5,
-        maxlength : 300
+        maxlength : 500
     },
     genre : [{
         type : String,

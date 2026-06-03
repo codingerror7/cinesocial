@@ -13,7 +13,11 @@ export const signUp = async (req,res) => {
             return res.status(400).json({message:"user already exist,please login"});
         }
         let hashPassword = await bcrypt.hash(password,10);
-        const user = await User.create({name,email,password : hashPassword});
+        
+        // Generate a default avatar for new users
+        const defaultAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'Anonymous')}&background=6366f1&color=fff&size=128`;
+        
+        const user = await User.create({name,email,password : hashPassword, avatar: defaultAvatar, title: "Cinephile"});
         //refresh token mechanism
         const accessToken = await generateAccessToken(user._id);
         const refreshToken = await generateRefreshToken(user._id);

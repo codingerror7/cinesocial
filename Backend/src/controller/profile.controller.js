@@ -5,42 +5,76 @@ import User from "../model/User.models.js";
 
 export const createProfile = async (req,res) => {
     try {
-        const {title,avatar,bio,fantag,dob,userId,genres,genre} = req.body;
-        const profileId = userId || req.params?.id;
+        const {title: rawTitle, avatar: rawAvatar, bio, fantag, dob, userId, genres, genre} = req.body;
+
+        // Determine profileId: prefer explicit userId, then route param, then Authorization token if present
+        let profileId = userId || req.params?.id;
+        if (!profileId) {
+            const header = req.headers?.authorization;
+            if (header && header.startsWith('Bearer ')) {
+                try {
+                    const token = header.split(' ')[1];
+                    const decoded = await (async () => {
+                        try { return await import('jsonwebtoken').then(m => m.verify(token, process.env.ACCESS_SECRET)); }
+                        catch { return null }
+                    })();
+                    profileId = decoded?.userId || decoded?._id || profileId;
+                } catch (e) {
+                    // token decode failed; we'll fall through and handle missing id below
+                }
+            }
+        }
+        // sanitize genres and filter to allowed list
+        const allowedGenres = ["action","thriller","sci-fi","drama","mystery","emotional","horror","anime"];
         const updatedGenres = Array.isArray(genres)
-            ? genres
-            : genre
-                ? [genre]
+            ? genres.map(g => String(g).toLowerCase()).filter(g => allowedGenres.includes(g))
+            : genre && allowedGenres.includes(String(genre).toLowerCase())
+                ? [String(genre).toLowerCase()]
                 : [];
 
-        if(!profileId) {
-            return res.status(400).json({message : "userId missing"});
+        if (!profileId) {
+            return res.status(400).json({ message: "userId missing: provide userId in body, route param, or send a valid Authorization token" });
         }
-        if(!title) {
-            return res.status(400).json({message : "title missing"});
+
+        // Provide safe defaults and sanitize inputs rather than failing when optional fields are missing
+        const title = (rawTitle && String(rawTitle).trim()) ? String(rawTitle).trim() : "Cinephile";
+        const avatar = (rawAvatar && String(rawAvatar).trim()) ? String(rawAvatar).trim() : `https://ui-avatars.com/api/?name=${encodeURIComponent(title || 'Anonymous')}&background=6366f1&color=fff&size=128`;
+
+        // sanitize bio: enforce minimum length; if too short, set to empty string to avoid mongoose validation error
+        const sanitizedBio = (typeof bio === 'string' && bio.trim().length >= 5) ? String(bio).trim() : "";
+
+        // sanitize dob: only include if valid date
+        let sanitizedDob = undefined;
+        if (dob && String(dob).trim() !== "") {
+            const parsed = new Date(dob);
+            if (!isNaN(parsed.getTime())) {
+                sanitizedDob = parsed;
+            }
         }
-        if(!avatar){
-            return res.status(400).json({message : "avatar missing"});
-        }
+
+        // build update object with only valid fields
+        const updateObj = {
+            title,
+            avatar,
+            bio: sanitizedBio,
+            fantag: (fantag && String(fantag).trim()) ? String(fantag).trim() : undefined,
+            genre: updatedGenres.length > 0 ? updatedGenres : undefined,
+        };
+        if (sanitizedDob) updateObj.dob = sanitizedDob;
+
+        console.log('createProfile updateObj:', updateObj);
 
         const userProfile = await User.findByIdAndUpdate(
             profileId,
-            {
-                title,
-                avatar,
-                bio,
-                fantag,
-                genre: updatedGenres,
-                dob
-            },
-            { new: true, runValidators: true }
+            updateObj,
+            { returnDocument: 'after', runValidators: true }
         );
 
         if (!userProfile) {
             return res.status(404).json({ message: "user not found" });
         }
         
-        await redisClient.del(`profile:${id}`);  //deleting the cached profile data in redis when profile is updated to maintain cache consistency
+        await redisClient.del(`profile:${profileId}`);  //deleting the cached profile data in redis when profile is updated to maintain cache consistency
 
         return res.status(201).json({message : "profile saved successfully", success : true, userProfile});
 

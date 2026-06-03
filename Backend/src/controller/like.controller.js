@@ -12,7 +12,7 @@ const LikePost = async (req, res) => {
       const updatedPost = await Post.findByIdAndUpdate(
         postId,
         { $inc: { likesCount: -1 } },
-        { new: true }
+        { returnDocument: 'after' }
       );
 
       return res.status(200).json({
@@ -26,7 +26,7 @@ const LikePost = async (req, res) => {
     const updatedPost = await Post.findByIdAndUpdate(
       postId,
       { $inc: { likesCount: 1 } },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     return res.status(200).json({

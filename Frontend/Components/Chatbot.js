@@ -68,7 +68,7 @@ export default function ChatBot() {
           </p>
 
           <p className="mt-8 text-center text-white/80 text-base">
-            Select one or more genres to get personalized recommendations.
+            Select minimum 2 genres to get personalized recommendations.
           </p>
 
           {error && (

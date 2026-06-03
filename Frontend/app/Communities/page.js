@@ -292,8 +292,8 @@ const page = () => {
                     "
                   >
                     {joiningCommunities[community._id]
-                      ? "Entering..."
-                      : "Enter"}
+                      ? "Joining..."
+                      : "Join"}
                   </button>
                 </div>
 
