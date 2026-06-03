@@ -7,67 +7,45 @@ import Navbar2 from "@/Components/Navbar2";
 import MobileTopBar from "@/Components/MobileTopBar";
 import SectionRow from "@/Components/Sectionrow";
 import ExploreSkeleton from "@/Components/Skeletonloader";
+import {useQuery} from "@tanstack/react-query";
 
 const WatchlistPage = () => {
-  const [popularMovies, setPopularMovies] = useState([]);
-  const [topRatedMovies, setTopRatedMovies] = useState([]);
-  const [trendingMovies, setTrendingMovies] = useState([]);
-  const [trendingSeries, setTrendingSeries] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
-  const fetchMovies = async () => {
-    const apiKey = process.env.NEXT_PUBLIC_TMDB_API_KEY;
-    const baseUrl = "https://api.themoviedb.org/3";
-    const headers = { accept: "application/json" };
+ const fetchMovies = async () => {
+  const apiKey = process.env.NEXT_PUBLIC_TMDB_API_KEY;
+  const baseUrl = "https://api.themoviedb.org/3";
 
-    try {
-      if (!apiKey) {
-        const res = await fetch("/api/tmdb");
-        const json = await res.json();
+  const urls = [
+    `${baseUrl}/movie/popular?api_key=${apiKey}`,
+    `${baseUrl}/movie/top_rated?api_key=${apiKey}`,
+    `${baseUrl}/trending/movie/day?api_key=${apiKey}`,
+    `${baseUrl}/trending/tv/day?api_key=${apiKey}`,
+  ];
 
-        if (!res.ok) {
-          throw new Error(json?.message || "Failed to load TMDB data");
-        }
+  const responses = await Promise.all(
+    urls.map(url => fetch(url))
+  );
 
-        setPopularMovies(json.popularMovies || []);
-        setTopRatedMovies(json.topRatedMovies || []);
-        setTrendingMovies(json.trendingMovies || []);
-        setTrendingSeries(json.trendingTv || []);
-        return;
-      }
+  const data = await Promise.all(
+    responses.map(res => res.json())
+  );
 
-      const urls = [
-        `${baseUrl}/movie/popular?api_key=${apiKey}`,
-        `${baseUrl}/movie/top_rated?api_key=${apiKey}`,
-        `${baseUrl}/trending/movie/day?api_key=${apiKey}`,
-        `${baseUrl}/trending/tv/day?api_key=${apiKey}`,
-      ];
-
-      const responses = await Promise.all(urls.map((url) => fetch(url, { headers })));
-      const jsonData = await Promise.all(responses.map((res) => res.json()));
-
-      if (responses.some((res) => !res.ok)) {
-        const bad = responses.find((res) => !res.ok);
-        const badBody = jsonData[responses.indexOf(bad)];
-        throw new Error(badBody?.status_message || `TMDB request failed: ${bad.status}`);
-      }
-
-      setPopularMovies(jsonData[0].results || []);
-      setTopRatedMovies(jsonData[1].results || []);
-      setTrendingMovies(jsonData[2].results || []);
-      setTrendingSeries(jsonData[3].results || []);
-    } catch (error) {
-      setError(error?.message || "Unable to load movies from TMDB");
-      console.error("TMDB Error:", error);
-    } finally {
-      setLoading(false);
-    }
+  return {
+    popularMovies: data[0].results || [],
+    topRatedMovies: data[1].results || [],
+    trendingMovies: data[2].results || [],
+    trendingSeries: data[3].results || [],
   };
+};
 
-  useEffect(() => {
-    fetchMovies();
-  }, []);
+  const {
+  data,
+  isLoading,
+  error
+} = useQuery({
+  queryKey: ["homepageMovies"],
+  queryFn: fetchMovies,
+});
 
   return (
     <div
@@ -91,32 +69,32 @@ const WatchlistPage = () => {
     )}
 
     {/* Loading */}
-    {loading ? (
+    {isLoading ? (
       <ExploreSkeleton />
     ) : (
       <>
         <SectionRow
           title="Trending Movies"
           subtitle="Most watched movies right now"
-          data={trendingMovies}
+          data={data?.trendingMovies || []}
         />
 
         <SectionRow
           title="Trending Series"
           subtitle="Shows everyone is talking about"
-          data={trendingSeries}
+          data={data?.trendingSeries || []}
         />
 
         <SectionRow
           title="Popular Movies"
           subtitle="Popular across the community"
-          data={popularMovies}
+          data={data?.popularMovies || []}
         />
 
         <SectionRow
           title="Top Rated Movies"
           subtitle="Highest rated films on TMDB"
-          data={topRatedMovies}
+          data={data?.topRatedMovies || []}
         />
       </>
     )}

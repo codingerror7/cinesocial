@@ -1,6 +1,7 @@
 
 import "./globals.css";
 import { AuthProvider } from "../context/AuthContext.js";
+import QueryProvider from "../Provider/QueryProvider.js";
 
 export const metadata = {
   title: "Cinesocial-A platform for cinephiles",
@@ -13,9 +14,11 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body
       >
+        <QueryProvider>
         <AuthProvider>
           {children}
         </AuthProvider>
+        </QueryProvider>
       </body>
     </html>
   );
