@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import redisClient from "../config/redis.config.js";
 import Community from "../model/Community.models.js";
 import { getMessagesByCommunity } from "../services/message.service.js";
 
@@ -68,6 +69,15 @@ export const createCommunities = async (req,res) => {
 
 export const getCommunities = async (req,res) => {
     try{
+        
+        // const cachedKey = "all-communities";
+        // const cachedCommunities = await redisClient.get(cachedKey);
+        // if(cachedCommunities){
+        //     console.log("cache hit for communities data");
+        //     return res.status(200).json(JSON.parse(cachedCommunities));
+        // }
+        // console.log("cache miss for communities data, fetching from database");
+
         const allCommunities = await Community.find()
             .sort({createdAt : -1})
             .limit(25)
@@ -89,7 +99,9 @@ export const getCommunities = async (req,res) => {
                 }
             };
         });
-        
+
+        // await redisClient.setEx(cachedKey,60,JSON.stringify(enrichedCommunities)); //caching the communities data in redis for 60 seconds to reduce database load and improve response times for subsequent requests
+
         return res.status(200).json({success : true, communities : enrichedCommunities});
     }
     catch(err) {

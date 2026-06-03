@@ -39,6 +39,8 @@ export const createProfile = async (req,res) => {
         if (!userProfile) {
             return res.status(404).json({ message: "user not found" });
         }
+        
+        await redisClient.del(`profile:${id}`);  //deleting the cached profile data in redis when profile is updated to maintain cache consistency
 
         return res.status(201).json({message : "profile saved successfully", success : true, userProfile});
 
