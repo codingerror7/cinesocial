@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import uploadOnCloudinary from "../utils/cloudinary.js";
 import Post from "../model/Post.models.js";
 import Like from "../model/Like.models.js";
+import redisClient from "../config/redis.config.js";
 
 
 export const createPost = async (req,res) => {
@@ -109,6 +110,25 @@ export const getPost = async (req,res) => {
       const limit = 25; // number of posts to return per request
       const cursor = req.query.cursor; // expecting a timestamp or post ID for pagination
 
+      //cache first page only:
+      const isFirstPage = !cursor;
+      if(isFirstPage){
+        console.log("First page request - consider caching this response in Redis");
+      }
+      else{
+        console.log(`Fetching posts before cursor: ${cursor}`);
+      }
+      const cacheKey = "feed:first-page";
+      if(isFirstPage){
+        const cached = await redisClient.get(cacheKey);
+        if(cached){
+          console.log("Cache hit for first page feed");
+          return res.status(200).json(JSON.parse(cached));
+        }
+        console.log("Cache miss for first page feed");
+      }
+
+
       let query = {};
 
       //if cursor is provided, we fetch posts created before the cursor timestamp for pagination
@@ -161,13 +181,19 @@ export const getPost = async (req,res) => {
           return po;
         });
 
-        return res.status(200).json({
+        const responseData = {
           success : true,
           message : "post fetched successfully.",
           post: postsWithLikeFlag,
           nextCursor,
           hasMore : postsWithLikeFlag.length === limit
-        });
+        };
+
+        if(isFirstPage){
+          await redisClient.setEx(cacheKey,120, JSON.stringify    (responseData));
+        }  //delete cache after 2 mins, so that users can see new posts after every 2 mins on first page feed.
+        return res.status(200).json(responseData);
+
     } catch (error) {
         console.error("Error fetching posts:", error);
         return res.status(500).json({message : error.message});

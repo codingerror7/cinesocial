@@ -11,6 +11,7 @@ import profileRouter from "./src/routes/profile.routes.js";
 import likeAndCommentsRouter from "./src/routes/likeAndCommentsRoute.route.js";
 import communityRoutes from "./src/routes/community.routes.js";
 import { initSocket } from "./src/socket/socket.js";
+import {connectRedis} from "./src/config/redis.config.js";
 
 dotenv.config({
     path : "./.env"
@@ -69,7 +70,22 @@ app.get("/what",(req,res)=>{
     res.send("app for cinephile!");
 })
 
-server.listen(PORT, "0.0.0.0",()=>{
-    console.log(`running at ${PORT}`);
-    connectDB();
-});
+// server.listen(PORT, "0.0.0.0",()=>{
+//     console.log(`running at ${PORT}`);
+//     connectDB();
+//     connectRedis();
+// });
+
+const startServer = async () => {
+    try{
+        await connectDB();
+        await connectRedis();
+        server.listen(PORT, "0.0.0.0", ()=>{
+            console.log(`Server running at ${PORT}`);
+        });
+    }
+     catch(error){
+        console.log("Error starting server: ", error);
+     }
+}
+startServer();
