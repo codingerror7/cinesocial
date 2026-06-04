@@ -128,6 +128,7 @@ const page = () => {
               alt="choose avatar"
               width={100}
               height={100}
+              unoptimized={true}
               className="relative w-24 h-24 sm:w-30 sm:h-30 rounded-full object-cover border border-white/10 shadow-[0_0_25px_rgba(255,255,255,0.08)]"
             />
           </div>

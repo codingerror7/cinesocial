@@ -19,18 +19,20 @@ export const signUp = async (req,res) => {
         
         const user = await User.create({name,email,password : hashPassword, avatar: defaultAvatar, title: "Cinephile"});
         //refresh token mechanism
+        const isProduction = process.env.NODE_ENV === "production" || process.env.NODE_ENVIRONMENT === "production";
         const accessToken = await generateAccessToken(user._id);
         const refreshToken = await generateRefreshToken(user._id);
-        res.cookie("refreshToken",refreshToken,{
-            httpOnly : true,
-            secure : process.env.NODE_ENVIRONMENT === "production",
-            sameSite : process.env.NODE_ENVIRONMENT === "production" ? "none" : "lax",
-            maxAge : 7*24*60*60*1000
-        })
+        res.cookie("refreshToken", refreshToken, {
+            httpOnly: true,
+            secure: isProduction,
+            sameSite: isProduction ? "none" : "lax",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+            path: "/"
+        });
 
         // In development, include refresh token in body as a fallback (so dev env without HTTPS can test)
         const responseBody = { user, accessToken };
-        if (process.env.NODE_ENVIRONMENT !== "production") {
+        if (!isProduction) {
             responseBody.refreshToken = refreshToken;
         }
 
@@ -59,17 +61,19 @@ export const logIn = async (req,res) => {
         return res.status(400).json({message : "password invalid."});
     }
     //refresh token mechanism
+    const isProduction = process.env.NODE_ENV === "production" || process.env.NODE_ENVIRONMENT === "production";
     const accessToken = await generateAccessToken(existUser._id);
     const refreshToken = await generateRefreshToken(existUser._id);
-    res.cookie("refreshToken",refreshToken,{
-        httpOnly : true,
-        secure : process.env.NODE_ENVIRONMENT === "production",
-        sameSite : process.env.NODE_ENVIRONMENT === "production" ? "none" : "lax",
-        maxAge : 7*24*60*60*1000
-    })
+    res.cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: isProduction ? "none" : "lax",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+        path: "/"
+    });
     // In development, include refresh token in body as a fallback
     const responseBody = { user: existUser, accessToken };
-    if (process.env.NODE_ENVIRONMENT !== "production") {
+    if (!isProduction) {
         responseBody.refreshToken = refreshToken;
     }
     return res.status(200).json(responseBody);
@@ -84,9 +88,16 @@ export const logIn = async (req,res) => {
 
 //refresh token
 export const refresh = async (req,res) => {
+    const isProduction = process.env.NODE_ENV === "production" || process.env.NODE_ENVIRONMENT === "production";
     // Accept refresh token from cookie OR request body to support dev environments
     const token = req.cookies.refreshToken || req.body?.refreshToken;
     if(!token){
+        res.clearCookie("refreshToken", {
+            httpOnly: true,
+            secure: isProduction,
+            sameSite: isProduction ? "none" : "lax",
+            path: "/"
+        });
         return res.status(401).json({message : "no refresh token"});
     }
     try {
@@ -94,6 +105,12 @@ export const refresh = async (req,res) => {
         const newAccessToken = await generateAccessToken(decoded.userId);
         res.json({accessToken : newAccessToken});
     } catch (error) {
+        res.clearCookie("refreshToken", {
+            httpOnly: true,
+            secure: isProduction,
+            sameSite: isProduction ? "none" : "lax",
+            path: "/"
+        });
         return res.status(401).json({message : "invalid refresh token"});
     }
 }
@@ -101,7 +118,13 @@ export const refresh = async (req,res) => {
 
 export const logOut = async (req,res) => {
     try {
-        await res.clearCookie("refreshToken");
+        const isProduction = process.env.NODE_ENV === "production" || process.env.NODE_ENVIRONMENT === "production";
+        res.clearCookie("refreshToken", {
+            httpOnly: true,
+            secure: isProduction,
+            sameSite: isProduction ? "none" : "lax",
+            path: "/"
+        });
         return res.status(204).json({message : "user logout successfully"})
     } catch (error) {
         return res.status(400).json({message:error});

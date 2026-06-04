@@ -363,10 +363,13 @@ const page = () => {
                       "
                     >
                       {community.admin?.avatar ? (
-                        <img
+                        <Image
                           src={community.admin.avatar}
                           alt={community.admin.username || "Admin"}
+                          width={40}
+                          height={40}
                           className="w-full h-full object-cover"
+                          unoptimized={true}
                           onError={(e) => {
                             e.currentTarget.style.display = 'none';
                           }}

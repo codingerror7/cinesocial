@@ -9,11 +9,11 @@ const getApiBaseUrl = () => {
   if (typeof window !== "undefined") {
     const host = window.location.hostname;
     const protocol = window.location.protocol;
-    // default frontend dev expects backend on port 8000
-    return `${protocol}//${host}:8000`;
+    const isLocalhost = host === "localhost" || host === "127.0.0.1";
+    return isLocalhost ? `${protocol}//${host}:8000` : window.location.origin;
   }
 
-  return "https://cinesocial-xzt4.onrender.com/";
+  return "https://cinesocial-xzt4.onrender.com";
 };
 
 const normalizeToken = (token) => {

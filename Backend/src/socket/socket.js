@@ -5,15 +5,21 @@ import { createMessage } from "../services/message.service.js";
 import { isMemberOfCommunity } from "../services/room.service.js";
 
 export const initSocket = (server, clientOrigin) => {
+    const allowedOrigins = Array.isArray(clientOrigin)
+        ? clientOrigin
+        : String(clientOrigin).split(",").map(origin => origin.trim()).filter(Boolean);
 
     const io = new Server(server, {
-
         cors: {
-            origin: clientOrigin,
+            origin: (origin, callback) => {
+                if (!origin || allowedOrigins.includes(origin)) {
+                    return callback(null, true);
+                }
+                return callback(new Error(`Socket CORS origin denied: ${origin}`));
+            },
             methods: ["GET", "POST"],
             credentials: true
         }
-
     });
 
     // socket authentication

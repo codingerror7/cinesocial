@@ -184,6 +184,7 @@ const page = () => {
                     alt="avatar"
                     width={100}
                     height={100}
+                    unoptimized={true}
                     className="w-full h-full object-cover"
                   />
                 </div>

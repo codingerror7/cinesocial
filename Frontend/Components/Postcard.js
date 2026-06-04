@@ -112,7 +112,7 @@ const Avatar = ({ src, alt = 'avatar', size = 44, small = false }) => {
       height={finalSize}
       className="rounded-full object-cover w-full h-full"
       onError={() => setErrored(true)}
-      unoptimized={typeof src === 'string' && src.startsWith(getFrontendOrigin())}
+      unoptimized={true}
     />
   );
 };
@@ -406,7 +406,7 @@ const Postcard = () => {
                       onError={(e) => {
                         e.currentTarget.style.display = 'none';
                       }}
-                      unoptimized={typeof comment.user.avatar === 'string' && comment.user.avatar.startsWith(getFrontendOrigin())}
+                      unoptimized={true}
                     />
                   ) : (
                     <span>👤</span>
