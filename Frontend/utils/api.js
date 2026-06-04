@@ -13,7 +13,7 @@ const getApiBaseUrl = () => {
     return `${protocol}//${host}:8000`;
   }
 
-  return "http://localhost:8000";
+  return "https://cinesocial-xzt4.onrender.com/";
 };
 
 const normalizeToken = (token) => {
