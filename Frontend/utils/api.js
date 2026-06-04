@@ -33,6 +33,7 @@ const getAuthToken = () => {
 
 const api = axios.create({
   baseURL: getApiBaseUrl(),
+  withCredentials: true, // Include cookies in requests for refresh token mechanism
 });
 
 // Track if we're currently refreshing the token to prevent multiple refresh calls
