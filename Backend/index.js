@@ -24,30 +24,17 @@ const PORT = process.env.PORT || 5000;
 app.use(compression());   //to compress the response data sent to clients, improving performance and reducing bandwidth usage, especially for large responses like images or JSON data.
 
 //cors for http:
-const CLIENT_ORIGINS = (process.env.CLIENT_ORIGINS || "http://localhost:3000").split(",").map(origin => origin.trim()).filter(Boolean);
+const CLIENT_ORIGIN = process.env.CORS_ORIGIN || "http://localhost:3000";
 
-const corsOptions = {
-    origin: (origin, callback) => {
-        if (!origin || CLIENT_ORIGINS.includes(origin)) {
-            return callback(null, true);
-        }
-        return callback(new Error(`CORS origin denied: ${origin}`));
-    },
-    credentials: true,
+app.use(cors({
+    origin : CLIENT_ORIGIN,
+    credentials : true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Origin', 'X-Requested-With']
-};
-
-if (process.env.NODE_ENV === "production") {
-    app.set("trust proxy", 1);
-}
-
-app.use(cors(corsOptions));
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 //create server
 const server = http.createServer(app);
-
-const CLIENT_ORIGIN = CLIENT_ORIGINS[0] || "http://localhost:3000";
 
 // socket module handles Socket.IO connection and room events
 const io = initSocket(server, CLIENT_ORIGIN);
