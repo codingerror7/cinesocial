@@ -19,7 +19,7 @@ export const getSocket = () => {
 
     socket = io(socketUrl, {
       withCredentials: true,
-      transports: ["websocket"],
+      transports: ["websocket","polling"],
       auth: {
         token,
       },

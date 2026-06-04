@@ -4,7 +4,8 @@ import ClientCommunity from './ClientCommunity';
 
 const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE_URL ||
-  'http://localhost:8000';
+  process.env.NEXT_PUBLIC_BACKEND_URL ||
+  'https://cinesocial-xzt4.onrender.com/';
 
 const Page = async ({ params }) => {
   const resolvedParams = await params;
