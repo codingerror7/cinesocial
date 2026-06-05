@@ -2,10 +2,15 @@ import Sidebar from '@/Components/Sidebar';
 import Loader from '@/Components/Loader';
 import ClientCommunity from './ClientCommunity';
 
-const API_BASE =
-  process.env.NEXT_PUBLIC_API_BASE_URL ||
-  process.env.NEXT_PUBLIC_BACKEND_URL ||
-  'https://cinesocial-xzt4.onrender.com/';
+const getApiBase = () => {
+  const base =
+    process.env.NEXT_PUBLIC_API_BASE_URL ||
+    process.env.NEXT_PUBLIC_BACKEND_URL ||
+    'https://cinesocial-xzt4.onrender.com';
+  return base.replace(/\/+$/, '');
+};
+
+const API_BASE = getApiBase();
 
 const Page = async ({ params }) => {
   const resolvedParams = await params;

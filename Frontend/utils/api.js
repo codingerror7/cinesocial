@@ -3,14 +3,16 @@ import axios from "axios";
 
 const getApiBaseUrl = () => {
   if (process.env.NEXT_PUBLIC_API_BASE_URL) {
-    return process.env.NEXT_PUBLIC_API_BASE_URL;
+    return process.env.NEXT_PUBLIC_API_BASE_URL.replace(/\/+$/, "");
   }
 
   if (typeof window !== "undefined") {
     const host = window.location.hostname;
     const protocol = window.location.protocol;
     const isLocalhost = host === "localhost" || host === "127.0.0.1";
-    return isLocalhost ? `${protocol}//${host}:8000` : window.location.origin;
+    if (isLocalhost) {
+      return `${protocol}//${host}:8000`;
+    }
   }
 
   return "https://cinesocial-xzt4.onrender.com";

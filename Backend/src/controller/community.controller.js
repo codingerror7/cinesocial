@@ -152,8 +152,16 @@ export const getCommunityBySlug = async (req,res) => {
         if(!slug){
             return res.status(400).json({message : "community slug missing"});
         }
-        const normalizedSlug = normalizeSlug(slug);
-        const community = await Community.findOne({slug:normalizedSlug}).populate('admin.userId', 'avatar username');
+        
+        let query = {};
+        if (mongoose.Types.ObjectId.isValid(slug)) {
+            query = { _id: slug };
+        } else {
+            const normalizedSlug = normalizeSlug(slug);
+            query = { slug: normalizedSlug };
+        }
+
+        const community = await Community.findOne(query).populate('admin.userId', 'avatar username');
         if(!community){
             return res.status(404).json({message : "community not found"});
         }
