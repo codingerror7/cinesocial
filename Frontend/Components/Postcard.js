@@ -534,14 +534,14 @@ const Postcard = () => {
   key={post._id}
   className="
     group relative overflow-hidden
-    rounded-3xl border border-white/[0.08]
+    rounded-3xl max-sm:rounded-2xl border border-white/[0.08]
     bg-black/30
     backdrop-blur-xl
     shadow-[0_10px_40px_rgba(0,0,0,0.45)]
     hover:border-white/[0.14]
     hover:shadow-[0_15px_60px_rgba(0,0,0,0.55)]
     transition-all duration-500
-    p-4 sm:p-5 mb-5
+    p-3 sm:p-5 mb-4
   "
 >
 
@@ -562,7 +562,7 @@ const Postcard = () => {
         rounded-full p-[2px]
       ">
         <div className="
-          w-14 h-14 sm:w-12 sm:h-12
+          w-10 h-10 sm:w-12 sm:h-12
           rounded-full overflow-hidden
           bg-black/40 border border-white/10
         ">

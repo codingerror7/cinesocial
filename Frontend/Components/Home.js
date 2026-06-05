@@ -18,7 +18,7 @@ const Home = () => {
 
   <main className="lg:ml-60 xl:pr-[360px]">
 
-    <div className="max-w-4xl mx-auto px-4">
+    <div className="max-w-4xl mx-auto px-2 sm:px-4">
       <Feed />
     </div>
 
