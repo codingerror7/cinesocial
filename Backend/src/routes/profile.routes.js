@@ -4,7 +4,7 @@ import authMiddleware from "../middlewares/auth.middleware.js";
 
 const profileRouter = express.Router();
 
-profileRouter.post("/create-profile",createProfile);
+profileRouter.post("/create-profile",authMiddleware, createProfile);
 profileRouter.get("/get-profile/:id",authMiddleware,getProfile);
 
 export default profileRouter;

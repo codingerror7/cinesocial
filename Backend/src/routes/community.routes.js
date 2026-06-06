@@ -11,7 +11,7 @@ import authMiddleware from "../middlewares/auth.middleware.js";
 
 const communityRoutes = express.Router();
 
-communityRoutes.post("/create-community", createCommunities);
+communityRoutes.post("/create-community", authMiddleware, createCommunities);
 communityRoutes.post("/join-community", authMiddleware, joinCommunity);
 communityRoutes.get("/community-messages/:communityId", authMiddleware, getCommunityMessages);
 communityRoutes.get("/get-communities", getCommunities);
