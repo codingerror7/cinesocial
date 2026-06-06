@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext.js';
 import { MdMovieFilter } from "react-icons/md";
+import { IoIosEyeOff, IoMdEye } from "react-icons/io";
 
 
 const Signup = () => {
@@ -14,6 +15,7 @@ const Signup = () => {
   const router = useRouter();
   const { login } = useAuth();
   const [isSignUp, setisSignUp] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const onSubmit = async (data) => {
     try {
@@ -245,25 +247,33 @@ const Signup = () => {
 
       {/* PASSWORD */}
       <div className="space-y-1.5">
-
-        <input
-          type="password"
-          placeholder="Password"
-          {...register("password", { required: true })}
-          className="
-          w-full
-          px-3.5 sm:px-4
-          py-2.5 sm:py-3
-          rounded-lg
-          bg-white/5
-          border border-white/10
-          text-[13px] sm:text-base
-          text-white placeholder-white/40
-          focus:outline-none focus:border-red-500
-          focus:ring-2 focus:ring-red-500/20
-          transition
-        "
-        />
+        <div className="relative">
+          <input
+            type={showPassword ? "text" : "password"}
+            placeholder="Password"
+            {...register("password", { required: true })}
+            className="
+            w-full
+            pl-3.5 pr-10 sm:pl-4 sm:pr-12
+            py-2.5 sm:py-3
+            rounded-lg
+            bg-white/5
+            border border-white/10
+            text-[13px] sm:text-base
+            text-white placeholder-white/40
+            focus:outline-none focus:border-red-500
+            focus:ring-2 focus:ring-red-500/20
+            transition
+          "
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition-colors cursor-pointer flex items-center justify-center"
+          >
+            {showPassword ? <IoIosEyeOff size={20} /> : <IoMdEye size={20} />}
+          </button>
+        </div>
 
         {errors.password && (
           <p className="text-[11px] text-red-400">
