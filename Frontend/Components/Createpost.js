@@ -304,8 +304,15 @@ function ActionBar({ onImageClick, onPollClick, onPost }) {
 //--------------------------------------------------------
 
 const CreatePost = () => {
-  
   const router = useRouter();
+  const { user } = useAuth();
+
+  useEffect(() => {
+    const storedUser = user || JSON.parse(localStorage.getItem('user') || 'null');
+    if (!storedUser?._id) {
+      router.push("/Login");
+    }
+  }, [user, router]);
 
   const params = useParams();
   const [postType, setPostType] = useState("story");
@@ -333,8 +340,6 @@ const CreatePost = () => {
     }
   };
 
-  const { user } = useAuth();
-  
   // Get user avatar from context or localStorage, with proper fallback
   const storedUser = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || 'null') : null;
   const currentUser = user || storedUser;

@@ -15,7 +15,7 @@ const Navbar = () => {
   const handleProfileClick = () => {
     const id = user?._id;
     if (id) router.push(`/Profile/${id}`);
-    else router.push('/Profile/123');
+    else router.push('/Login');
   };
 
   return (

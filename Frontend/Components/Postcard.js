@@ -2,6 +2,7 @@
 import React from 'react'
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';     //image optimization in nextjs, lazy loading, responsive images, making images light-weight and more efficient image handling.
+import { useRouter } from 'next/navigation';
 import Loader from '@/Components/Loader'
 import { api, getAuthToken } from '@/utils/api.js';
 import { useAuth } from '@/context/AuthContext.js';
@@ -118,6 +119,7 @@ const Avatar = ({ src, alt = 'avatar', size = 44, small = false }) => {
 };
 
 const Postcard = () => {
+  const router = useRouter();
   const [postData, setpostData] = useState([]);   // jab multiple data backend se aa rha hai tab empty array use krte hain and jab single document aa rha tab null use krte hain.
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -138,6 +140,11 @@ const Postcard = () => {
   const handleLike = async (postId) => {
     if (!postId) {
       console.warn("Missing postId for like toggle");
+      return;
+    }
+
+    if (!user?._id) {
+      router.push("/Login");
       return;
     }
 
@@ -302,6 +309,10 @@ const Postcard = () => {
   }, [hasMore, loadingMore, nextCursor, fetchMorePosts]);
 
   const handleOpenComments = async (postId) => {
+    if (!user?._id) {
+      router.push("/Login");
+      return;
+    }
     setCommentError("");
     setCommentInput("");
     setCommentModalPostId(postId);
@@ -481,6 +492,11 @@ const Postcard = () => {
   const handleVote = async (postId, optionIndex) => {
     if (!postId) {
       console.warn('Missing postId for vote');
+      return;
+    }
+
+    if (!user?._id) {
+      router.push("/Login");
       return;
     }
 

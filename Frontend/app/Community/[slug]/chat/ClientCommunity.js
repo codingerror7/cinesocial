@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { getSocket } from "@/utils/socket";
 import { api } from "@/utils/api.js";
 import { useAuth } from "@/context/AuthContext.js";
@@ -16,6 +17,7 @@ const isCommunityMember = (community, userId) => {
 
 const ClientCommunity = ({ initialCommunity }) => {
   const { user } = useAuth();
+  const router = useRouter();
   const [community, setCommunity] = useState(initialCommunity);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
@@ -131,7 +133,7 @@ const ClientCommunity = ({ initialCommunity }) => {
   const handleJoin = async () => {
     if (!communityId) return;
     if (!currentUser?._id) {
-      setError("Please log in to join this community.");
+      router.push("/Login");
       return;
     }
 

@@ -1,5 +1,5 @@
 "use client"
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Sidebar from '@/Components/Sidebar'
 import Navbar2 from '@/Components/Navbar2'
 import MobileTopBar from '@/Components/MobileTopBar'
@@ -32,6 +32,13 @@ const page = () => {
   const { user } = useAuth();
   const [selectedAvatar, setSelectedAvatar] = useState(null);
   const [selectedGenres, setSelectedGenres] = useState([]);
+
+  useEffect(() => {
+    const storedUser = user || JSON.parse(localStorage.getItem('user') || 'null');
+    if (!storedUser?._id) {
+      router.push("/Login");
+    }
+  }, [user, router]);
 
   const {
     register,

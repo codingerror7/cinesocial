@@ -61,7 +61,10 @@ const page = () => {
 
   useEffect(() => {
     const storedUser = user || JSON.parse(localStorage.getItem('user') || 'null');
-    if (!storedUser?._id) return;
+    if (!storedUser?._id) {
+      router.push("/Login");
+      return;
+    }
 
     const fetchProfile = async () => {
       try {

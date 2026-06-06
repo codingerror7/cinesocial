@@ -19,6 +19,12 @@ const page = () => {
   const [joiningCommunities, setJoiningCommunities] = useState({});
 
   useEffect(() => {
+    const storedUser = user || JSON.parse(localStorage.getItem('user') || 'null');
+    if (!storedUser?._id) {
+      router.push("/Login");
+      return;
+    }
+
     const fetchCommunities = async () => {
       try {
         setLoading(true);

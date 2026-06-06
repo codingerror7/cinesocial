@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext.js";
 
 import { FaHome } from "react-icons/fa";
@@ -42,6 +42,7 @@ const navItems = [
 
 const MobileBottomNav = () => {
   const pathname = usePathname();
+  const router = useRouter();
   const { user } = useAuth();
   const [mounted, setMounted] = React.useState(false);
 
@@ -52,6 +53,14 @@ const MobileBottomNav = () => {
   const profileHref = (mounted && user?._id)
     ? `/Profile/${user._id}`
     : "/Profile/123";
+
+  const handleNavClick = (e, itemHref) => {
+    const protectedPaths = ["/Communities", "/Post", "/Profile"];
+    if (protectedPaths.includes(itemHref) && !user?._id) {
+      e.preventDefault();
+      router.push("/Login");
+    }
+  };
 
   return (
     <div
@@ -98,6 +107,7 @@ const MobileBottomNav = () => {
             <Link
               key={item.label}
               href={href}
+              onClick={(e) => handleNavClick(e, item.href)}
               className={`
                 relative
                 flex flex-1 flex-col

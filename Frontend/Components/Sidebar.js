@@ -40,6 +40,13 @@ const Sidebar = () => {
     setTimeout(()=>router.push("/Login"), 2000);
   }
 
+  const handleNavClick = (e) => {
+    if (!user?._id) {
+      e.preventDefault();
+      router.push("/Login");
+    }
+  };
+
   return (
     <aside className="fixed left-0 top-0 h-screen w-68 bg-gradient-to-b from-[#0e0e14] to-black border-r border-white/10 flex flex-col z-100 py-2 hidden lg:flex">
       
@@ -64,10 +71,10 @@ const Sidebar = () => {
         <Link href="/">
           <NavItem text="Home" icon={<FaHome />} active={pathname === "/"} />
         </Link>
-        <Link href="/Communities">
+        <Link href="/Communities" onClick={handleNavClick}>
           <NavItem text="Communities" icon={<MdGroups2 />} active={pathname === "/Communities"} />
         </Link>
-        <Link href="/Post">
+        <Link href="/Post" onClick={handleNavClick}>
           <NavItem text="Create Post" icon={<IoIosCreate />} active={pathname === "/Post"} />
         </Link>
 
@@ -79,10 +86,10 @@ const Sidebar = () => {
         <Link href="/Chatbot">
           <NavItem text="Recommendations" icon={<GiArtificialIntelligence />} active={pathname === "/Chatbot"} />
         </Link>
-        <Link href="/CreateCommunity">
+        <Link href="/CreateCommunity" onClick={handleNavClick}>
           <NavItem text="Create Community" icon={<BsChatRightTextFill />} active={pathname === "/CreateCommunity"} />
         </Link>
-        <Link href={`/Profile/${userId}`}>
+        <Link href={`/Profile/${userId}`} onClick={handleNavClick}>
           <NavItem text="Profile" icon={<CgProfile />} active={pathname === `/Profile/${userId}`} />
         </Link>
 
