@@ -43,10 +43,15 @@ const navItems = [
 const MobileBottomNav = () => {
   const pathname = usePathname();
   const { user } = useAuth();
+  const [mounted, setMounted] = React.useState(false);
 
-  const profileHref = user?._id
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const profileHref = (mounted && user?._id)
     ? `/Profile/${user._id}`
-    : "/";
+    : "/Profile/123";
 
   return (
     <div
@@ -85,9 +90,9 @@ const MobileBottomNav = () => {
               : item.href;
 
           const isActive =
-            href === "/"
+            item.href === "/"
               ? pathname === "/"
-              : pathname.startsWith(href);
+              : pathname.startsWith(item.href);
 
           return (
             <Link
