@@ -24,8 +24,8 @@ const PORT = process.env.PORT || 5000;
 app.use(compression());   //to compress the response data sent to clients, improving performance and reducing bandwidth usage, especially for large responses like images or JSON data.
 
 //cors for http:
-const CLIENT_ORIGIN = process.env.CORS_ORIGIN ||  "http://localhost:3000";
-const VERCEL_ORIGIN = process.env.VERCEL_ORIGIN || "http://localhost:3000";
+const CLIENT_ORIGIN = (process.env.CORS_ORIGIN || "http://localhost:3000").replace(/\/+$/, "");
+const VERCEL_ORIGIN = (process.env.VERCEL_ORIGIN || "https://cinesocial-webapp.vercel.app").replace(/\/+$/, "");
 
 app.use(cors({
     origin : [CLIENT_ORIGIN, VERCEL_ORIGIN],
@@ -38,7 +38,7 @@ app.use(cors({
 const server = http.createServer(app);
 
 // socket module handles Socket.IO connection and room events
-const io = initSocket(server, CLIENT_ORIGIN);
+const io = initSocket(server, [CLIENT_ORIGIN, VERCEL_ORIGIN]);
 
 // Allow images from Cloudinary
 app.use((req, res, next) => {

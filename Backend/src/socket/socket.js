@@ -5,9 +5,10 @@ import { createMessage } from "../services/message.service.js";
 import { isMemberOfCommunity } from "../services/room.service.js";
 
 export const initSocket = (server, clientOrigin) => {
-    const allowedOrigins = Array.isArray(clientOrigin)
+    const allowedOrigins = (Array.isArray(clientOrigin)
         ? clientOrigin
-        : String(clientOrigin).split(",").map(origin => origin.trim()).filter(Boolean);
+        : String(clientOrigin).split(",").map(origin => origin.trim()).filter(Boolean)
+    ).map(origin => origin.replace(/\/+$/, ""));
 
     const io = new Server(server, {
         cors: {
