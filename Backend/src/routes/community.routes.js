@@ -14,7 +14,7 @@ const communityRoutes = express.Router();
 communityRoutes.post("/create-community", authMiddleware, createCommunities);
 communityRoutes.post("/join-community", authMiddleware, joinCommunity);
 communityRoutes.get("/community-messages/:communityId", authMiddleware, getCommunityMessages);
-communityRoutes.get("/get-communities", getCommunities);
+communityRoutes.get("/get-communities", authMiddleware, getCommunities);
 communityRoutes.get("/joined-communities/:id", getJoinedCommunities);
 communityRoutes.get("/get-community/:slug", getCommunityBySlug);
 

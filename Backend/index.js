@@ -24,10 +24,11 @@ const PORT = process.env.PORT || 5000;
 app.use(compression());   //to compress the response data sent to clients, improving performance and reducing bandwidth usage, especially for large responses like images or JSON data.
 
 //cors for http:
-const CLIENT_ORIGIN = process.env.CORS_ORIGIN || "http://localhost:3000";
+const CLIENT_ORIGIN = process.env.CORS_ORIGIN ||  "http://localhost:3000";
+const VERCEL_ORIGIN = process.env.VERCEL_ORIGIN || "http://localhost:3000";
 
 app.use(cors({
-    origin : CLIENT_ORIGIN,
+    origin : [CLIENT_ORIGIN, VERCEL_ORIGIN],
     credentials : true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']

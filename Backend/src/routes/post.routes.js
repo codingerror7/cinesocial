@@ -6,7 +6,7 @@ import pollrateLimit from "../middlewares/pollrateLimiter.middlewares.js";
 
 const postRouter = express.Router();
 
-postRouter.post("/post/create-post", upload.single("media"), createPost);
+postRouter.post("/post/create-post", authMiddleware, upload.single("media"), createPost);
 postRouter.get("/post/feed",getPost);
 postRouter.post("/post/vote/:postId",authMiddleware, pollrateLimit, voteOnPoll);
 postRouter.get("/post/user/:userId", getUserPosts);
