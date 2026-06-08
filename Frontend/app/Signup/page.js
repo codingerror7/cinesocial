@@ -248,25 +248,34 @@ const Signup = () => {
 
             {/* PASSWORD */}
             <div className="space-y-1.5">
-
-              <input
-                type="password"
-                placeholder="Password"
-                {...register("password", { required: true })}
-                className="
-          w-full
-          px-3.5 sm:px-4
-          py-2.5 sm:py-3
-          rounded-lg
-          bg-white/5
-          border border-white/10
-          text-[13px] sm:text-base
-          text-white placeholder-white/40
-          focus:outline-none focus:border-red-500
-          focus:ring-2 focus:ring-red-500/20
-          transition
-        "
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Password"
+                  {...register("password", { required: true })}
+                  className="
+            w-full
+            px-3.5 sm:px-4
+            py-2.5 sm:py-3
+            pr-10 sm:pr-12
+            rounded-lg
+            bg-white/5
+            border border-white/10
+            text-[13px] sm:text-base
+            text-white placeholder-white/40
+            focus:outline-none focus:border-red-500
+            focus:ring-2 focus:ring-red-500/20
+            transition
+          "
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition"
+                >
+                  {showPassword ? <IoIosEyeOff size={20} /> : <IoMdEye size={20} />}
+                </button>
+              </div>
 
               {errors.password && (
                 <p className="text-[11px] text-red-400">
