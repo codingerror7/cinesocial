@@ -86,6 +86,8 @@ const startServer = async () => {
         await connectRedis();
         server.listen(PORT, "0.0.0.0", ()=>{
             console.log(`Server running at ${PORT}`);
+            console.log("client origin : ", CLIENT_ORIGIN);
+            console.log("vercel origin : ", VERCEL_ORIGIN);
         });
     }
      catch(error){
