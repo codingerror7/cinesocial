@@ -1,6 +1,7 @@
 # 🎬 CineSocial — Social Platform for Cinephiles
 
-🔗 - https://cinesocial-app.onrender.com/
+🔗 RENDER - https://cinesocial-app.onrender.com/
+🔗 VERCEL = https://cinesocial-webapp.vercel.app/
 
 ## 🚀 Overview
 
