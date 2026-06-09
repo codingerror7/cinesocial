@@ -155,11 +155,6 @@ export const getPost = async (req,res) => {
 
         const nextCursor = post.length > 0 ? post[post.length - 1].createdAt : null;
         
-        console.log(`Retrieved ${post.length} posts from database`);
-        post.forEach((p, idx) => {
-            console.log(`Post ${idx}: media count = ${p.media?.length || 0}, media = ${JSON.stringify(p.media)}`);
-        });
-        
         // Attempt to detect authenticated user from Authorization header so
         // we can mark which posts the user already liked.
         let likedSet = new Set();
