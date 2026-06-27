@@ -359,7 +359,7 @@ const ClientCommunity = ({ initialCommunity }) => {
               {messages.map((message, index) => {
 
                 const isOwnMessage =
-                  message.user === user?._id;
+                  String(message.user || message.sender) === String(currentUser?._id);
 
                 return (
                   <div

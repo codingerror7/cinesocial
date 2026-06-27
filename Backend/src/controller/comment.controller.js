@@ -45,7 +45,7 @@ export const createComment = async (req,res)=>{
 export const getComments = async (req,res) => {
     try {
         const {postId} = req.params;
-        const comments = await Comment.find({post : postId}).sort({ createdAt: -1 });
+        const comments = await Comment.find({post : postId}).sort({ createdAt: -1 }).lean();
         return res.status(200).json(comments);
     }
     catch(err){

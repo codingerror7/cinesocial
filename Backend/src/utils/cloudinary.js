@@ -21,6 +21,13 @@ const uploadOnCloudinary = async (localFilePath) => {
         const imageUrl = response.secure_url || response.url;
         console.log("File uploaded successfully to Cloudinary");
         console.log("Image URL:", imageUrl);
+
+        // Delete the temporary file from the server
+        try {
+            fs.unlinkSync(localFilePath);
+        } catch (unlinkError) {
+            console.error("Error deleting temp file after success:", unlinkError);
+        }
         
         // Return the full response object so we have access to all properties
         return {

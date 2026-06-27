@@ -1,12 +1,12 @@
 import mongoose from 'mongoose'
 import dotenv from 'dotenv'
 
-const connectDB = () => {
+const connectDB = async () => {
     try {
-        mongoose.connect(process.env.MONGO_URL);
         if(!process.env.MONGO_URL){
             throw new Error("Mongo url variable is not present in dotenv file.");
         }
+        await mongoose.connect(process.env.MONGO_URL);
         console.log("database connected...no error");
     } catch (error) {
         console.log("error:",error);

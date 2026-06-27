@@ -128,7 +128,31 @@ export const getPost = async (req,res) => {
         const cached = await redisClient.get(cacheKey);
         if(cached){
           console.log("Cache hit for first page feed");
-          return res.status(200).json(JSON.parse(cached));
+          const cachedData = JSON.parse(cached);
+          
+          // Dynamically compute user-specific likes flag
+          let likedSet = new Set();
+          try {
+            const header = req.headers?.authorization;
+            if (header && header.startsWith("Bearer ")) {
+              const token = header.split(" ")[1];
+              const decoded = jwt.verify(token, process.env.ACCESS_SECRET);
+              const userId = decoded?.userId;
+              if (userId && cachedData.post && cachedData.post.length > 0) {
+                const likedDocs = await Like.find({ user: userId, post: { $in: cachedData.post.map(p => p._id) } }).select('post').lean();
+                likedDocs.forEach(d => likedSet.add(String(d.post)));
+              }
+            }
+          } catch (e) {
+            console.warn('Feed: token parse/verify failed on cache hit:', e?.message || e);
+          }
+
+          cachedData.post = (cachedData.post || []).map(p => ({
+            ...p,
+            isLiked: likedSet.has(String(p._id))
+          }));
+
+          return res.status(200).json(cachedData);
         }
         console.log("Cache miss for first page feed");
       }
@@ -155,6 +179,18 @@ export const getPost = async (req,res) => {
 
         const nextCursor = post.length > 0 ? post[post.length - 1].createdAt : null;
         
+        // Cache the raw page data (without user-specific liked flags)
+        if(isFirstPage){
+          const rawResponseData = {
+            success: true,
+            message: "post fetched successfully.",
+            post,
+            nextCursor,
+            hasMore: post.length === limit
+          };
+          await redisClient.setEx(cacheKey, 120, JSON.stringify(rawResponseData));
+        }
+
         // Attempt to detect authenticated user from Authorization header so
         // we can mark which posts the user already liked.
         let likedSet = new Set();
@@ -175,11 +211,10 @@ export const getPost = async (req,res) => {
         }
 
         // Attach isLiked to posts using the set we built
-        const postsWithLikeFlag = post.map(p => {
-          const po = p.toObject ? p.toObject() : { ...p };
-          po.isLiked = likedSet.has(String(p._id));
-          return po;
-        });
+        const postsWithLikeFlag = post.map(p => ({
+          ...p,
+          isLiked: likedSet.has(String(p._id))
+        }));
 
         const responseData = {
           success : true,
@@ -189,9 +224,6 @@ export const getPost = async (req,res) => {
           hasMore : postsWithLikeFlag.length === limit
         };
 
-        if(isFirstPage){
-          await redisClient.setEx(cacheKey,120, JSON.stringify    (responseData));
-        }  //delete cache after 2 mins, so that users can see new posts after every 2 mins on first page feed.
         return res.status(200).json(responseData);
 
     } catch (error) {
@@ -245,7 +277,7 @@ export const getUserPosts = async (req, res) => {
       return res.status(400).json({ message: "userId is required" });
     }
 
-    const userPosts = await Post.find({ "user.userId": userId }).sort({ createdAt: -1 });
+    const userPosts = await Post.find({ "user.userId": userId }).sort({ createdAt: -1 }).lean();
 
     if (!userPosts || userPosts.length === 0) {
       return res.status(200).json({

@@ -7,7 +7,7 @@ const authRouter = express.Router();
 authRouter.post("/signup",authrateLimit,signUp);
 authRouter.post("/login",authrateLimit,logIn);
 authRouter.post("/refresh",refresh);
-authRouter.post("/logout",authrateLimit,logOut);
+authRouter.post("/logout",logOut);
 authRouter.delete("/delete-account/:id", deleteAccount);
 
 export default authRouter;

@@ -53,8 +53,11 @@ const communitySchema = new mongoose.Schema({
 },{timestamps : true});
 
 // optimized indexes
-
-communitySchema.index({ createdAt : -1,title: "text" });
+communitySchema.index({ slug: 1 }, { unique: true });
+communitySchema.index({ members: 1 });
+communitySchema.index({ "admin.userId": 1 });
+communitySchema.index({ createdAt: -1 });
+communitySchema.index({ title: "text" });
 
 const Community = mongoose.model("Community",communitySchema);
 

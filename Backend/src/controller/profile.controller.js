@@ -107,7 +107,7 @@ export const getProfile = async (req,res) => {
             }
         }
 
-        const profile = await User.findById(id).select("-password");  //select is a mongoose query used to include and exclude the values, here "minus" sign is telling mongodb to exclude password field in the document and not to send password with response.
+        const profile = await User.findById(id).select("-password").lean();  //select is a mongoose query used to include and exclude the values, here "minus" sign is telling mongodb to exclude password field in the document and not to send password with response.
         if(!profile){
             return res.status(404).json({message : "profile not found"});
         }

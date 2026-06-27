@@ -34,8 +34,7 @@ const commentSchema = new mongoose.Schema({
 
 
 //indexing for optimized query search
-// commentSchema.index({userId : 1});
-// commentSchema.index({createdAt : -1});
+commentSchema.index({ post: 1, createdAt: -1 });
 
 const Comment = mongoose.model("Comment",commentSchema);
 
