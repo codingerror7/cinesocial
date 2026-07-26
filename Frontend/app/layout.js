@@ -3,9 +3,7 @@ import "./globals.css";
 import { AuthProvider } from "../context/AuthContext.js";
 import QueryProvider from "../Provider/QueryProvider.js";
 import { PopupProvider } from "../context/PopupContext.js";
-import dynamic from "next/dynamic";
-
-const PopupContainer = dynamic(() => import("../Components/PopupContainer.js"), { ssr: false });
+import PopupContainer from "../Components/PopupContainer.js";
 
 export const metadata = {
   title: "Cinesocial-A platform for cinephiles",
