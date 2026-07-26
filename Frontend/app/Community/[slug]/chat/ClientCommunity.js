@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { getSocket } from "@/utils/socket";
 import { api } from "@/utils/api.js";
 import { useAuth } from "@/context/AuthContext.js";
+import { usePopup } from "@/context/PopupContext.js";
 
 const isCommunityMember = (community, userId) => {
   if (!community || !userId) return false;
@@ -18,6 +19,7 @@ const isCommunityMember = (community, userId) => {
 const ClientCommunity = ({ initialCommunity }) => {
   const { user } = useAuth();
   const router = useRouter();
+  const { showModal, showToast } = usePopup();
   const [community, setCommunity] = useState(initialCommunity);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
@@ -133,7 +135,7 @@ const ClientCommunity = ({ initialCommunity }) => {
   const handleJoin = async () => {
     if (!communityId) return;
     if (!currentUser?._id) {
-      router.push("/Login");
+      showModal("login");
       return;
     }
 
@@ -146,6 +148,7 @@ const ClientCommunity = ({ initialCommunity }) => {
         const updated = response.data.community;
         setCommunity(updated);
         setError("");
+        showToast("success", "Successfully joined the community!");
         const socket = getSocket();
         if (socket && updated?._id) {
           socket.emit("join-community", { communityId: updated._id }, (res) => {
@@ -153,14 +156,14 @@ const ClientCommunity = ({ initialCommunity }) => {
               setRoomJoined(true);
             } else {
               setRoomJoined(false);
-              setError(res?.message || "Could not join chat room after joining community.");
+              showToast("error", res?.message || "Could not join chat room.");
             }
           });
         }
       }
     } catch (err) {
       console.error("Error joining community:", err);
-      setError(err?.response?.data?.message || "Failed to join community.");
+      showToast("error", err?.response?.data?.message || "Failed to join community.");
     } finally {
       setJoining(false);
     }

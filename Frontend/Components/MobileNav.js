@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext.js";
+import { usePopup } from "@/context/PopupContext.js";
 
 import { FaHome } from "react-icons/fa";
 import { MdGroups2 } from "react-icons/md";
@@ -44,6 +45,7 @@ const MobileBottomNav = () => {
   const pathname = usePathname();
   const router = useRouter();
   const { user } = useAuth();
+  const { showModal, checkDraftAndNavigate } = usePopup();
   const [mounted, setMounted] = React.useState(false);
 
   React.useEffect(() => {
@@ -55,11 +57,18 @@ const MobileBottomNav = () => {
     : "/Profile/123";
 
   const handleNavClick = (e, itemHref) => {
-    const protectedPaths = ["/Communities", "/Post", "/Profile"];
-    if (protectedPaths.includes(itemHref) && !user?._id) {
-      e.preventDefault();
-      router.push("/Login");
+    e.preventDefault();
+    const isProfilePath = itemHref.startsWith("/Profile");
+    const isProtected = ["/Communities", "/Post", "/CreateCommunity"].includes(itemHref) || isProfilePath;
+    
+    if (isProtected && !user?._id) {
+      showModal("login");
+      return;
     }
+
+    checkDraftAndNavigate(() => {
+      router.push(itemHref);
+    });
   };
 
   return (
@@ -107,7 +116,7 @@ const MobileBottomNav = () => {
             <Link
               key={item.label}
               href={href}
-              onClick={(e) => handleNavClick(e, item.href)}
+              onClick={(e) => handleNavClick(e, href)}
               className={`
                 relative
                 flex flex-1 flex-col

@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation';
 import Loader from '@/Components/Loader'
 import { api, getAuthToken } from '@/utils/api.js';
 import { useAuth } from '@/context/AuthContext.js';
+import { usePopup } from '@/context/PopupContext.js';
+import { Share2 } from 'lucide-react';
 import { AiOutlineLike } from "react-icons/ai";
 import { AiFillLike } from "react-icons/ai";
 import { FaRegComment } from "react-icons/fa";
@@ -136,6 +138,7 @@ const Postcard = () => {
   const [commentPosting, setCommentPosting] = useState(false);
   const [commentError, setCommentError] = useState("");
   const { user } = useAuth();
+  const { showModal, showToast } = usePopup();
 
   const handleLike = async (postId) => {
     if (!postId) {
@@ -144,7 +147,7 @@ const Postcard = () => {
     }
 
     if (!user?._id) {
-      router.push("/Login");
+      showModal("login");
       return;
     }
 
@@ -194,6 +197,47 @@ const Postcard = () => {
         delete next[postId];
         return next;
       });
+    }
+  };
+
+  const handleShareClick = (postId) => {
+    const postLink = `${getFrontendOrigin()}/Post/${postId}`;
+    if (window.innerWidth < 640) {
+      showModal("bottomSheetActions", {
+        title: "Share Options",
+        actions: [
+          {
+            label: "Copy Link",
+            icon: Share2,
+            onClick: () => {
+              navigator.clipboard.writeText(postLink)
+                .then(() => showToast("success", "Post link copied successfully", 2000))
+                .catch(() => showToast("error", "Failed to copy link"));
+            }
+          },
+          {
+            label: "Share on WhatsApp",
+            onClick: () => {
+              window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent("Check out this post on CineSocial: " + postLink)}`, "_blank");
+            }
+          },
+          {
+            label: "Share on Twitter",
+            onClick: () => {
+              window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent("Check out this post on CineSocial: " + postLink)}`, "_blank");
+            }
+          }
+        ]
+      });
+    } else {
+      navigator.clipboard.writeText(postLink)
+        .then(() => {
+          showToast("success", "Post link copied successfully", 2000);
+        })
+        .catch((err) => {
+          console.error("Failed to copy link: ", err);
+          showToast("error", "Failed to copy link");
+        });
     }
   };
 
@@ -310,7 +354,7 @@ const Postcard = () => {
 
   const handleOpenComments = async (postId) => {
     if (!user?._id) {
-      router.push("/Login");
+      showModal("login");
       return;
     }
     setCommentError("");
@@ -368,6 +412,7 @@ const Postcard = () => {
         [postId]: [createdComment, ...(prev[postId] || [])],
       }));
       setCommentInput("");
+      showToast("success", "Comment added successfully");
       setpostData((prev) =>
         Array.isArray(prev)
           ? prev.map((item) => {
@@ -496,7 +541,7 @@ const Postcard = () => {
     }
 
     if (!user?._id) {
-      router.push("/Login");
+      showModal("login");
       return;
     }
 
@@ -828,6 +873,24 @@ const Postcard = () => {
 
       <span className="text-sm font-medium">
         {post.commentsCount}
+      </span>
+    </button>
+
+    {/* SHARE */}
+    <button
+      onClick={() => handleShareClick(post._id || post.id)}
+      className="
+        flex items-center gap-2
+        text-white/60 hover:text-blue-300
+        transition duration-300 cursor-pointer
+      "
+    >
+      <span className="text-lg sm:text-xl">
+        <Share2 className="w-4.5 h-4.5" />
+      </span>
+
+      <span className="text-sm font-medium">
+        Share
       </span>
     </button>
   </div>

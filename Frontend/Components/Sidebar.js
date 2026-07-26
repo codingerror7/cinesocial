@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "../context/AuthContext.js";
+import { usePopup } from "../context/PopupContext.js";
 import { FaHome } from "react-icons/fa";
 import { MdGroups2 } from "react-icons/md";
 import { IoIosCreate } from "react-icons/io";
@@ -29,22 +30,36 @@ const Sidebar = () => {
   const displayName = user?.name || "Cinephile";
   const { logout } = useAuth();
   const [isLoggedOut, setIsLoggedOut] = useState(false);
+  const { showModal, showToast, checkDraftAndNavigate } = usePopup();
 
   const handleLogOut = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
-    logout();
-    setIsLoggedOut(true);
-    console.log("Logged out successfully.");
-    setTimeout(()=>router.push("/Login"), 2000);
-  }
+    showModal("confirm", {
+      title: "Confirm Logout",
+      message: "Are you sure you want to log out? You will need to sign in again to access your account.",
+      confirmText: "Logout",
+      cancelText: "Cancel",
+      isDangerous: true,
+      onConfirm: () => {
+        localStorage.removeItem("user");
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        logout();
+        setIsLoggedOut(true);
+        showToast("success", "Logged out successfully!");
+        setTimeout(() => router.push("/Login"), 1500);
+      }
+    });
+  };
 
-  const handleNavClick = (e) => {
-    if (!user?._id) {
-      e.preventDefault();
-      router.push("/Login");
+  const handleLinkClick = (e, href, authRequired = false) => {
+    e.preventDefault();
+    if (authRequired && !user?._id) {
+      showModal("login");
+      return;
     }
+    checkDraftAndNavigate(() => {
+      router.push(href);
+    });
   };
 
   return (
@@ -68,13 +83,13 @@ const Sidebar = () => {
           Main
         </div>  
 
-        <Link href="/">
+        <Link href="/" onClick={(e) => handleLinkClick(e, "/")}>
           <NavItem text="Home" icon={<FaHome />} active={pathname === "/"} />
         </Link>
-        <Link href="/Communities" onClick={handleNavClick}>
+        <Link href="/Communities" onClick={(e) => handleLinkClick(e, "/Communities", true)}>
           <NavItem text="Communities" icon={<MdGroups2 />} active={pathname === "/Communities"} />
         </Link>
-        <Link href="/Post" onClick={handleNavClick}>
+        <Link href="/Post" onClick={(e) => handleLinkClick(e, "/Post", true)}>
           <NavItem text="Create Post" icon={<IoIosCreate />} active={pathname === "/Post"} />
         </Link>
 
@@ -83,13 +98,13 @@ const Sidebar = () => {
           Library
         </div>
 
-        <Link href="/Chatbot">
+        <Link href="/Chatbot" onClick={(e) => handleLinkClick(e, "/Chatbot")}>
           <NavItem text="Recommendations" icon={<GiArtificialIntelligence />} active={pathname === "/Chatbot"} />
         </Link>
-        <Link href="/CreateCommunity" onClick={handleNavClick}>
+        <Link href="/CreateCommunity" onClick={(e) => handleLinkClick(e, "/CreateCommunity", true)}>
           <NavItem text="Create Community" icon={<BsChatRightTextFill />} active={pathname === "/CreateCommunity"} />
         </Link>
-        <Link href={`/Profile/${userId}`} onClick={handleNavClick}>
+        <Link href={`/Profile/${userId}`} onClick={(e) => handleLinkClick(e, `/Profile/${userId}`, true)}>
           <NavItem text="Profile" icon={<CgProfile />} active={pathname === `/Profile/${userId}`} />
         </Link>
 
@@ -98,10 +113,10 @@ const Sidebar = () => {
           More
         </div>
 
-        <Link href="/Watchlist">
+        <Link href="/Watchlist" onClick={(e) => handleLinkClick(e, "/Watchlist")}>
           <NavItem text="Explore" icon={<MdExplore />} active={pathname === "/Watchlist"} />
         </Link>
-        <Link href="/Settings">
+        <Link href="/Settings" onClick={(e) => handleLinkClick(e, "/Settings")}>
           <NavItem text="Settings" icon={<IoSettingsOutline />} active={pathname === "/Settings"} />
         </Link>
       </nav>

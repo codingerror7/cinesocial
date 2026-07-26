@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext.js"; // Update the path as neede
 import { api } from "@/utils/api.js";
 import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
+import { usePopup } from "@/context/PopupContext.js";
 import Navbar2 from "./Navbar2.js";
 import MobileTopBar from "./MobileTopBar.js";
 import Sidebar from "./Sidebar.js";
@@ -115,6 +116,7 @@ function WhatIfSection({value, setValue}) {
 
 function ImageSection({ file, setFile }) {
   const fileInputRef = useRef(null);
+  const { showToast } = usePopup();
 
   const handleClick = () => {
     fileInputRef.current.click();
@@ -127,12 +129,12 @@ function ImageSection({ file, setFile }) {
 
     // Optional validation
     if (!selectedFile.type.startsWith("image/")) {
-      alert("Only image files allowed");
+      showToast("warning", "Only image files allowed");
       return;
     }
 
     if (selectedFile.size > 10 * 1024 * 1024) {
-      alert("Max file size is 10MB");
+      showToast("warning", "Max file size is 10MB");
       return;
     }
 
@@ -306,6 +308,7 @@ function ActionBar({ onImageClick, onPollClick, onPost }) {
 const CreatePost = () => {
   const router = useRouter();
   const { user } = useAuth();
+  const { setDraft, showModal, showToast, showLoading, hideLoading } = usePopup();
 
   useEffect(() => {
     const storedUser = user || JSON.parse(localStorage.getItem('user') || 'null');
@@ -318,14 +321,27 @@ const CreatePost = () => {
   const [postType, setPostType] = useState("story");
   const [spoiler,  setSpoiler]  = useState(false);
   const [tags,     setTags]     = useState([]);
-  const [text,     setText]     = useState("");
-  const [posted,   setPosted]   = useState(false);
+  const [text,     setText]     = useState("");  const [posted,   setPosted]   = useState(false);
   const [error,    setError]    = useState("");
   const [options, setOptions] = useState(["", ""]);
   const [whatIfText, setWhatIfText] = useState("");
   const [file, setFile] = useState(null);
   const [title, settitle] = useState("");
   const [profile, setprofile] = useState(null);
+
+  useEffect(() => {
+    const hasDraft = text.trim() !== "" || whatIfText.trim() !== "" || file !== null;
+    setDraft(hasDraft, () => {
+      setText("");
+      setWhatIfText("");
+      setFile(null);
+      setOptions(["", ""]);
+      settitle("");
+    });
+    return () => {
+      setDraft(false, null);
+    };
+  }, [text, whatIfText, file, setDraft]);
 
   const handlePostTypeChange = (type) => {
     setPostType(type);
@@ -354,119 +370,157 @@ const CreatePost = () => {
   const titleName = currentUser?.title || profile?.title || "Cinephile";
 
   const handlePost = async () => {
-  try {
-    setError("");
+    try {
+      setError("");
 
-    // Validation for poll type
-    if (postType === "poll") {
-      const nonEmptyOptions = options.filter(opt => opt.trim() !== "");
-      if (nonEmptyOptions.length < 2) {
-        setError("Poll must have at least 2 options");
+      // Validation for poll type
+      if (postType === "poll") {
+        const nonEmptyOptions = options.filter(opt => opt.trim() !== "");
+        if (nonEmptyOptions.length < 2) {
+          setError("Poll must have at least 2 options");
+          return;
+        }
+        if (!text.trim()) {
+          setError("Poll question is required");
+          return;
+        }
+      }
+
+      // Validation for What If type
+      if (postType === "whatif") {
+        if (!whatIfText.trim()) {
+          setError("Please add some content for your What If scenario");
+          return;
+        }
+      }
+
+      // Validation for story/image type
+      if (postType !== "poll" && postType !== "whatif" && !text.trim() && !file) {
+        setError("Please add some content");
         return;
       }
-      if (!text.trim()) {
-        setError("Poll question is required");
-        return;
+
+      const formData = new FormData();
+
+      // Generate a consistent userId if none exists. Prefer the Mongo `_id` saved in localStorage.
+      let userId = user?._id || user?.id || user?.uid;
+      if (!userId || userId === "anonymous") {
+        // Generate a temporary userId for anonymous users
+        userId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       }
-    }
 
-    // Validation for What If type
-    if (postType === "whatif") {
-      if (!whatIfText.trim()) {
-        setError("Please add some content for your What If scenario");
-        return;
+      // Generate avatar URL if not available
+      let userAvatar = avatar;
+      if (!userAvatar || userAvatar.trim() === "") {
+        userAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(username || "Anonymous")}&background=6366f1&color=fff&size=128`;
       }
+
+      formData.append("avatar", userAvatar);
+      formData.append("username", username);
+      formData.append("userId", userId);
+      formData.append("postedAt", new Date().toISOString());
+      formData.append("postType", postType);
+
+      // content logic based on type
+      const contentValue = postType === "whatif" ? whatIfText : text;
+      formData.append("content", contentValue);
+      formData.append("title", title || contentValue.split("\n")[0] || "Untitled");
+
+      // poll data - only send non-empty options
+      if (postType === "poll") {
+        const nonEmptyOptions = options.filter(opt => opt.trim() !== "");
+        formData.append("pollOptions", JSON.stringify(nonEmptyOptions));
+      }
+
+      // file - IMPORTANT: field name must match multer field "media"
+      if (file) {
+        console.log("Appending file to FormData:", file.name, file.size, file.type);
+        formData.append("media", file);
+      }
+
+      console.log("📤 Sending post data:", {
+        username,
+        userId,
+        postType,
+        hasFile: !!file,
+        fileName: file?.name,
+        contentLength: text?.length || whatIfText?.length
+      });
+
+      const startTime = Date.now();
+      showLoading(file ? "Uploading image..." : "Creating post...", 0, "Initializing...");
+
+      const response = await api.post("/api/post/create-post", formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        timeout: 60000,
+        onUploadProgress: (progressEvent) => {
+          if (progressEvent.total) {
+            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            let eta = "Uploading...";
+            if (percentCompleted > 0 && percentCompleted < 100) {
+              const elapsed = (Date.now() - startTime) / 1000;
+              const totalEst = (elapsed / percentCompleted) * 100;
+              const remaining = Math.max(0, Math.round(totalEst - elapsed));
+              eta = `Estimated time: ${remaining}s`;
+            } else if (percentCompleted === 100) {
+              eta = "Processing upload...";
+            }
+            showLoading(file ? "Uploading image..." : "Creating post...", percentCompleted, eta);
+          } else {
+            showLoading(file ? "Uploading image..." : "Creating post...");
+          }
+        }
+      });
+
+      console.log("✓ Post created successfully:", response.data);
+
+      hideLoading();
+
+      if (response.status !== 201) {
+        throw new Error(response.data.message || "Failed to create post");
+      }
+
+      // reset UI
+      setPosted(true);
+      setText("");
+      setWhatIfText("");
+      setOptions(["", ""]);
+      setFile(null);
+      setError("");
+      settitle("");
+      setDraft(false); // clear draft state
+
+      setTimeout(() => setPosted(false), 2500);
+
+      showModal("success", {
+        title: "Post Shared Successfully",
+        description: "Your post is now live and visible to the CineSocial community.",
+        primaryButtonText: "View Post",
+        onPrimaryButtonClick: () => {
+          router.push("/");
+        }
+      });
+
+    } catch (err) {
+      hideLoading();
+      const errorMessage = err.response?.data?.message || err.message || "Post failed";
+      setError(errorMessage);
+      console.error("❌ Post failed:", {
+        status: err.response?.status,
+        data: err.response?.data,
+        message: err.message
+      });
+
+      showModal("error", {
+        title: "Upload Failed",
+        message: errorMessage,
+        retryText: "Retry",
+        onRetry: handlePost
+      });
     }
-
-    // Validation for story/image type
-    if (postType !== "poll" && postType !== "whatif" && !text.trim() && !file) {
-      setError("Please add some content");
-      return;
-    }
-
-    const formData = new FormData();
-
-    // Generate a consistent userId if none exists. Prefer the Mongo `_id` saved in localStorage.
-    let userId = user?._id || user?.id || user?.uid;
-    if (!userId || userId === "anonymous") {
-      // Generate a temporary userId for anonymous users
-      userId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    }
-
-    // Generate avatar URL if not available
-    let userAvatar = avatar;
-    if (!userAvatar || userAvatar.trim() === "") {
-      userAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(username || "Anonymous")}&background=6366f1&color=fff&size=128`;
-    }
-
-    formData.append("avatar", userAvatar);
-    formData.append("username", username);
-    formData.append("userId", userId);
-    formData.append("postedAt", new Date().toISOString());
-    formData.append("postType", postType);
-
-    // content logic based on type
-    const contentValue = postType === "whatif" ? whatIfText : text;
-    formData.append("content", contentValue);
-    formData.append("title", title || contentValue.split("\n")[0] || "Untitled");
-
-    // poll data - only send non-empty options
-    if (postType === "poll") {
-      const nonEmptyOptions = options.filter(opt => opt.trim() !== "");
-      formData.append("pollOptions", JSON.stringify(nonEmptyOptions));
-    }
-
-    // file - IMPORTANT: field name must match multer field "media"
-    if (file) {
-      console.log("Appending file to FormData:", file.name, file.size, file.type);
-      formData.append("media", file);
-    }
-
-    console.log("📤 Sending post data:", {
-      username,
-      userId,
-      postType,
-      hasFile: !!file,
-      fileName: file?.name,
-      contentLength: text?.length || whatIfText?.length
-    });
-
-    const response = await api.post("/api/post/create-post", formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-      timeout: 30000
-    });
-
-    console.log("✓ Post created successfully:", response.data);
-
-    if (response.status !== 201) {
-      throw new Error(response.data.message || "Failed to create post");
-    }
-
-    // reset UI
-    setPosted(true);
-    setText("");
-    setWhatIfText("");
-    setOptions(["", ""]);
-    setFile(null);
-    setError("");
-    settitle("");
-
-    setTimeout(() => setPosted(false), 2500);
-
-    router.push("/");
-
-  } catch (err) {
-    const errorMessage = err.response?.data?.message || err.message || "Post failed";
-    setError(errorMessage);
-    console.error("❌ Post failed:", {
-      status: err.response?.status,
-      data: err.response?.data,
-      message: err.message
-    });
-  }
-};
+  };
 
 useEffect(()=>{
   const id = params?.id;

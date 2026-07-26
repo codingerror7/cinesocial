@@ -8,11 +8,13 @@ import MobileTopBar from '@/Components/MobileTopBar'
 import Loader from '@/Components/Loader'
 import { api } from '@/utils/api.js'
 import { useAuth } from '@/context/AuthContext.js'
+import { usePopup } from '@/context/PopupContext.js'
 import Image from 'next/image'
 
 const page = () => {
   const router = useRouter();
   const { user } = useAuth();
+  const { showModal, showToast } = usePopup();
   const [communities, setCommunities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -48,7 +50,7 @@ const page = () => {
     try {
       const storedUser = user || JSON.parse(localStorage.getItem('user') || 'null');
       if (!storedUser?._id) {
-        setError('Please log in to join a community');
+        showModal("login");
         return;
       }
 
@@ -63,13 +65,21 @@ const page = () => {
         setCommunities(prev =>
           prev.map(c =>
             c._id === communityId
-              ? { ...c, membersCount: (c.membersCount || 0) + 1, slug: updatedCommunity?.slug || c.slug }
-              : c
+               ? { ...c, membersCount: (c.membersCount || 0) + 1, slug: updatedCommunity?.slug || c.slug }
+               : c
           )
         );
         setError(null);
         const destination = updatedCommunity?.slug ? `/Community/${updatedCommunity.slug}/chat` : `/Community/${updatedCommunity._id}/chat`;
-        router.push(destination);
+        
+        showModal("success", {
+          title: "Community Joined",
+          description: "You have joined the community successfully. Welcome aboard!",
+          primaryButtonText: "Enter Chat",
+          onPrimaryButtonClick: () => {
+            router.push(destination);
+          }
+        });
       }
     } catch (err) {
       const errMsg = err?.response?.data?.message || 'Failed to join community';
@@ -78,7 +88,10 @@ const page = () => {
         const destination = currentCommunity?.slug ? `/Community/${currentCommunity.slug}/chat` : `/Community/${communityId}/chat`;
         router.push(destination);
       } else {
-        setError(errMsg);
+        showModal("error", {
+          title: "Join Request Failed",
+          message: errMsg
+        });
       }
       console.error('Error joining community:', err);
     } finally {

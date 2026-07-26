@@ -2,6 +2,8 @@
 import "./globals.css";
 import { AuthProvider } from "../context/AuthContext.js";
 import QueryProvider from "../Provider/QueryProvider.js";
+import { PopupProvider } from "../context/PopupContext.js";
+import PopupContainer from "../Components/PopupContainer.js";
 
 export const metadata = {
   title: "Cinesocial-A platform for cinephiles",
@@ -12,12 +14,14 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body
-      >
+      <body>
         <QueryProvider>
-        <AuthProvider>
-          {children}
-        </AuthProvider>
+          <AuthProvider>
+            <PopupProvider>
+              {children}
+              <PopupContainer />
+            </PopupProvider>
+          </AuthProvider>
         </QueryProvider>
       </body>
     </html>

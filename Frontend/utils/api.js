@@ -147,15 +147,15 @@ api.interceptors.response.use(
         // Both refresh attempts failed — process queue with error
         processQueue(refreshError, null);
 
-        // Clear storage and redirect to login
+        // Clear storage and trigger session expiration event
         localStorage.removeItem("accessToken");
         localStorage.removeItem("accesstoken");
         localStorage.removeItem("user");
         localStorage.removeItem("refreshToken");
 
-        // Redirect to login page
+        // Dispatch session expired event instead of direct redirect
         if (typeof window !== "undefined") {
-          window.location.href = "/Login";
+          window.dispatchEvent(new CustomEvent("cinesocial-session-expired"));
         }
 
         return Promise.reject(refreshError);

@@ -4,18 +4,32 @@ import React from 'react'
 import Link from 'next/link';
 import { MdMovieFilter } from "react-icons/md";
 import { useAuth } from '../context/AuthContext.js';
+import { usePopup } from '../context/PopupContext.js';
 import { useRouter } from 'next/navigation';
 
 const Navbar = () => {
   const { user } = useAuth();
   const router = useRouter();
+  const { showModal, checkDraftAndNavigate } = usePopup();
   const displayName = user?.name || user?.displayName || 'Cinephile';
   const avatarSrc = user?.avatar && user.avatar.trim() !== '' ? user.avatar : '/avatar1.jpg';
 
   const handleProfileClick = () => {
     const id = user?._id;
-    if (id) router.push(`/Profile/${id}`);
-    else router.push('/Login');
+    if (id) {
+      checkDraftAndNavigate(() => {
+        router.push(`/Profile/${id}`);
+      });
+    } else {
+      showModal("login");
+    }
+  };
+
+  const handleLinkClick = (e, href) => {
+    e.preventDefault();
+    checkDraftAndNavigate(() => {
+      router.push(href);
+    });
   };
 
   return (
@@ -73,7 +87,7 @@ const Navbar = () => {
   <div className="flex items-center gap-3 ml-6">
 
     {/* About */}
-    <Link href="/About">
+    <Link href="/About" onClick={(e) => handleLinkClick(e, "/About")}>
       <button
         className="
         group relative overflow-hidden
@@ -93,7 +107,7 @@ const Navbar = () => {
     </Link>
 
     {/* Feedback */}
-    <Link href="/Feedback">
+    <Link href="/Feedback" onClick={(e) => handleLinkClick(e, "/Feedback")}>
       <button
         className="
         group relative overflow-hidden

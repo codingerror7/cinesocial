@@ -7,6 +7,7 @@ import { useForm } from 'react-hook-form'
 import { useRouter } from 'next/navigation'
 import { api } from '@/utils/api.js';
 import { useAuth } from '@/context/AuthContext.js'
+import { usePopup } from '@/context/PopupContext.js';
 import Image from 'next/image'
 
 const avatars = [
@@ -39,6 +40,7 @@ const genresList = ["action","thriller","sci-fi","drama","mystery","emotional","
 const page = () => {
   const router = useRouter();
   const { user } = useAuth();
+  const { showModal, showLoading, hideLoading } = usePopup();
   const [selectedAvatar, setSelectedAvatar] = useState(null);
   const [selectedGenres, setSelectedGenres] = useState([]);
 
@@ -109,13 +111,15 @@ const page = () => {
   };
 
   const onSubmit = async (data) => {
-    try {
-      const storedUser = user || JSON.parse(localStorage.getItem('user') || 'null');
-      if (!storedUser?._id) {
-        console.error("User not found. Please log in.");
-        return;
-      }
+    const storedUser = user || JSON.parse(localStorage.getItem('user') || 'null');
+    if (!storedUser?._id) {
+      showModal("error", { title: "Authentication Required", message: "User session not found. Please log in again." });
+      return;
+    }
 
+    showLoading("Saving changes...");
+
+    try {
       const payload = {
         ...data,
         genres: data.genres || selectedGenres,
@@ -135,10 +139,26 @@ const page = () => {
         dob: data.dob,
       };
       localStorage.setItem('user', JSON.stringify(updatedUser));
-      router.push(`/Profile/${storedUser._id}`);
+      
+      hideLoading();
+      
+      showModal("success", {
+        title: "Profile Updated",
+        description: "Your profile has been saved successfully.",
+        primaryButtonText: "View Profile",
+        onPrimaryButtonClick: () => {
+          router.push(`/Profile/${storedUser._id}`);
+        }
+      });
+      
       reset();
     } catch (error) {
+      hideLoading();
       console.error("Something went wrong in create-profile frontend:", error);
+      showModal("error", {
+        title: "Profile Update Failed",
+        message: error.response?.data?.message || error.message || "Failed to save profile changes. Please try again."
+      });
     }
   };
 

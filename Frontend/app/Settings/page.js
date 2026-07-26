@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext.js";
+import { usePopup } from "@/context/PopupContext.js";
 import { useRouter } from "next/navigation";
 import { FaWhatsapp } from "react-icons/fa";
 import { MdOutlineMail } from "react-icons/md";
@@ -35,6 +36,7 @@ const page = () => {
 
   const { logout } = useAuth();
   const router = useRouter();
+  const { showModal, showToast } = usePopup();
 
   const [openIndex, setOpenIndex] = useState(null);
   const [isLoggedOut, setIsLoggedOut] = useState(false);
@@ -44,13 +46,21 @@ const page = () => {
   };
 
   const handleLogOut = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("accessToken");
-
-    logout();
-    setIsLoggedOut(true);
-
-    setTimeout(() => router.push("/Login"), 1000);
+    showModal("confirm", {
+      title: "Confirm Logout",
+      message: "Are you sure you want to log out? You will need to sign in again to access your account.",
+      confirmText: "Logout",
+      cancelText: "Cancel",
+      isDangerous: true,
+      onConfirm: () => {
+        localStorage.removeItem("user");
+        localStorage.removeItem("accessToken");
+        logout();
+        setIsLoggedOut(true);
+        showToast("success", "Logged out successfully!");
+        setTimeout(() => router.push("/Login"), 1000);
+      }
+    });
   };
 
   return (
