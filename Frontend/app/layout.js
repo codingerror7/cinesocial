@@ -1,4 +1,3 @@
-
 import "./globals.css";
 import { AuthProvider } from "../context/AuthContext.js";
 import QueryProvider from "../Provider/QueryProvider.js";
