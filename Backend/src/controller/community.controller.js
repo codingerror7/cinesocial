@@ -56,6 +56,7 @@ export const createCommunities = async (req,res) => {
         if(!community){
             return res.status(400).json({message : "community creation failed"});
         }
+        await redisClient.del("all_communities");
         return res.status(201).json({message : "community created successfully",success : true,community});
     }
     catch(error){
@@ -69,39 +70,42 @@ export const createCommunities = async (req,res) => {
 
 export const getCommunities = async (req,res) => {
     try{
-        // const cachedKey = "all_communities";
-        // const cachedCommunities = await redisClient.get(cachedKey);
-        // if(cachedCommunities){
-        //     console.log("cache hit for communities data");
-        //     return res.status(200).json(JSON.parse(cachedCommunities));
-        // }
-        // console.log("cache miss for communities data, fetching from database");
+        const cachedKey = "all_communities";
+        const cachedCommunities = await redisClient.get(cachedKey);
+        if(cachedCommunities){
+            console.log("cache hit for communities data");
+            return res.status(200).json(JSON.parse(cachedCommunities));
+        }
+        console.log("cache miss for communities data, fetching from database");
         
         const allCommunities = await Community.find()
             .sort({createdAt : -1})
             .limit(25)
             .select('slug title description communityBanner tags admin membersCount createdAt _id')
-            .populate('admin.userId', 'avatar username');
+            .populate('admin.userId', 'avatar username')
+            .lean();
         
         if(!allCommunities || allCommunities.length === 0){
-            return res.status(200).json({success : true, communities : []});
+            const emptyRes = {success : true, communities : []};
+            await redisClient.setEx(cachedKey, 300, JSON.stringify(emptyRes));
+            return res.status(200).json(emptyRes);
         }
         
         const enrichedCommunities = allCommunities.map(c => {
-            const community = c.toObject();
             return {
-                ...community,
+                ...c,
                 admin: {
-                    userId: community.admin?.userId?._id,
-                    username: community.admin?.username,
-                    avatar: community.admin?.userId?.avatar || ""
+                    userId: c.admin?.userId?._id,
+                    username: c.admin?.username,
+                    avatar: c.admin?.userId?.avatar || ""
                 }
             };
         });
 
-        // await redisClient.setEx(cachedKey,60,JSON.stringify(enrichedCommunities)); //caching the communities data in redis for 60 seconds to reduce database load and improve response times for subsequent requests
+        const resData = {success : true, communities : enrichedCommunities};
+        await redisClient.setEx(cachedKey, 300, JSON.stringify(resData));
 
-        return res.status(200).json({success : true, communities : enrichedCommunities});
+        return res.status(200).json(resData);
     }
     catch(err) {
         return res.status(500).json({message : "error 500 while fetching communities", error: err.message});
@@ -120,20 +124,20 @@ export const getJoinedCommunities = async (req,res) => {
                 { "admin.userId": id }
             ]
         }).select('slug title description communityBanner tags admin membersCount createdAt _id')
-            .populate('admin.userId', 'avatar username');
+            .populate('admin.userId', 'avatar username')
+            .lean();
         
         if(!joinedCommunities || joinedCommunities.length === 0){
             return res.status(200).json({success : true, joinedCommunities : []});
         }
         
         const enrichedCommunities = joinedCommunities.map(c => {
-            const community = c.toObject();
             return {
-                ...community,
+                ...c,
                 admin: {
-                    userId: community.admin?.userId?._id,
-                    username: community.admin?.username,
-                    avatar: community.admin?.userId?.avatar || ""
+                    userId: c.admin?.userId?._id,
+                    username: c.admin?.username,
+                    avatar: c.admin?.userId?.avatar || ""
                 }
             };
         });
@@ -161,7 +165,7 @@ export const getCommunityBySlug = async (req,res) => {
             query = { slug: normalizedSlug };
         }
 
-        const community = await Community.findOne(query).populate('admin.userId', 'avatar username');
+        const community = await Community.findOne(query).populate('admin.userId', 'avatar username').lean();
         if(!community){
             return res.status(404).json({message : "community not found"});
         }
@@ -202,6 +206,7 @@ export const joinCommunity = async (req, res) => {
         await community.save();
 
         const updatedCommunity = await Community.findById(communityId).populate('admin.userId', 'avatar username');
+        await redisClient.del("all_communities");
 
         return res.status(200).json({ success: true, message: "Joined community successfully", community: updatedCommunity });
     } catch (error) {
@@ -229,7 +234,7 @@ export const getCommunityMessages = async (req, res) => {
                 { members: userId },
                 { "admin.userId": userId }
             ]
-        });
+        }).lean();
 
         if (!community) {
             return res.status(403).json({ message: "You must join this community to view messages" });

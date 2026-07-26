@@ -12,19 +12,29 @@ export default function ChatBot() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    let isMounted = true;
     const fetchGenres = async () => {
       try {
         const response = await fetch("/api/chatbot/genres");
         const data = await response.json();
-        setGenres(data.genres || []);
+        if (isMounted) {
+          setGenres(data.genres || []);
+        }
       } catch (err) {
         console.error("Error fetching genres:", err);
-        setError("Failed to load genres");
+        if (isMounted) {
+          setError("Failed to load genres");
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
     fetchGenres();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const handleRecommend = async () => {

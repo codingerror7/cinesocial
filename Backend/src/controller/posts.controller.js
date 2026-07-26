@@ -96,6 +96,7 @@ export const createPost = async (req,res) => {
         })
 
         console.log("✓ Post created successfully with media:", post.media);
+        await redisClient.del("feed:first-page");
         return res.status(201).json({success : true , message : "post saved successfully.", post});
 
     }
@@ -255,6 +256,7 @@ export const voteOnPoll = async (req, res) => {
     post.poll.options[optionIndex].votes += 1;
 
     await post.save();
+    await redisClient.del("feed:first-page");
 
     return res.status(200).json({
       success: true,

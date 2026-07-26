@@ -4,11 +4,13 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import {generateAccessToken , generateRefreshToken} from "../config/token.config.js";
 import User from "../model/User.models.js";
+import redisClient from "../config/redis.config.js";
 
 export const signUp = async (req,res) => {
     try {  
         const {name,email,password} = req.body;
-        let existUser = await User.findOne({email});
+        const normalizedEmail = email ? String(email).trim().toLowerCase() : "";
+        let existUser = await User.findOne({email: normalizedEmail}).lean();
         if(existUser){
             return res.status(400).json({message:"user already exist,please login"});
         }
@@ -17,7 +19,7 @@ export const signUp = async (req,res) => {
         // Generate a default avatar for new users
         const defaultAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'Anonymous')}&background=6366f1&color=fff&size=128`;
         
-        const user = await User.create({name,email,password : hashPassword, avatar: defaultAvatar, title: "Cinephile"});
+        const user = await User.create({name,email : normalizedEmail,password : hashPassword, avatar: defaultAvatar, title: "Cinephile"});
         //refresh token mechanism
         const isProduction = process.env.NODE_ENV === "production" || process.env.NODE_ENVIRONMENT === "production";
         const accessToken = await generateAccessToken(user._id);
@@ -52,7 +54,7 @@ export const logIn = async (req,res) => {
     try {
         const {email,password} = req.body;
         const normalizedEmail = String(req.body.email).trim().toLowerCase();
-    let existUser = await User.findOne({email : normalizedEmail});
+    let existUser = await User.findOne({email : normalizedEmail}).lean();
     if(!existUser){
         return res.status(404).json({message:"user not found, please signup."});
     }
@@ -135,11 +137,24 @@ export const logOut = async (req,res) => {
 //deleteAccount
 export const deleteAccount = async (req,res)=>{
     try{
-        const {userId} = req.body;
-        const deleteUser = await User.findByIdAndDelete(userId);
-        if(!deleteUser){
-            return res.status(400).json({message : "cant delete user"});
+        const { id } = req.params;
+        const authUserId = req.user?.userId;
+
+        if (!authUserId) {
+            return res.status(401).json({ message: "User not authorized." });
         }
+
+        if (String(id) !== String(authUserId)) {
+            return res.status(403).json({ message: "You are not authorized to delete this account." });
+        }
+
+        const deleteUser = await User.findByIdAndDelete(authUserId);
+        if(!deleteUser){
+            return res.status(404).json({message : "User not found."});
+        }
+        
+        await redisClient.del(`profile:${authUserId}`);
+
         return res.status(204).json({message : "user deleted successfully"});
     }
     catch(error){

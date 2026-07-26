@@ -10,23 +10,35 @@ const Trending = () => {
    const [error, setError] = useState(null);
 
    useEffect(() => {
+    let isMounted = true;
     const fetchCommunities = async () => {
       try {
-        setLoading(true);
-        setError(null);
+        if (isMounted) {
+          setLoading(true);
+          setError(null);
+        }
         const res = await api.get('/api/get-communities');
         const fetchedCommunities = res.data?.communities || [];
-        setCommunities(fetchedCommunities);
+        if (isMounted) {
+          setCommunities(fetchedCommunities);
+        }
       } catch (err) {
         console.error('Error fetching communities:', err);
-        setError(err?.response?.data?.message || 'Failed to load communities');
-        setCommunities([]);
+        if (isMounted) {
+          setError(err?.response?.data?.message || 'Failed to load communities');
+          setCommunities([]);
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchCommunities();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   return (

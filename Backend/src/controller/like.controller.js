@@ -1,5 +1,6 @@
 import Like from "../model/Like.models.js";
 import Post from "../model/Post.models.js";
+import redisClient from "../config/redis.config.js";
 
 const LikePost = async (req, res) => {
   try {
@@ -15,6 +16,8 @@ const LikePost = async (req, res) => {
         { returnDocument: 'after' }
       );
 
+      await redisClient.del("feed:first-page");
+
       return res.status(200).json({
         message: "Post unliked successfully.",
         liked: false,
@@ -28,6 +31,8 @@ const LikePost = async (req, res) => {
       { $inc: { likesCount: 1 } },
       { returnDocument: 'after' }
     );
+
+    await redisClient.del("feed:first-page");
 
     return res.status(200).json({
       message: "Post liked successfully.",

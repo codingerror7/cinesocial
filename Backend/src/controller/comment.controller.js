@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import Comment from "../model/Comment.models.js";
 import Post from "../model/Post.models.js";
 import User from "../model/User.models.js";
+import redisClient from "../config/redis.config.js";
 
 export const createComment = async (req,res)=>{
     try{
@@ -33,6 +34,7 @@ export const createComment = async (req,res)=>{
         });
 
         await Post.findByIdAndUpdate(postId, { $inc: { commentsCount: 1 } });
+        await redisClient.del("feed:first-page");
 
         return res.status(201).json({message : "Comment created successfully", comment});
     }

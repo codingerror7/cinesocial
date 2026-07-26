@@ -262,6 +262,7 @@ const Postcard = () => {
   };
 
   useEffect(() => {
+    let isMounted = true;
     const fetchData = async () => {
       setFeedError("");
       try {
@@ -272,18 +273,27 @@ const Postcard = () => {
 
         const processedPosts = posts.map((post) => sanitizePost(post));
 
-        setpostData(processedPosts);
-        setNextCursor(cursor);
-        setHasMore(more && posts.length > 0);
+        if (isMounted) {
+          setpostData(processedPosts);
+          setNextCursor(cursor);
+          setHasMore(more && posts.length > 0);
+        }
       } catch (error) {
         console.error('Error fetching post data:', error);
-        setpostData([]);
-        setFeedError('Failed to load posts. Please try again.');
+        if (isMounted) {
+          setpostData([]);
+          setFeedError('Failed to load posts. Please try again.');
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
     fetchData();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const fetchMorePosts = useCallback(async () => {
