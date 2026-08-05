@@ -53,9 +53,12 @@ export const signUp = async (req,res) => {
 export const logIn = async (req,res) => {
     try {
         const {email,password} = req.body;
-        const normalizedEmail = String(req.body.email).trim().toLowerCase();
-    let existUser = await User.findOne({email : normalizedEmail}).lean();
-    if(!existUser){
+        if (!email || !password || String(email).trim() === "" || String(password).trim() === "") {
+            return res.status(400).json({ message: "Email and password are required." });
+        }
+        const normalizedEmail = String(email).trim().toLowerCase();
+        let existUser = await User.findOne({email : normalizedEmail}).lean();
+        if(!existUser){
         return res.status(404).json({message:"user not found, please signup."});
     }
     let userMatch = await bcrypt.compare(password,existUser.password);

@@ -2,9 +2,8 @@
 const nextConfig = {
   /* config options here */
   allowedDevOrigins: ['10.58.48.223'],
-  experimental: {
-    reactCompiler: true,
-  },
+  reactCompiler: true,
+
   images: {
     remotePatterns: [
       {

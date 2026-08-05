@@ -12,12 +12,7 @@ export const initSocket = (server, clientOrigin) => {
 
     const io = new Server(server, {
         cors: {
-            origin: (origin, callback) => {
-                if (!origin || allowedOrigins.includes(origin)) {
-                    return callback(null, true);
-                }
-                return callback(new Error(`Socket CORS origin denied: ${origin}`));
-            },
+            origin: allowedOrigins,
             methods: ["GET", "POST"],
             credentials: true
         }

@@ -70,6 +70,16 @@ app.use("/api",profileRouter);
 app.use("/api",likeAndCommentsRouter);
 app.use("/api",communityRoutes);
 
+// Global Error Handling Middleware
+app.use((err, req, res, next) => {
+    console.error("Centralized Error Catcher:", err.stack || err);
+    res.status(err.status || 500).json({
+        success: false,
+        message: err.message || "Internal server error.",
+        error: process.env.NODE_ENV === "production" ? undefined : err.stack || err
+    });
+});
+
 //test route
 app.get("/home",(req,res)=>{
     res.send("db connected..");

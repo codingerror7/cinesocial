@@ -22,6 +22,11 @@ export const createComment = async (req,res)=>{
             return res.status(404).json({message: "User not found."});
         }
 
+        const postExists = await Post.findById(postId).lean();
+        if(!postExists){
+            return res.status(404).json({message: "Post not found."});
+        }
+
         const comment = await Comment.create({
             post : postId,
             user : {
