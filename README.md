@@ -5,6 +5,7 @@
 
 ## 🚀 Overview
 
+**CineSocial** is a modern social platform designed exclusively for **cinephiles and cinema enthusiasts**. It combines the real-time, expressive nature of microblogging with the depth of community-driven discussions.
 
 The platform enables users to **share opinions, explore movies, engage in discussions, and discover content tailored to their cinematic taste** — all in one place.
 
